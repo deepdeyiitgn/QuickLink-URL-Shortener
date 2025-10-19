@@ -1,0 +1,7 @@
+{
+  "name": "Copy of QuickLink URL Shortener",
+  "description": "A modern, fast, and easy-to-use URL shortener. Create custom, memorable short links for any website. Features include optional custom aliases and automatic expiration of links after 7 days.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
