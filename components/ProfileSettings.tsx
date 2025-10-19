@@ -6,10 +6,11 @@ const ProfileSettings: React.FC = () => {
     const auth = useContext(AuthContext);
     const { currentUser, updateUserProfile } = auth || {};
     
-    const [name, setName] = useState(currentUser?.name || '');
-    const [profilePicture, setProfilePicture] = useState<string | null>(currentUser?.profilePictureUrl || null);
+    const [name, setName] = useState(currentUser?.name ?? '');
+    const [profilePicture, setProfilePicture] = useState<string | null>(currentUser?.profilePictureUrl ?? null);
     const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [error, setError] = useState('');
     
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -32,18 +33,24 @@ const ProfileSettings: React.FC = () => {
         
         setIsLoading(true);
         setIsSuccess(false);
+        setError('');
 
-        await updateUserProfile({
-            name: name,
-            profilePictureUrl: profilePicture || undefined
-        });
-
-        setIsLoading(false);
-        setIsSuccess(true);
-        setTimeout(() => setIsSuccess(false), 2000);
+        try {
+            await updateUserProfile({
+                name: name,
+                profilePictureUrl: profilePicture || undefined
+            });
+            setIsSuccess(true);
+            setTimeout(() => setIsSuccess(false), 2000);
+        } catch (err: any) {
+            console.error("Profile update failed:", err);
+            setError(err.message || "Failed to update profile. The image might be too large.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    const hasChanges = name !== currentUser.name || profilePicture !== (currentUser.profilePictureUrl || null);
+    const hasChanges = name !== (currentUser.name ?? '') || profilePicture !== (currentUser.profilePictureUrl ?? null);
 
     return (
         <div className="glass-card p-6 md:p-8 rounded-2xl">
@@ -90,6 +97,7 @@ const ProfileSettings: React.FC = () => {
                      <button type="submit" disabled={isLoading || !hasChanges} className="w-full sm:w-auto flex justify-center items-center gap-2 rounded-md bg-brand-primary px-6 py-3 text-sm font-semibold text-brand-dark shadow-[0_0_15px_rgba(0,229,255,0.5)] hover:bg-brand-primary/80 disabled:opacity-50 transition-all">
                         {isLoading ? <LoadingIcon className="animate-spin h-5 w-5" /> : (isSuccess ? <CheckIcon className="h-5 w-5" /> : 'Save Changes')}
                     </button>
+                    {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
                 </div>
             </form>
         </div>
