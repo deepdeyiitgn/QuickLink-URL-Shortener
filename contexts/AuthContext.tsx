@@ -185,6 +185,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const value: AuthContextType = {
         currentUser,
+        users,
         isAuthModalOpen,
         authModalMode,
         isSubscriptionModalOpen,
