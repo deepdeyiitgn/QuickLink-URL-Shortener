@@ -128,6 +128,7 @@ export interface BlogPost {
 
 export interface AuthContextType {
   currentUser: User | null;
+  users: User[];
   isAuthModalOpen: boolean;
   authModalMode: 'login' | 'signup';
   isSubscriptionModalOpen: boolean;
