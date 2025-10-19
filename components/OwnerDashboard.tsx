@@ -17,20 +17,9 @@ const OwnerDashboard: React.FC = () => {
     const urlContext = useContext(UrlContext);
     const qrContext = useContext(QrContext);
     const blogContext = useContext(BlogContext);
-
+    const { users = [] } = auth || {};
     const [activeTab, setActiveTab] = useState('users');
-    const [users, setUsers] = useState<User[]>([]);
     const [viewingUser, setViewingUser] = useState<User | null>(null);
-    
-    useEffect(() => {
-        const fetchUsers = async () => {
-            if (auth) {
-                const fetchedUsers = await auth.getAllUsers();
-                setUsers(fetchedUsers);
-            }
-        };
-        fetchUsers();
-    }, [auth]);
 
     const pendingPosts = useMemo(() => {
         return blogContext?.posts.filter(p => p.status === 'pending') || [];
@@ -51,8 +40,6 @@ const OwnerDashboard: React.FC = () => {
         try {
             if (auth?.updateUserPermissions) {
                 await auth.updateUserPermissions(userId, permissions);
-                const updatedUsers = await auth.getAllUsers();
-                setUsers(updatedUsers);
             }
         } catch (error: any) {
             alert(`Error: ${error.message}`);
