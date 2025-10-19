@@ -1,0 +1,19 @@
+{
+  "name": "quicklink-url-shortener",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A modern, fast, and easy-to-use URL shortener.",
+  "scripts": {
+    "dev": "echo 'This project is intended to be run in an environment like AI Studio.'",
+    "build": "echo 'Build step not required for this setup.'",
+    "start": "echo 'Start command not applicable.'"
+  },
+  "dependencies": {
+    "mongodb": "^6.20.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "typescript": "^5.3.3"
+  }
+}
