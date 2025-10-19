@@ -64,17 +64,22 @@ export default async function handler(req: any, res: any) {
         }
 
         if (req.method === 'PUT') { // Update a single existing user
-            const updatedUser: User = req.body;
+            const updatedUser: User & { _id?: any } = req.body;
             if (!updatedUser || !updatedUser.id) {
                 return res.status(400).json({ error: 'User ID is required for an update.' });
             }
             
-            const { id, ...userFieldsToUpdate } = updatedUser;
-            // Never allow changing the user's ID or email via this method.
-            delete (userFieldsToUpdate as Partial<User>).id;
+            // Explicitly copy the body and remove immutable fields to prevent the error.
+            const userFieldsToUpdate = { ...updatedUser };
+            const userId = userFieldsToUpdate.id; // Store the id for the query
+
+            delete userFieldsToUpdate.id;
+            delete userFieldsToUpdate._id; // This is the crucial part to fix the error.
+            
+            // For extra safety, explicitly prevent email updates, as it's a key identifier.
             delete (userFieldsToUpdate as Partial<User>).email;
             
-            const result = await usersCollection.updateOne({ id: id }, { $set: userFieldsToUpdate });
+            const result = await usersCollection.updateOne({ id: userId }, { $set: userFieldsToUpdate });
             
             if (result.matchedCount === 0) {
                 return res.status(404).json({ error: 'User not found.' });
