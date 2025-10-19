@@ -232,6 +232,87 @@
 }
 </script>
 
+        <script>
+// =======================
+// Persistent Background Music (SPA + Multi-track) 
+// =======================
+
+const MUSIC_FILES = ["background1.mp3", "background2.mp3", "background3.mp3", "background4.mp3"];
+const FADE_DURATION = 10; // sec
+const DEFAULT_VOL = 0.7;
+
+// Detect mobile
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+// Create audio elements only once
+if (!window.bgMusicManager) {
+  window.bgMusicManager = {
+    tracks: MUSIC_FILES.map(file => {
+      const audio = new Audio(`./${file}`);
+      audio.volume = 0;
+      audio.loop = false;
+      return audio;
+    }),
+    currentIndex: 0
+  };
+
+  const manager = window.bgMusicManager;
+
+  const fade = (audio, to, duration) => {
+    const steps = 70;
+    const stepTime = (duration * 1000) / steps;
+    let currentStep = 0;
+    const interval = setInterval(() => {
+      if (currentStep++ >= steps) {
+        clearInterval(interval);
+      } else {
+        audio.volume += (to - audio.volume) / (steps - currentStep + 1);
+      }
+    }, stepTime);
+  };
+
+  const playTrack = (index) => {
+    const audio = manager.tracks[index];
+    audio.currentTime = 0;
+    audio.play().catch(() => {}); // Catch autoplay block errors
+    fade(audio, DEFAULT_VOL, FADE_DURATION);
+
+    audio.onended = () => {
+      const nextIndex = (index + 1) % manager.tracks.length;
+      const nextAudio = manager.tracks[nextIndex];
+      nextAudio.currentTime = 0;
+      nextAudio.play().catch(() => {});
+      fade(nextAudio, DEFAULT_VOL, FADE_DURATION);
+      fade(audio, 0, FADE_DURATION);
+      setTimeout(() => audio.pause(), FADE_DURATION * 1000);
+      manager.currentIndex = nextIndex;
+      playTrack(nextIndex);
+    };
+  };
+
+  const startMusic = () => {
+    // Mobile autoplay restrictions
+    if (isMobile) {
+      document.addEventListener("click", () => playTrack(manager.currentIndex), { once: true });
+    } else {
+      playTrack(manager.currentIndex);
+    }
+  };
+
+  // Start music on load / user interaction if blocked
+  const tryStart = () => {
+    startMusic();
+    document.removeEventListener("click", tryStart);
+    document.removeEventListener("keydown", tryStart);
+  };
+
+  document.addEventListener("click", tryStart);
+  document.addEventListener("keydown", tryStart);
+}
+
+   
+    </script>
+
 <!-- START: Added Festival Popup Styles -->
 <style>
   /* Diwali Popup Styles */
@@ -1147,124 +1228,5 @@
     });
     </script>
     <!-- END: Added Festival Popup HTML and Scripts -->
-
-    <script>
-
-// =======================
-// Persistent Background Music (SPA + Multi-track + Lofi) 
-// =======================
-
-const MUSIC_FILES = ["background1.mp3", "background2.mp3", "background3.mp3"];
-const LOFI_URL = "https://pagalnew.com/128-downloads/49220"; // replace with real lofi 24/7 link
-const FADE_DURATION = 10; // sec
-const DEFAULT_VOL = 0.7;
-let skipLofiSession = false;
-
-// Detect mobile
-const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-// Create audio elements
-if (!window.bgMusicManager) {
-  window.bgMusicManager = {
-    tracks: MUSIC_FILES.map(file => {
-      const audio = new Audio(`./${file}`);
-      audio.volume = 0;
-      audio.loop = false;
-      return audio;
-    }),
-    lofi: new Audio(LOFI_URL),
-    currentIndex: 0,
-    playingLofi: false,
-  };
-
-  const manager = window.bgMusicManager;
-
-  const fade = (audio, to, duration) => {
-    const steps = 70;
-    const stepTime = (duration * 1000) / steps;
-    let currentStep = 0;
-    const interval = setInterval(() => {
-      if (currentStep++ >= steps) {
-        clearInterval(interval);
-      } else {
-        audio.volume += (to - audio.volume) / (steps - currentStep + 1);
-      }
-    }, stepTime);
-  };
-
-  const playTrack = (index) => {
-    const audio = manager.tracks[index];
-    audio.currentTime = 0;
-    audio.play();
-    fade(audio, DEFAULT_VOL, FADE_DURATION);
-
-    audio.onended = () => {
-      const nextIndex = (index + 1) % manager.tracks.length;
-      const nextAudio = manager.tracks[nextIndex];
-      nextAudio.currentTime = 0;
-      nextAudio.play();
-      fade(nextAudio, DEFAULT_VOL, FADE_DURATION);
-      fade(audio, 0, FADE_DURATION);
-      setTimeout(() => audio.pause(), FADE_DURATION * 1000);
-      manager.currentIndex = nextIndex;
-      playTrack(nextIndex);
-    };
-  };
-
-  const startMusic = () => {
-    // If mobile, skip lofi
-    if (!isMobile && !skipLofiSession) {
-      manager.lofi.volume = DEFAULT_VOL;
-      manager.lofi.loop = true;
-      manager.lofi.play();
-      manager.playingLofi = true;
-
-      // Show tip animation for skip
-      const tip = document.createElement("div");
-      tip.innerText = "Press any key to skip lofi";
-      tip.style.position = "fixed";
-      tip.style.left = "10px";
-      tip.style.bottom = "10px";
-      tip.style.padding = "5px 10px";
-      tip.style.background = "rgba(0,0,0,0.6)";
-      tip.style.color = "white";
-      tip.style.fontSize = "14px";
-      tip.style.animation = "fadeTip 5s forwards";
-      document.body.appendChild(tip);
-
-      setTimeout(() => tip.remove(), 5000);
-
-      const skipHandler = () => {
-        manager.lofi.pause();
-        manager.playingLofi = false;
-        skipLofiSession = true;
-        playTrack(manager.currentIndex);
-        document.removeEventListener("keydown", skipHandler);
-      };
-      document.addEventListener("keydown", skipHandler);
-    } else {
-      playTrack(manager.currentIndex);
-    }
-  };
-
-  // Start music after user interaction if autoplay blocked
-  const tryStart = () => {
-    startMusic();
-    document.removeEventListener("click", tryStart);
-    document.removeEventListener("keydown", tryStart);
-  };
-  document.addEventListener("click", tryStart);
-  document.addEventListener("keydown", tryStart);
-
-  // Fade tip CSS
-  const style = document.createElement("style");
-  style.innerHTML = `
-    @keyframes fadeTip { 0% {opacity:1} 100% {opacity:0} }
-  `;
-  document.head.appendChild(style);
-}
-
-      
-    </script>
   </body>
 </html>
