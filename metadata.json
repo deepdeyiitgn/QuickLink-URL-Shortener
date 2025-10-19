@@ -1,6 +1,6 @@
 {
-  "name": "Copy of QuickLink URL Shortener",
-  "description": "A modern, fast, and easy-to-use URL shortener. Create custom, memorable short links for any website. Features include optional custom aliases and automatic expiration of links after 7 days.",
+  "name": "QuickLink URL Shortener & JEE Blog",
+  "description": "A top-ranking URL shortener, QR generator, and QR scanner with a developer API. Also features a blog with content for JEE 2027 aspirants by Deep Dey.",
   "requestFramePermissions": [
     "camera"
   ]

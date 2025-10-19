@@ -69,6 +69,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             settings: { warningThreshold: 24 },
             isAdmin: false,
             canSetCustomExpiry: false,
+            canModerate: false,
             ipAddress: 'pending', // Placeholder; server will set the real IP
         };
         
@@ -125,6 +126,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setCurrentUser(updatedUser);
     }, [currentUser, users]);
 
+    const updateUserProfile = useCallback(async (profileData: { name?: string; profilePictureUrl?: string }) => {
+        if (!currentUser) return;
+        const updatedUser: User = { ...currentUser, ...profileData };
+        await api.updateUser(updatedUser);
+        setUsers(users => users.map(u => u.id === currentUser.id ? updatedUser : u));
+        setCurrentUser(updatedUser);
+    }, [currentUser, users]);
+
     const generateApiKey = useCallback(async () => {
         if (!currentUser || currentUser.apiAccess) return;
         const newApiKey = `qk_live_${generateUUID()}`;
@@ -154,7 +163,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setCurrentUser(updatedUser);
     }, [currentUser, users]);
 
-    const updateUserPermissions = useCallback(async (userId: string, permissions: Partial<Pick<User, 'isAdmin' | 'canSetCustomExpiry'>>) => {
+    const updateUserPermissions = useCallback(async (userId: string, permissions: Partial<Pick<User, 'isAdmin' | 'canSetCustomExpiry' | 'canModerate'>>) => {
         const userToUpdate = users.find(u => u.id === userId);
         if (!userToUpdate) throw new Error("User not found to update permissions.");
         
@@ -191,6 +200,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         closeApiSubscriptionModal,
         updateUserSubscription,
         updateUserSettings,
+        updateUserProfile,
         getAllUsers,
         generateApiKey,
         purchaseApiKey,

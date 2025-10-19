@@ -1,7 +1,9 @@
+
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthProvider, AuthContext } from './contexts/AuthContext';
 import { UrlProvider, UrlContext } from './contexts/UrlContext';
 import { QrProvider } from './contexts/QrContext';
+import { BlogProvider } from './contexts/BlogContext';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import AuthModal from './components/AuthModal';
@@ -23,7 +25,9 @@ import ScannerPage from './components/ScannerPage';
 import AboutPage from './components/AboutPage';
 import PrivacyPolicyPage from './components/PrivacyPolicyPage';
 import TermsPage from './components/TermsPage';
-import MobileBottomNav from './components/MobileBottomNav';
+import BlogPage from './components/BlogPage';
+import FaqPage from './components/FaqPage';
+import FullScreenLoader from './components/FullScreenLoader';
 import type { User } from './types';
 
 interface AppContentProps {
@@ -68,7 +72,7 @@ const AppContent: React.FC<AppContentProps> = ({ isAuthModalOpen, isSubscription
     }, []);
 
     if (urlContext?.loading) {
-        return <div className="min-h-screen bg-brand-dark" />;
+        return <FullScreenLoader />;
     }
 
     const renderView = () => {
@@ -83,6 +87,8 @@ const AppContent: React.FC<AppContentProps> = ({ isAuthModalOpen, isSubscription
             'about': <AboutPage />,
             'privacy': <PrivacyPolicyPage />,
             'terms': <TermsPage />,
+            'blog': <BlogPage />,
+            'faq': <FaqPage />,
             'dashboard': <Dashboard />,
             'status': <StatusPage />,
             'owner': <OwnerDashboard />,
@@ -121,6 +127,7 @@ const AppContent: React.FC<AppContentProps> = ({ isAuthModalOpen, isSubscription
                     <div className="container mx-auto px-4 text-center">
                         <div className="flex justify-center items-center flex-wrap gap-x-6 gap-y-2 mb-4">
                            <a href="/about" className="text-sm text-gray-400 hover:text-brand-primary transition-colors">About</a>
+                           <a href="/faq" className="text-sm text-gray-400 hover:text-brand-primary transition-colors">FAQ</a>
                            <a href="/privacy" className="text-sm text-gray-400 hover:text-brand-primary transition-colors">Privacy Policy</a>
                            <a href="/terms" className="text-sm text-gray-400 hover:text-brand-primary transition-colors">Terms of Service</a>
                            <a href="/status" className="text-sm text-gray-400 hover:text-brand-primary transition-colors">Status</a>
@@ -134,7 +141,6 @@ const AppContent: React.FC<AppContentProps> = ({ isAuthModalOpen, isSubscription
             {isSubscriptionModalOpen && <SubscriptionModal onClose={closeSubscriptionModal} />}
             {isApiSubscriptionModalOpen && <ApiSubscriptionModal onClose={closeApiSubscriptionModal} />}
             <BackToTopButton />
-            <MobileBottomNav currentView={cleanPath} />
         </div>
     );
 };
@@ -144,18 +150,20 @@ const App: React.FC = () => {
         <AuthProvider>
             <UrlProvider>
                 <QrProvider>
-                    <AuthContext.Consumer>
-                        {auth => auth ? (
-                            <AppContent 
-                                currentUser={auth.currentUser}
-                                isAuthModalOpen={auth.isAuthModalOpen}
-                                isSubscriptionModalOpen={auth.isSubscriptionModalOpen}
-                                isApiSubscriptionModalOpen={auth.isApiSubscriptionModalOpen}
-                                closeSubscriptionModal={auth.closeSubscriptionModal}
-                                closeApiSubscriptionModal={auth.closeApiSubscriptionModal}
-                            />
-                        ) : null}
-                    </AuthContext.Consumer>
+                    <BlogProvider>
+                        <AuthContext.Consumer>
+                            {auth => auth ? (
+                                <AppContent 
+                                    currentUser={auth.currentUser}
+                                    isAuthModalOpen={auth.isAuthModalOpen}
+                                    isSubscriptionModalOpen={auth.isSubscriptionModalOpen}
+                                    isApiSubscriptionModalOpen={auth.isApiSubscriptionModalOpen}
+                                    closeSubscriptionModal={auth.closeSubscriptionModal}
+                                    closeApiSubscriptionModal={auth.closeApiSubscriptionModal}
+                                />
+                            ) : null}
+                        </AuthContext.Consumer>
+                    </BlogProvider>
                 </QrProvider>
             </UrlProvider>
         </AuthProvider>

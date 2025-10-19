@@ -20,6 +20,8 @@ declare global {
   }
 }
 
+export type UserBadge = 'normal' | 'premium' | 'owner';
+
 export interface Subscription {
   planId: 'monthly' | 'semi-annually' | 'yearly';
   expiresAt: number;
@@ -40,6 +42,7 @@ export interface User {
   email: string;
   passwordHash: string;
   createdAt: number;
+  profilePictureUrl?: string;
   subscription?: Subscription;
   apiAccess: {
     apiKey: string;
@@ -48,6 +51,7 @@ export interface User {
   settings?: UserSettings;
   isAdmin?: boolean;
   canSetCustomExpiry?: boolean;
+  canModerate?: boolean;
   ipAddress?: string;
 }
 
@@ -93,6 +97,35 @@ export interface ScanRecord {
     scannedAt: number;
 }
 
+export interface Comment {
+  id: string;
+  userId: string;
+  userName: string;
+  userBadge: UserBadge;
+  text: string;
+  createdAt: number;
+}
+
+export interface BlogPost {
+  _id?: any; // MongoDB ID
+  id: string;
+  userId: string;
+  userName: string;
+  userBadge: UserBadge;
+  userProfilePictureUrl?: string;
+  title: string;
+  content: string; // HTML content
+  postType: 'normal' | 'html';
+  imageUrls: string[];
+  audioUrl: string | null;
+  isPinned?: boolean;
+  status: 'approved' | 'pending';
+  createdAt: number;
+  likes: string[]; // Array of user IDs
+  comments: Comment[];
+  shares: number;
+}
+
 export interface AuthContextType {
   currentUser: User | null;
   isAuthModalOpen: boolean;
@@ -110,10 +143,11 @@ export interface AuthContextType {
   closeApiSubscriptionModal: () => void;
   updateUserSubscription: (planId: 'monthly' | 'semi-annually' | 'yearly', expiresAt: number) => Promise<void>;
   updateUserSettings: (settings: Partial<UserSettings>) => Promise<void>;
+  updateUserProfile: (profileData: { name?: string; profilePictureUrl?: string }) => Promise<void>;
   getAllUsers: () => Promise<User[]>;
   generateApiKey: () => Promise<void>;
   purchaseApiKey: (planId: 'basic' | 'pro', expiresAt: number) => Promise<void>;
-  updateUserPermissions: (userId: string, permissions: { isAdmin?: boolean; canSetCustomExpiry?: boolean }) => Promise<void>;
+  updateUserPermissions: (userId: string, permissions: { isAdmin?: boolean; canSetCustomExpiry?: boolean; canModerate?: boolean; }) => Promise<void>;
 }
 
 export interface UrlContextType {
@@ -135,6 +169,18 @@ export interface QrContextType {
     scanHistory: ScanRecord[];
     addQrCode: (qr: Omit<QrCodeRecord, 'id' | 'createdAt'>) => Promise<void>;
     addScan: (scan: Omit<ScanRecord, 'id' | 'scannedAt'>) => Promise<void>;
+}
+
+export interface BlogContextType {
+  posts: BlogPost[];
+  loading: boolean;
+  addPost: (postData: Omit<BlogPost, 'id' | 'createdAt' | 'likes' | 'comments' | 'shares' | 'isPinned' | 'status' | 'userProfilePictureUrl'>) => Promise<void>;
+  toggleLike: (postId: string) => Promise<void>;
+  addComment: (postId: string, commentData: Omit<Comment, 'id' | 'createdAt'>) => Promise<void>;
+  incrementShares: (postId: string) => Promise<void>;
+  deletePost: (postId: string) => Promise<void>;
+  togglePinPost: (postId: string) => Promise<void>;
+  approvePost: (postId: string) => Promise<void>;
 }
 
 export interface RazorpayOrder {
