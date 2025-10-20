@@ -17,7 +17,7 @@ const UrlShortener: React.FC = () => {
   // FIX: Cast context to the correct type to resolve property errors
   const auth = useContext(AuthContext) as AuthContextType;
   const urlContext = useContext(UrlContext);
-  const { currentUser, openAuthModal, openSubscriptionModal, updateUserData } = auth || {};
+  const { currentUser, openAuthModal, openSubscriptionModal } = auth || {};
   const { addUrl } = urlContext || {};
 
   const [longUrl, setLongUrl] = useState<string>('');
@@ -27,13 +27,12 @@ const UrlShortener: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
 
+  // State for custom expiration controls for admins/privileged users
   const [isPermanent, setIsPermanent] = useState(false);
   const [customExpiryValue, setCustomExpiryValue] = useState(1);
   const [customExpiryUnit, setCustomExpiryUnit] = useState<'days'|'months'|'years'>('months');
 
   const canSetCustomExpiry = currentUser?.isAdmin || currentUser?.canSetCustomExpiry;
-  const permanentUrlCredits = currentUser?.urlCredits?.permanent || 0;
-  const canSetPermanent = canSetCustomExpiry || permanentUrlCredits > 0;
 
   const generateRandomAlias = (): string => {
     return Math.random().toString(36).substring(2, 8);
@@ -48,7 +47,7 @@ const UrlShortener: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
@@ -66,29 +65,17 @@ const UrlShortener: React.FC = () => {
         
         const now = Date.now();
         let expiresAt: number | null;
-        let usedCredit = false;
 
-        if (isPermanent) {
-            if (canSetCustomExpiry) {
-                expiresAt = null; // Admin sets permanent link
-            } else if (permanentUrlCredits > 0) {
-                expiresAt = null; // User uses a credit
-                usedCredit = true;
+        if (canSetCustomExpiry) {
+            if (isPermanent) {
+                expiresAt = null; // Use null for permanent links
             } else {
-                // This state should not be reachable if the UI is disabled correctly, but as a fallback,
-                // we will revert to the user's default expiration.
-                // FIX: The `isPermanent` state variable is a constant and cannot be reassigned.
-                // This fallback logic correctly calculates a default expiration time, so the
-                // reassignment is not necessary for the function to work as intended.
-                 const oneDay = 24 * 60 * 60 * 1000;
-                 expiresAt = now + (currentUser ? (7 * oneDay) : oneDay);
+                const date = new Date();
+                if (customExpiryUnit === 'days') date.setDate(date.getDate() + customExpiryValue);
+                if (customExpiryUnit === 'months') date.setMonth(date.getMonth() + customExpiryValue);
+                if (customExpiryUnit === 'years') date.setFullYear(date.getFullYear() + customExpiryValue);
+                expiresAt = date.getTime();
             }
-        } else if (canSetCustomExpiry) {
-            const date = new Date();
-            if (customExpiryUnit === 'days') date.setDate(date.getDate() + customExpiryValue);
-            if (customExpiryUnit === 'months') date.setMonth(date.getMonth() + customExpiryValue);
-            if (customExpiryUnit === 'years') date.setFullYear(date.getFullYear() + customExpiryValue);
-            expiresAt = date.getTime();
         } else {
             const oneDay = 24 * 60 * 60 * 1000;
             let expirationDuration;
@@ -124,13 +111,6 @@ const UrlShortener: React.FC = () => {
         if (addUrl) {
           await addUrl(newUrl);
         }
-
-        if (usedCredit && updateUserData && currentUser) {
-            await updateUserData(currentUser.id, {
-                urlCredits: { permanent: permanentUrlCredits - 1 }
-            });
-        }
-        
         setResult(newUrl);
         setLongUrl('');
         setAlias('');
@@ -174,12 +154,14 @@ const UrlShortener: React.FC = () => {
             </div>
           </div>
 
-          {canSetCustomExpiry ? (
+          {canSetCustomExpiry && (
             <div className="p-4 border border-brand-secondary/30 rounded-lg space-y-4 bg-brand-secondary/10">
                 <h4 className="font-semibold text-brand-secondary">Admin: Custom Expiration</h4>
-                <div className="flex items-center gap-2">
-                    <input id="isPermanent" type="checkbox" checked={isPermanent} onChange={(e) => setIsPermanent(e.target.checked)} className="h-4 w-4 rounded border-gray-600 bg-gray-700 text-brand-secondary focus:ring-brand-secondary" />
-                    <label htmlFor="isPermanent" className="text-sm text-gray-300">Set as Permanent</label>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <input id="isPermanent" type="checkbox" checked={isPermanent} onChange={(e) => setIsPermanent(e.target.checked)} className="h-4 w-4 rounded border-gray-600 bg-gray-700 text-brand-secondary focus:ring-brand-secondary" />
+                        <label htmlFor="isPermanent" className="text-sm text-gray-300">Set as Permanent</label>
+                    </div>
                 </div>
                 {!isPermanent && (
                     <div className="flex items-center gap-2">
@@ -192,17 +174,7 @@ const UrlShortener: React.FC = () => {
                     </div>
                 )}
             </div>
-          ) : permanentUrlCredits > 0 && (
-            <div className="p-4 border border-brand-primary/30 rounded-lg space-y-2 bg-brand-primary/10">
-                <h4 className="font-semibold text-brand-primary">Use a Credit</h4>
-                <div className="flex items-center gap-2">
-                    <input id="isPermanent" type="checkbox" checked={isPermanent} onChange={(e) => setIsPermanent(e.target.checked)} className="h-4 w-4 rounded border-gray-600 bg-gray-700 text-brand-primary focus:ring-brand-primary" />
-                    <label htmlFor="isPermanent" className="text-sm text-gray-300">Set as Permanent (Uses 1 Credit)</label>
-                </div>
-                <p className="text-xs text-brand-primary/80">You have {permanentUrlCredits} permanent URL credit(s) available.</p>
-            </div>
           )}
-
 
           <button type="submit" disabled={isLoading} className="w-full flex justify-center items-center gap-2 rounded-md bg-brand-primary px-3 py-3 text-sm font-semibold text-brand-dark shadow-[0_0_15px_rgba(0,229,255,0.5)] hover:bg-brand-primary/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105">
             {isLoading ? (<><LoadingIcon className="animate-spin h-5 w-5" /> Shortening...</>) : ('Generate Short URL')}

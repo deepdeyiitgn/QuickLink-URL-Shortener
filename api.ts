@@ -1,7 +1,7 @@
 // api.ts
 // A simple API client to interact with the Vercel Serverless Functions.
 
-import type { ShortenedUrl, PaymentRecord, QrCodeRecord, ScanRecord, DbStatus, Donation, Ticket, Notification, User, Product, BlogPost } from './types';
+import type { ShortenedUrl, PaymentRecord, QrCodeRecord, ScanRecord, DbStatus, Donation, Ticket, Notification, User, TicketReply, Product, Coupon } from './types';
 
 const fetcher = async (url: string, options: RequestInit = {}) => {
     const res = await fetch(url, {
@@ -15,9 +15,7 @@ const fetcher = async (url: string, options: RequestInit = {}) => {
         const errorData = await res.json().catch(() => ({ error: 'An unknown error occurred' }));
         throw new Error(errorData.error || res.statusText);
     }
-    // Handle cases where the response might be empty (e.g., a 204 No Content)
-    const text = await res.text();
-    return text ? JSON.parse(text) : {};
+    return res.json();
 };
 
 export const api = {
@@ -41,33 +39,36 @@ export const api = {
     // DB STATUS
     getDbStatus: (): Promise<DbStatus> => fetcher('/api/status'),
 
-    // STORE (Donations & Shop)
-    getDonations: (): Promise<Donation[]> => fetcher('/api/store?type=donations'),
-    addDonation: (donation: Omit<Donation, 'id' | 'createdAt'>): Promise<{ success: boolean }> => fetcher('/api/store?type=donations', { method: 'POST', body: JSON.stringify(donation) }),
-    getProducts: (): Promise<Product[]> => fetcher('/api/store?type=products'),
-    addProduct: (product: Omit<Product, 'id'>): Promise<Product> => fetcher('/api/store?type=products', { method: 'POST', body: JSON.stringify(product) }),
+    // DONATIONS
+    getDonations: (): Promise<Donation[]> => fetcher('/api/donations'),
+    addDonation: (donation: Omit<Donation, 'id' | 'createdAt'>): Promise<{ success: boolean }> => fetcher('/api/donations', { method: 'POST', body: JSON.stringify(donation) }),
 
-    // SUPPORT (Tickets & Notifications)
-    createTicket: (ticket: Omit<Ticket, 'id' | 'createdAt' | 'status' | 'replies' | 'lastReplyAt'>): Promise<Ticket> => fetcher('/api/support?type=ticket', { method: 'POST', body: JSON.stringify(ticket) }),
-    getTickets: (userId?: string): Promise<Ticket[]> => fetcher(`/api/support?type=ticket${userId ? `&userId=${userId}` : ''}`),
-    replyToTicket: (ticketId: string, reply: { userId: string, message: string, isAdminReply: boolean }): Promise<Ticket> => fetcher(`/api/support?type=ticket&ticketId=${ticketId}&action=reply`, { method: 'PUT', body: JSON.stringify(reply) }),
-    updateTicketStatus: (ticketId: string, status: Ticket['status']): Promise<Ticket> => fetcher(`/api/support?type=ticket&ticketId=${ticketId}&action=status`, { method: 'PUT', body: JSON.stringify({ status }) }),
-
+    // SUPPORT (Consolidated)
+    createTicket: (ticket: Omit<Ticket, 'id' | 'createdAt' | 'status' | 'replies'>): Promise<Ticket> => fetcher('/api/support?type=ticket', { method: 'POST', body: JSON.stringify(ticket) }),
+    getUserTickets: (userId: string): Promise<Ticket[]> => fetcher(`/api/support?type=ticket&userId=${userId}`),
+    getAllTickets: (): Promise<Ticket[]> => fetcher('/api/support?type=ticket&scope=all'),
+    replyToTicket: (ticketId: string, reply: Omit<TicketReply, 'id' | 'createdAt'>): Promise<Ticket> => fetcher('/api/support?type=ticket', { method: 'PUT', body: JSON.stringify({ action: 'reply', ticketId, reply }) }),
+    updateTicketStatus: (ticketId: string, status: Ticket['status']): Promise<Ticket> => fetcher('/api/support?type=ticket', { method: 'PUT', body: JSON.stringify({ action: 'status', ticketId, status }) }),
+    
     getNotifications: (userId: string): Promise<Notification[]> => fetcher(`/api/support?type=notification&userId=${userId}`),
     markNotificationAsRead: (notificationId: string): Promise<{ success: boolean }> => fetcher('/api/support?type=notification', { method: 'PUT', body: JSON.stringify({ notificationId }) }),
-    createBroadcastNotification: (notification: { title: string, message: string, imageUrl?: string }): Promise<Notification> => fetcher('/api/support?type=notification', { method: 'POST', body: JSON.stringify(notification) }),
+    createCustomNotification: (userId: 'all' | string, message: string): Promise<{ success: boolean }> => fetcher('/api/support?type=notification', { method: 'POST', body: JSON.stringify({ userId, message }) }),
 
     // USERS & AUTH (Consolidated)
     getAllUsers: (): Promise<User[]> => fetcher('/api/users'),
     updateUser: (userId: string, data: Partial<User>): Promise<User> => fetcher(`/api/users?userId=${userId}`, { method: 'PUT', body: JSON.stringify(data) }),
-    propagateUserChanges: (userId: string, data: { name: string, profilePictureUrl?: string }): Promise<{ success: boolean }> => fetcher(`/api/users?userId=${userId}&action=propagate_changes`, { method: 'PUT', body: JSON.stringify(data) }),
     login: (email: string, password: string): Promise<User> => fetcher('/api/auth?action=login', { method: 'POST', body: JSON.stringify({ email, password }) }),
     signup: (name: string, email: string, password: string): Promise<User> => fetcher('/api/auth?action=signup', { method: 'POST', body: JSON.stringify({ name, email, password }) }),
 
-    // BLOG
-    getPosts: (userId?: string): Promise<BlogPost[]> => fetcher(`/api/blog${userId ? `?userId=${userId}` : ''}`),
-    getPostBySlug: (slug: string): Promise<BlogPost> => fetcher(`/api/blog?postSlug=${slug}`),
-    createPost: (postData: Omit<BlogPost, 'id' | 'createdAt' | 'status'>): Promise<BlogPost> => fetcher('/api/blog', { method: 'POST', body: JSON.stringify(postData) }),
-    updatePost: (payload: any): Promise<BlogPost> => fetcher('/api/blog', { method: 'PUT', body: JSON.stringify(payload) }),
-    deletePost: (postId: string, userId: string): Promise<{ success: boolean }> => fetcher('/api/blog', { method: 'DELETE', body: JSON.stringify({ postId, userId }) }),
+    // SHOP & COUPONS
+    getProducts: (): Promise<Product[]> => fetcher('/api/shop?type=product'),
+    addProduct: (product: Omit<Product, 'id'|'createdAt'|'stock'>, adminId: string): Promise<Product> => fetcher('/api/shop?type=product', { method: 'POST', body: JSON.stringify({ product, adminId }) }),
+    deleteProduct: (productId: string, adminId: string): Promise<{ success: boolean }> => fetcher('/api/shop?type=product', { method: 'DELETE', body: JSON.stringify({ productId, adminId }) }),
+    
+    getCoupons: (adminId: string): Promise<Coupon[]> => fetcher(`/api/shop?type=coupon&adminId=${adminId}`),
+    addCoupon: (coupon: Omit<Coupon, 'id'|'createdAt'|'uses'>, adminId: string): Promise<Coupon> => fetcher('/api/shop?type=coupon', { method: 'POST', body: JSON.stringify({ coupon, adminId }) }),
+    deleteCoupon: (couponId: string, adminId: string): Promise<{ success: boolean }> => fetcher('/api/shop?type=coupon', { method: 'DELETE', body: JSON.stringify({ couponId, adminId }) }),
+    verifyCoupon: (code: string, userId: string): Promise<{ finalPrice: number, discountAmount: number, isValid: boolean, message: string }> => fetcher(`/api/shop?type=coupon&action=verify&code=${code}&userId=${userId}`),
+    
+    fulfillPurchase: (data: { userId: string, productId: string, paymentId: string, couponCode?: string }): Promise<{ success: boolean }> => fetcher('/api/shop?action=fulfill', { method: 'POST', body: JSON.stringify(data) }),
 };

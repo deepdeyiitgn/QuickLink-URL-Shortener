@@ -26,10 +26,6 @@ export interface User {
   // Subscriptions
   subscription: Subscription | null;
   apiAccess: ApiAccess | null;
-  // Shop-related benefits
-  urlCredits?: {
-      permanent: number;
-  }
 }
 
 export interface Subscription {
@@ -43,7 +39,7 @@ export interface ApiAccess {
 }
 
 export interface ApiSubscription {
-  planId: 'trial' | 'basic' | 'pro' | 'permanent';
+  planId: 'trial' | 'basic' | 'pro';
   expiresAt: number;
 }
 
@@ -57,22 +53,19 @@ export interface AuthContextType {
   authModalMode: AuthModalMode;
   isSubscriptionModalOpen: boolean;
   isApiSubscriptionModalOpen: boolean;
-  isTicketModalOpen: boolean;
   openAuthModal: (mode: AuthModalMode) => void;
   closeAuthModal: () => void;
   openSubscriptionModal: () => void;
   closeSubscriptionModal: () => void;
   openApiSubscriptionModal: () => void;
   closeApiSubscriptionModal: () => void;
-  openTicketModal: () => void;
-  closeTicketModal: () => void;
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   updateUserData: (userId: string, data: Partial<User>) => Promise<User>;
   updateUserProfile: (data: { name: string, profilePictureUrl?: string }) => Promise<User>;
   generateApiKey: () => Promise<void>;
-  purchaseApiKey: (planId: 'basic' | 'pro' | 'permanent', expiresAt: number) => Promise<void>;
+  purchaseApiKey: (planId: 'basic' | 'pro', expiresAt: number) => Promise<void>;
   updateUserSubscription: (planId: 'monthly' | 'semi-annually' | 'yearly', expiresAt: number) => Promise<void>;
   updateUserAsDonor: (userId: string) => Promise<void>;
   getAllUsers: () => Promise<User[]>;
@@ -137,7 +130,8 @@ export interface PaymentRecord {
     userEmail: string;
     amount: number;
     currency: string;
-    durationLabel: string;
+    durationLabel: string; // Describes what was purchased
+    couponCode?: string;
     createdAt: number;
 }
 
@@ -183,7 +177,7 @@ export interface CashfreeOrder {
 }
 
 // Blog
-export type UserBadge = 'normal' | 'premium' | 'owner' | 'blacklist';
+export type UserBadge = 'normal' | 'premium' | 'owner' | 'moderator' | 'blacklist';
 
 export interface Comment {
     id: string;
@@ -213,7 +207,6 @@ export interface BlogPost {
     isPinned: boolean;
     status: 'pending' | 'approved' | 'rejected';
     views: number;
-    alias?: string;
 }
 
 export interface BlogContextType {
@@ -240,9 +233,8 @@ export interface TicketReply {
     id: string;
     userId: string;
     userName: string;
-    message: string;
+    text: string;
     createdAt: number;
-    isAdminReply: boolean;
 }
 
 export interface Ticket {
@@ -250,37 +242,60 @@ export interface Ticket {
     userId: string | null;
     userName: string;
     userEmail: string;
-    phone?: string;
     subject: string;
     message: string;
     createdAt: number;
-    lastReplyAt: number;
     status: 'open' | 'closed' | 'in-progress';
     replies: TicketReply[];
 }
 
-
 export interface Notification {
     id: string;
-    userId: string; // Can be 'all' for broadcast
+    userId: string;
     message: string;
     createdAt: number;
     isRead: boolean;
-    link?: string;
 }
 
-// Shop
-export type ProductType = 'url_pack' | 'api_plan' | 'custom';
+// Shop & Coupons
+export interface ProductBenefit {
+    type: 'SUBSCRIPTION_DAYS' | 'API_DAYS';
+    value: number; // e.g., 30 for 30 days
+}
+
 export interface Product {
     id: string;
     name: string;
     description: string;
     price: number;
-    type: ProductType;
-    imageUrl?: string;
-    // Specific benefits
-    benefit: {
-        permanentUrls?: number;
-        apiPlan?: 'permanent';
-    }
+    benefit: ProductBenefit;
+    limitQuantity?: number; // Total available stock
+    stock?: number; // Current stock
+    availableUntil?: number; // Expiration date for the product listing
+    createdAt: number;
+    isActive: boolean;
+}
+
+export interface CouponDiscount {
+    type: 'PERCENT' | 'FLAT';
+    value: number;
+}
+
+export interface Coupon {
+    id: string;
+    code: string;
+    discount: CouponDiscount;
+    expiresAt?: number;
+    quantityLimit?: number; // Max number of times the coupon can be used in total
+    uses: number; // How many times it has been used
+    onePerUser: boolean;
+    createdAt: number;
+}
+
+// To track which user used which coupon
+export interface CouponUsage {
+    id: string;
+    couponId: string;
+    userId: string;
+    timestamp: number;
 }

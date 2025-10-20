@@ -1,5 +1,7 @@
+
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+// FIX: Changed single quotes to double quotes for the import.
+import { useNavigate } from "react-router-dom";
 import { LinkIcon, QrCodeScannerIcon } from './icons/IconComponents';
 
 const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; children: React.ReactNode }> = ({ icon, title, children }) => (

@@ -17,17 +17,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [authModalMode, setAuthModalMode] = useState<AuthModalMode>('login');
     const [isSubscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
     const [isApiSubscriptionModalOpen, setApiSubscriptionModalOpen] = useState(false);
-    const [isTicketModalOpen, setTicketModalOpen] = useState(false);
 
     useEffect(() => {
         const loadUser = async () => {
+            setLoading(true);
             const storedUser = localStorage.getItem('currentUser');
-            let user = null;
+            let user: User | null = null;
             if (storedUser) {
                 user = JSON.parse(storedUser);
                 setCurrentUser(user);
             }
-            if (user?.isAdmin) {
+            // Fetch all users if anyone is logged in to support dynamic badges
+            if (user) {
                 await getAllUsers();
             }
             setLoading(false);
@@ -38,20 +39,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const handleUserUpdate = (user: User) => {
         setCurrentUser(user);
         localStorage.setItem('currentUser', JSON.stringify(user));
+        // Also update the user in the global users list
+        setUsers(prev => prev.map(u => u.id === user.id ? user : u));
     };
 
     const login = async (email: string, password: string) => {
         const user = await api.login(email, mockHash(password));
         handleUserUpdate(user);
+        // Fetch all users on login
+        await getAllUsers();
     };
 
     const signup = async (name: string, email: string, password: string) => {
         const user = await api.signup(name, email, password);
         handleUserUpdate(user);
+        // Fetch all users on signup
+        await getAllUsers();
     };
 
     const logout = () => {
         setCurrentUser(null);
+        setUsers([]); // Clear users list on logout
         localStorage.removeItem('currentUser');
     };
 
@@ -68,14 +76,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const closeSubscriptionModal = () => setSubscriptionModalOpen(false);
     const openApiSubscriptionModal = () => setApiSubscriptionModalOpen(true);
     const closeApiSubscriptionModal = () => setApiSubscriptionModalOpen(false);
-    const openTicketModal = () => setTicketModalOpen(true);
-    const closeTicketModal = () => setTicketModalOpen(false);
     
     // User data updates
     const updateUserData = async (userId: string, data: Partial<User>): Promise<User> => {
         const updatedUser = await api.updateUser(userId, data);
         setUsers(prev => prev.map(u => u.id === userId ? { ...u, ...updatedUser } : u));
         if (currentUser?.id === userId) {
+            // Merge with existing currentUser state to avoid overwriting properties not returned by API
             handleUserUpdate({ ...currentUser, ...updatedUser });
         }
         return updatedUser;
@@ -83,21 +90,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const updateUserProfile = async (data: { name: string, profilePictureUrl?: string }): Promise<User> => {
         if (!currentUser) throw new Error("Not logged in");
-        const updatedUser = await updateUserData(currentUser.id, data);
-        
-        // After successfully updating the user, trigger the backend to propagate these changes
-        // to all their posts and comments for data consistency.
-        await api.propagateUserChanges(currentUser.id, {
-            name: updatedUser.name,
-            profilePictureUrl: updatedUser.profilePictureUrl,
-        });
-        
-        return updatedUser;
+        return updateUserData(currentUser.id, data);
     };
     
     const updateUserSubscription = async (planId: 'monthly' | 'semi-annually' | 'yearly', expiresAt: number) => {
         if (!currentUser) throw new Error("Not logged in");
-        await updateUserData(currentUser.id, { subscription: { planId, expiresAt } });
+        await updateUserData(currentUser.id, { subscription: { planId, expiresAt }, isDonor: true });
     };
 
     const generateApiKey = async () => {
@@ -112,14 +110,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         });
     };
 
-    const purchaseApiKey = async (planId: 'basic' | 'pro' | 'permanent', expiresAt: number) => {
+    const purchaseApiKey = async (planId: 'basic' | 'pro', expiresAt: number) => {
         if (!currentUser) throw new Error("Not logged in");
         const apiKey = currentUser.apiAccess?.apiKey || `qk_prod_${Date.now().toString(36)}`;
         await updateUserData(currentUser.id, {
             apiAccess: {
                 apiKey,
                 subscription: { planId, expiresAt }
-            }
+            },
+            isDonor: true // Purchasing anything makes them a "premium" user
         });
     };
     
@@ -132,7 +131,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isAuthModalOpen, authModalMode, openAuthModal, closeAuthModal,
         isSubscriptionModalOpen, openSubscriptionModal, closeSubscriptionModal,
         isApiSubscriptionModalOpen, openApiSubscriptionModal, closeApiSubscriptionModal,
-        isTicketModalOpen, openTicketModal, closeTicketModal,
         login, signup, logout,
         updateUserData, updateUserProfile,
         generateApiKey, purchaseApiKey, updateUserSubscription,

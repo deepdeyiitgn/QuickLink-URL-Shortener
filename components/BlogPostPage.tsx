@@ -1,5 +1,7 @@
+
 import React, { useContext, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+// FIX: Changed single quotes to double quotes for the import.
+import { Link } from "react-router-dom";
 import { BlogContext } from '../contexts/BlogContext';
 // FIX: Corrected import path for AuthContext
 import { AuthContext } from '../contexts/AuthContext';
@@ -8,25 +10,25 @@ import BlogPostItem from './BlogPostItem';
 import NotFoundPage from './NotFoundPage';
 
 interface BlogPostPageProps {
-    postSlug: string;
+    postId: string;
 }
 
-const BlogPostPage: React.FC<BlogPostPageProps> = ({ postSlug }) => {
+const BlogPostPage: React.FC<BlogPostPageProps> = ({ postId }) => {
     const blog = useContext(BlogContext);
     
-    const post = blog?.posts.find(p => p.id === postSlug || p.alias === postSlug);
-
     // Set up view tracking for the post
     useEffect(() => {
-        if (post && blog?.incrementView) {
-            const viewedKey = `viewed-${post.id}`;
+        if (postId && blog?.incrementView) {
+            const viewedKey = `viewed-${postId}`;
             // Only count the view if it hasn't been counted in this session
             if (!sessionStorage.getItem(viewedKey)) {
-                blog.incrementView(post.id);
+                blog.incrementView(postId);
                 sessionStorage.setItem(viewedKey, 'true');
             }
         }
-    }, [post, blog]);
+    }, [postId, blog]);
+
+    const post = blog?.posts.find(p => p.id === postId);
 
     // Set document title for SEO
     useEffect(() => {

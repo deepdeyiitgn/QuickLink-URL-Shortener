@@ -185,6 +185,19 @@
           color: #f0f8ff; /* Alice Blue - a slightly brighter white */
           font-weight: 600;
       }
+      /* Footer glowing text animation */
+      .footer-glow {
+        animation: footer-glow-animation 4s ease-in-out infinite;
+        text-shadow: 0 0 5px rgba(255, 255, 255, 0.2), 0 0 10px rgba(0, 229, 255, 0.3), 0 0 15px rgba(255, 46, 99, 0.3);
+      }
+      @keyframes footer-glow-animation {
+        0%, 100% {
+          text-shadow: 0 0 5px rgba(255, 255, 255, 0.2), 0 0 10px rgba(0, 229, 255, 0.3), 0 0 15px rgba(255, 46, 99, 0.3);
+        }
+        50% {
+          text-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 0 15px rgba(0, 229, 255, 0.5), 0 0 25px rgba(255, 46, 99, 0.5);
+        }
+      }
     </style>
     <script>
       tailwind.config = {
@@ -233,7 +246,10 @@
     "react-dom": "https://aistudiocdn.com/react-dom@^19.2.0",
     "mongodb": "https://aistudiocdn.com/mongodb@^6.20.0",
     "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.4",
-    "qr-code-styling": "https://aistudiocdn.com/qr-code-styling@^1.9.2"
+    "qr-code-styling": "https://aistudiocdn.com/qr-code-styling@^1.9.2",
+    "path": "https://aistudiocdn.com/path@^0.12.7",
+    "vite": "https://aistudiocdn.com/vite@^7.1.11",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.0.4"
   }
 }
 </script>

@@ -2,20 +2,53 @@
 // Handles GET/POST for payment records and POST for creating payment orders.
 
 import { connectToDatabase } from './lib/mongodb.js';
-import type { PaymentRecord } from '../types';
+import type { PaymentRecord, Coupon, User } from '../types';
+
+// Server-side coupon verification logic
+async function verifyAndApplyCoupon(db: any, code: string, baseAmount: number, userId: string): Promise<{ finalPrice: number; discountAmount: number }> {
+    if (!code) {
+        return { finalPrice: baseAmount, discountAmount: 0 };
+    }
+
+    const couponsCollection = db.collection('coupons');
+    const coupon: Coupon | null = await couponsCollection.findOne({ code: code.toUpperCase() });
+
+    if (!coupon) throw new Error("Invalid coupon code.");
+    if (coupon.expiresAt && coupon.expiresAt < Date.now()) throw new Error("This coupon has expired.");
+    if (coupon.quantityLimit && coupon.uses >= coupon.quantityLimit) throw new Error("This coupon has reached its usage limit.");
+    
+    if (coupon.onePerUser) {
+        const usageCollection = db.collection('coupon_usage');
+        const existingUsage = await usageCollection.findOne({ couponId: coupon.id, userId });
+        if (existingUsage) throw new Error("You have already used this coupon code.");
+    }
+    
+    let discountAmount = 0;
+    if (coupon.discount.type === 'FLAT') {
+        discountAmount = coupon.discount.value;
+    } else if (coupon.discount.type === 'PERCENT') {
+        discountAmount = (baseAmount * coupon.discount.value) / 100;
+    }
+
+    const finalPrice = Math.max(0, baseAmount - discountAmount);
+    return { finalPrice, discountAmount };
+}
 
 // Helper function for Razorpay order creation
 async function createRazorpayOrder(req: any, res: any) {
-    const { amount, currency } = req.body;
-    if (!amount || !currency) return res.status(400).json({ error: 'Amount and currency are required.' });
+    const { amount, currency, couponCode, userId } = req.body;
+    if (!amount || !currency || !userId) return res.status(400).json({ error: 'Amount, currency, and userId are required.' });
 
     const keyId = process.env.VITE_RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
     if (!keyId || !keySecret) return res.status(500).json({ error: 'Payment gateway (Razorpay) is not configured correctly.' });
 
+    const { db } = await connectToDatabase();
+    const { finalPrice } = await verifyAndApplyCoupon(db, couponCode, amount, userId);
+
     const auth = btoa(`${keyId}:${keySecret}`);
     const options = {
-        amount: Math.round(amount * 100),
+        amount: Math.round(finalPrice * 100), // Razorpay requires amount in paise
         currency,
         receipt: `receipt_order_${Date.now()}`,
     };
@@ -34,21 +67,24 @@ async function createRazorpayOrder(req: any, res: any) {
 
 // Helper function for Cashfree order creation
 async function createCashfreeOrder(req: any, res: any) {
-    const { amount, currency, user } = req.body;
+    const { amount, currency, user, couponCode } = req.body;
     if (!amount || !currency || !user) return res.status(400).json({ error: 'Amount, currency, and user details are required.' });
     
     const clientId = process.env.CASHFREE_CLIENT_ID;
     const clientSecret = process.env.CASHFREE_CLIENT_SECRET;
     if (!clientId || !clientSecret) return res.status(500).json({ error: 'Payment gateway (Cashfree) is not configured correctly.' });
 
+    const { db } = await connectToDatabase();
+    const { finalPrice } = await verifyAndApplyCoupon(db, couponCode, amount, user.id);
+
     const options = {
         order_id: `order_${Date.now()}`,
-        order_amount: amount,
+        order_amount: finalPrice,
         order_currency: currency,
         customer_details: {
             customer_id: user.id,
             customer_email: user.email,
-            customer_phone: '9999999999'
+            customer_phone: '9999999999' // Placeholder as it's required
         },
         order_meta: {
             return_url: `https://quick-link-url-shortener.vercel.app/dashboard?order_id={order_id}`

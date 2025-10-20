@@ -7,7 +7,7 @@ interface ShareButtonsProps {
 }
 
 const ShareButtons: React.FC<ShareButtonsProps> = ({ shortUrl, longUrl }) => {
-    const watermark = "Made with 🩷 Deep | Helped by Google Gemini 💙 | We Are Here 🧿";
+    const watermark = "Made with 🩷 Deep | Helped by Gemini 💙 | We Are Here 🧿 | Saiyaara & Aashiqui 2 ✨ || Feminist ✨ | Jee Aspirant 2027 🎯";
     const text = `Check out this link I shortened with QuickLink!\n\n${watermark}`;
     const encodedShortUrl = encodeURIComponent(shortUrl);
     const encodedText = encodeURIComponent(text);
@@ -76,8 +76,8 @@ const ShareButtons: React.FC<ShareButtonsProps> = ({ shortUrl, longUrl }) => {
                     </a>
                 ))}
             </div>
-            <p className="text-center text-xs text-gray-600 mt-4 select-none">
-                Made with 🩷 Deep | Helped by Google Gemini 💙 | We Are Here 🧿
+            <p className="text-center text-xs text-gray-600 mt-4 select-none footer-glow">
+                "Made with 🩷 Deep | Helped by Gemini 💙 | We Are Here 🧿 | Saiyaara & Aashiqui 2 ✨ || Feminist ✨ | Jee Aspirant 2027 🎯"
             </p>
         </div>
     );

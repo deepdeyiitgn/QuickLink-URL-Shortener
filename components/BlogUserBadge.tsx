@@ -1,32 +1,29 @@
 import React from 'react';
 // FIX: Corrected import path for types
 import type { UserBadge } from '../types';
-import { BadgeCheckIcon, CrownIcon, WarningIcon } from './icons/IconComponents';
+import { BadgeCheckIcon, CrownIcon, WarningIcon, ShieldCheckIcon } from './icons/IconComponents';
 
 interface BlogUserBadgeProps {
     badge: UserBadge;
 }
 
-const BADGE_CONFIG: Record<UserBadge, { label: string; className: string; icon: React.FC<any> | null }> = {
-    normal: { label: 'User', className: '', icon: null },
-    premium: { label: 'Premium', className: 'bg-green-500/20 text-green-400', icon: CrownIcon },
-    owner: { label: 'Owner', className: 'bg-yellow-500/20 text-yellow-400', icon: BadgeCheckIcon },
-    blacklist: { label: 'Blacklisted', className: 'bg-red-500/20 text-red-400', icon: WarningIcon },
+const BADGE_CONFIG: Record<UserBadge, { label: string; className: string; icon: React.FC<any> }> = {
+    normal: { label: 'User', className: 'text-green-400', icon: BadgeCheckIcon },
+    premium: { label: 'Premium', className: 'text-pink-400', icon: BadgeCheckIcon },
+    moderator: { label: 'Quicklink Team', className: 'text-blue-400', icon: ShieldCheckIcon },
+    owner: { label: 'Owner', className: 'text-yellow-400', icon: CrownIcon },
+    blacklist: { label: 'Blacklisted', className: 'text-red-400', icon: WarningIcon },
 };
 
 const BlogUserBadge: React.FC<BlogUserBadgeProps> = ({ badge }) => {
     const config = BADGE_CONFIG[badge];
-
-    if (!config.icon) {
-        return null; // Don't show a badge for normal users
-    }
+    if (!config) return null;
     
     const Icon = config.icon;
 
     return (
-        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${config.className}`}>
-            <Icon className="h-3.5 w-3.5" />
-            {config.label}
+        <span title={config.label} className={`inline-flex items-center gap-1.5 ${config.className}`}>
+            <Icon className="h-4 w-4" />
         </span>
     );
 };
