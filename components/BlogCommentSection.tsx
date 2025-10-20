@@ -1,25 +1,22 @@
 import React, { useState, useContext } from 'react';
-import { Comment, User, UserBadge } from '../types';
+// FIX: Corrected import path for types
+import { Comment, AuthContextType } from '../types';
+// FIX: Corrected import path for AuthContext
 import { AuthContext } from '../contexts/AuthContext';
 import { BlogContext } from '../contexts/BlogContext';
 import { LoadingIcon } from './icons/IconComponents';
 import BlogUserBadge from './BlogUserBadge';
 import { timeAgo } from '../utils/time';
+import { getUserBadge } from '../utils/userHelper';
 
 interface BlogCommentSectionProps {
     postId: string;
     comments: Comment[];
 }
 
-const getUserBadge = (user: User | null): UserBadge => {
-    if (!user) return 'normal';
-    if (user.isAdmin) return 'owner';
-    const hasActiveSub = (user.subscription && user.subscription.expiresAt > Date.now()) || (user.apiAccess?.subscription && user.apiAccess.subscription.expiresAt > Date.now());
-    return hasActiveSub ? 'premium' : 'normal';
-};
-
 const BlogCommentSection: React.FC<BlogCommentSectionProps> = ({ postId, comments }) => {
-    const auth = useContext(AuthContext);
+    // FIX: Cast context to the correct type to resolve property errors
+    const auth = useContext(AuthContext) as AuthContextType;
     const blog = useContext(BlogContext);
     const [newComment, setNewComment] = useState('');
     const [isLoading, setIsLoading] = useState(false);

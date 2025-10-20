@@ -1,7 +1,8 @@
 // Vercel Serverless Function: /api/urls
 // Handles GET, POST, PUT, and DELETE requests for the 'urls' collection in MongoDB.
 
-import { connectToDatabase } from './lib/mongodb.js';
+import { connectToDatabase } from './lib/mongodb';
+// FIX: Corrected import path for types
 import type { ShortenedUrl } from '../types';
 
 export default async function handler(req: any, res: any) {

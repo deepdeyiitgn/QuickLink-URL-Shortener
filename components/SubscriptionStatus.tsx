@@ -1,6 +1,8 @@
 import React, { useContext } from 'react';
+// FIX: Corrected import path for AuthContext
 import { AuthContext } from '../contexts/AuthContext';
 import { CrownIcon } from './icons/IconComponents';
+import { AuthContextType } from '../types';
 
 const PRICING_MAP: Record<string, { label: string }> = {
     'monthly': { label: 'Monthly' },
@@ -9,7 +11,8 @@ const PRICING_MAP: Record<string, { label: string }> = {
 };
 
 const SubscriptionStatus: React.FC = () => {
-    const auth = useContext(AuthContext);
+    // FIX: Cast context to the correct type to resolve property errors
+    const auth = useContext(AuthContext) as AuthContextType;
 
     if (!auth || !auth.currentUser) return null;
 

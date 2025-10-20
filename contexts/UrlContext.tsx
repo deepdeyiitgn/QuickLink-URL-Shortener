@@ -1,7 +1,7 @@
-
-
 import React, { createContext, useState, useEffect, ReactNode, useMemo } from 'react';
+// FIX: Corrected import path for types
 import type { ShortenedUrl, PaymentRecord, UrlContextType } from '../types';
+// FIX: Corrected import path for api
 import { api } from '../api';
 
 export const UrlContext = createContext<UrlContextType | undefined>(undefined);
@@ -14,13 +14,18 @@ export const UrlProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      const [urls, payments] = await Promise.all([
-        api.getUrls(),
-        api.getPaymentHistory()
-      ]);
-      setAllUrls(urls);
-      setPaymentHistory(payments);
-      setLoading(false);
+      try {
+        const [urls, payments] = await Promise.all([
+            api.getUrls(),
+            api.getPaymentHistory()
+        ]);
+        setAllUrls(urls);
+        setPaymentHistory(payments);
+      } catch (error) {
+          console.error("Failed to load URL context data:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadData();

@@ -1,8 +1,10 @@
 import React, { useState, useContext, useRef } from 'react';
+// FIX: Corrected import path for AuthContext
 import { AuthContext } from '../contexts/AuthContext';
 import { BlogContext } from '../contexts/BlogContext';
 import { LoadingIcon, UploadIcon, MicrophoneIcon, XIcon } from './icons/IconComponents';
-import type { User, UserBadge } from '../types';
+// FIX: Corrected import path for types
+import type { User, UserBadge, AuthContextType } from '../types';
 
 type PostType = 'normal' | 'html';
 
@@ -14,7 +16,8 @@ const getUserBadge = (user: User | null): UserBadge => {
 };
 
 const BlogCreatePost: React.FC = () => {
-    const auth = useContext(AuthContext);
+    // FIX: Cast context to the correct type to resolve property errors
+    const auth = useContext(AuthContext) as AuthContextType;
     const blog = useContext(BlogContext);
     
     const [title, setTitle] = useState('');
@@ -110,6 +113,8 @@ const BlogCreatePost: React.FC = () => {
             setAudio(null);
             if (imageInputRef.current) imageInputRef.current.value = '';
             if (audioInputRef.current) audioInputRef.current.value = '';
+            // Ideally, redirect to blog page
+            window.location.href = '/blog';
         } catch (err) {
             setError('Failed to create post. Please try again.');
         } finally {

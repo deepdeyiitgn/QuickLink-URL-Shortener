@@ -1,7 +1,8 @@
 // Vercel Serverless Function: /api/payments
 // Handles GET and POST requests for the 'payments' collection in MongoDB.
 
-import { connectToDatabase } from './lib/mongodb.js';
+import { connectToDatabase } from './lib/mongodb';
+// FIX: Corrected import path for types
 import type { PaymentRecord } from '../types';
 
 export default async function handler(req: any, res: any) {

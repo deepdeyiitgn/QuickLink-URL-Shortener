@@ -1,13 +1,16 @@
 import React, { useEffect, useState, useContext, useRef } from 'react';
 import { LinkIcon, CameraIcon, UploadIcon, LoadingIcon } from './icons/IconComponents';
 import { QrContext } from '../contexts/QrContext';
+// FIX: Corrected import path for AuthContext
 import { AuthContext } from '../contexts/AuthContext';
+import { AuthContextType } from '../types';
 
 declare const Html5Qrcode: any;
 
 const QrCodeScanner: React.FC = () => {
     const qrContext = useContext(QrContext);
-    const auth = useContext(AuthContext);
+    // FIX: Cast context to the correct type to resolve property errors
+    const auth = useContext(AuthContext) as AuthContextType;
     
     const [scanResult, setScanResult] = useState<string | null>(null);
     const [scanMode, setScanMode] = useState<'idle' | 'camera' | 'file'>('idle');

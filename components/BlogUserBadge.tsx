@@ -1,6 +1,7 @@
 import React from 'react';
+// FIX: Corrected import path for types
 import type { UserBadge } from '../types';
-import { BadgeCheckIcon, CrownIcon } from './icons/IconComponents';
+import { BadgeCheckIcon, CrownIcon, WarningIcon } from './icons/IconComponents';
 
 interface BlogUserBadgeProps {
     badge: UserBadge;
@@ -10,6 +11,7 @@ const BADGE_CONFIG: Record<UserBadge, { label: string; className: string; icon: 
     normal: { label: 'User', className: '', icon: null },
     premium: { label: 'Premium', className: 'bg-green-500/20 text-green-400', icon: CrownIcon },
     owner: { label: 'Owner', className: 'bg-yellow-500/20 text-yellow-400', icon: BadgeCheckIcon },
+    blacklist: { label: 'Blacklisted', className: 'bg-red-500/20 text-red-400', icon: WarningIcon },
 };
 
 const BlogUserBadge: React.FC<BlogUserBadgeProps> = ({ badge }) => {

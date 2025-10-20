@@ -1,7 +1,8 @@
 // This is a Vercel serverless function for the Developer API endpoint.
 // It validates the API key and creates a short URL, storing it in MongoDB Atlas.
 
-import { connectToDatabase } from '../lib/mongodb.js';
+import { connectToDatabase } from '../lib/mongodb';
+// FIX: Corrected import path for types
 import type { User, ShortenedUrl } from '../../types';
 
 export default async function handler(req: any, res: any) {

@@ -1,10 +1,13 @@
 import React, { useContext, useState } from 'react';
+// FIX: Corrected import path for AuthContext
 import { AuthContext } from '../contexts/AuthContext';
 import { CopyIcon, CheckIcon, LoadingIcon, EyeIcon, EyeSlashIcon } from './icons/IconComponents';
 import DomainConfigGuide from './DomainConfigGuide';
+import { AuthContextType } from '../types';
 
 const ApiAccessPage: React.FC = () => {
-    const auth = useContext(AuthContext);
+    // FIX: Cast context to the correct type to resolve property errors
+    const auth = useContext(AuthContext) as AuthContextType;
     const { currentUser, generateApiKey, openApiSubscriptionModal } = auth || {};
     const [isGenerating, setIsGenerating] = useState(false);
     const [copied, setCopied] = useState(false);

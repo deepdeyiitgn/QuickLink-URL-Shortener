@@ -1,22 +1,50 @@
-# QuickLink URL Shortener
+# QuickLink: The All-in-One Link & Community Platform
 
-A modern, fast, and easy-to-use URL shortener built with React, TypeScript, and Tailwind CSS. Create custom, memorable short links for any website. This project is now feature-complete, secure, and ready for deployment.
+A modern, fast, and feature-rich platform built with React, TypeScript, and Tailwind CSS. QuickLink has evolved beyond a simple utility into a complete solution for link management, content sharing, and community interaction. This project is now feature-complete, secure, and ready for deployment.
 
 ## ✨ Features
 
-- **Instant URL Shortening**: Quickly convert long URLs into short, shareable links.
-- **Custom Aliases**: Personalize your short links with a custom alias (e.g., `/#my-event`).
-- **Live Payments with Vercel**: Securely process one-time payments for subscriptions using Razorpay, powered by Vercel Serverless Functions.
-- **Developer API**: A dedicated developer portal where users can generate an API key (with a 1-month free trial) and purchase subscriptions to use the URL shortening service in their own applications.
-- **Powerful QR Code Suite**:
-    - **Generator**: A powerful, free tool to create a wide variety of static and custom-themed QR codes (URL, Wi-Fi, vCard, Events, Payments, and more) with custom logos and colors.
-    - **Scanner**: An integrated scanner that can read QR codes using either the device camera or by uploading an image file.
-- **Branded Redirection Page**: Short links first lead to a branded, user-friendly interstitial page, enhancing security and brand visibility before redirecting.
-- **User & Owner Dashboards**:
-  - **User Dashboard**: Logged-in users can view and manage their created links and subscription status.
-  - **Owner Dashboard**: An administrative panel for the site owner to view all users, links, API keys, QR code history, and scan history in an organized, tabbed interface.
-- **Live Status Page**: A public status page displaying real-time site metrics and the operational status of all core services.
-- **Server-Side Persistence**: The application now uses **MongoDB Atlas** for all data storage, making user accounts, links, and history persistent and accessible from any device.
+- **Advanced URL Shortening**: 
+  - Quickly convert long URLs into short, shareable links.
+  - Personalize your links with **Custom Aliases** (e.g., `/#my-event`).
+  - Set custom expiration dates for links, with extended durations for subscribed users.
+
+- **Comprehensive QR Code Suite**:
+  - **Powerful Generator**: A free tool to create a wide variety of static QR codes (URL, Wi-Fi, vCard, Events, Payments, and more).
+  - **Deep Customization**: Brand your QR codes by customizing colors and embedding your own logo.
+  - **Versatile Scanner**: An integrated scanner that reads QR codes instantly using either the device camera or by uploading an image file.
+
+- **Blog & Community Platform**:
+  - **Rich Content Creation**: Users can create and publish blog posts with formatted text, raw HTML, images, and even audio uploads.
+  - **Community Interaction**: Engage with content through a system of likes, threaded comments, and social sharing.
+  - **Advanced Moderation**: Admins have full control with post-approval workflows, the ability to pin important posts to the top, and deletion rights.
+  - **Live User Presence**: User badges (Premium, Owner, Blacklisted) and profile details update in real-time across all their posts and comments.
+
+- **Full Support Ticket System**:
+  - **Integrated Helpdesk**: Logged-in users can create support tickets through a dedicated portal.
+  - **Threaded Conversations**: Enables persistent, back-and-forth communication between users and administrators.
+  - **Admin Management**: Admins can view, reply to, and manage the status of all user tickets directly from the Owner Dashboard.
+
+- **Centralized Notification System**:
+  - **User Alerts**: A dedicated notification panel alerts users to important events.
+  - **Automated Triggers**: Notifications are automatically generated for replies to support tickets, approval status of blog posts, and changes to account status (e.g., being banned or unbanned).
+
+- **Secure Payment & Donation Integration**:
+  - **Flexible Subscriptions**: Securely process one-time payments for link and API subscriptions using Razorpay and Cashfree.
+  - **Donation System**: A dedicated page allows the community to support the platform through one-time donations.
+  - **Supporter Recognition**: A public leaderboard showcases top contributors, and donors receive a "Premium" badge as a thank-you.
+
+- **Powerful Dashboards & API**:
+  - **User Dashboard**: A central hub for users to manage their profile, subscription status, API key, and view their support ticket history.
+  - **Owner Dashboard**: An administrative command center to view all users, links, API keys, QR/scan history, and manage the entire support ticket system.
+  - **Developer API**: A dedicated portal where users can generate an API key (with a 1-month free trial) and purchase subscriptions to use the URL shortening service in their own applications.
+
+- **Enhanced Security & Analytics**:
+  - **User Moderation**: Admins can ban users, which restricts their access to site tools while maintaining their content with a "Blacklisted" status.
+  - **Activity Logging**: The system automatically logs a user's IP address, device type, and browser on login and subsequent activity, providing valuable analytics and security insights for the site owner.
+  - **Live Status Page**: A public page displaying real-time site metrics and the operational status of all core services, including database connectivity.
+
+- **Server-Side Persistence**: The application uses **MongoDB Atlas** for all data storage, making user accounts, links, blog posts, and history persistent and accessible from any device.
 
 ## 🚀 How to Run Locally
 
@@ -55,45 +83,43 @@ This project is optimized for deployment on platforms like Vercel.
     -   Follow the **"Setting up MongoDB Atlas"** guide below to create your free database.
 6.  **Add Environment Variables**:
     -   Navigate to your Vercel project's **Settings > Environment Variables**.
-    -   Add all the required variables from the `.env.example` file, including your new `MONGODB_URI`, `MONGODB_DB_NAME`, and `RAZORPAY_KEY_SECRET`.
+    -   Add all the required variables from the `.env.example` file, including your new `MONGODB_URI`, `MONGODB_DB_NAME`, and payment gateway secrets.
 7.  **Deploy**: Click the "Deploy" button. Vercel will build your site and deploy the serverless functions, which will connect to your MongoDB database.
 
 ### Setting up MongoDB Atlas (Required for Deployment)
 
-This application requires a MongoDB database to store user and URL data. You can get a free database from MongoDB Atlas.
+This application requires a MongoDB database to store all its data. You can get a free database from MongoDB Atlas.
 
 1.  **Create a MongoDB Atlas Account**:
     -   Go to the [MongoDB Atlas website](https://www.mongodb.com/cloud/atlas/register) and sign up for a free account.
 
 2.  **Create a Free Cluster**:
     -   After signing up, you will be prompted to create a new cluster. Choose the **M0 (Free)** option.
-    -   Select a cloud provider and region (choose one close to your users). You can leave the other settings as default.
-    -   Click **"Create Cluster"**. It will take a few minutes to provision.
+    -   Select a cloud provider and region.
+    -   Click **"Create Cluster"**.
 
 3.  **Create a Database User**:
-    -   In your cluster's dashboard, go to **Database Access** under the "Security" section.
-    -   Click **"Add New Database User"**.
-    -   Enter a **username** and **password**. Make sure to save these securely, as you will need the password for your connection string.
+    -   In your cluster's dashboard, go to **Database Access** under "Security".
+    -   Click **"Add New Database User"**. Enter a **username** and **password** (save these securely).
     -   Grant the user the **"Read and write to any database"** privilege.
     -   Click **"Add User"**.
 
 4.  **Configure Network Access**:
-    -   Go to **Network Access** under the "Security" section.
-    -   Click **"Add IP Address"**.
-    -   Select **"ALLOW ACCESS FROM ANYWHERE"**. This will enter `0.0.0.0/0` in the IP address field. This is necessary for Vercel's serverless functions to connect.
+    -   Go to **Network Access** under "Security".
+    -   Click **"Add IP Address"** and select **"ALLOW ACCESS FROM ANYWHERE"** (`0.0.0.0/0`). This is necessary for Vercel's serverless functions to connect.
     -   Click **"Confirm"**.
 
 5.  **Get Your Connection String**:
-    -   Go back to your cluster's **Database** dashboard and click the **"Connect"** button.
+    -   Go to your cluster's **Database** dashboard and click **"Connect"**.
     -   Select the **"Drivers"** option.
-    -   You will see a connection string (URI). Copy it. It will look like this:
+    -   Copy the connection string (URI). It will look like:
         `mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority`
-    -   **Important**: Replace `<password>` with the actual password you created for your database user.
+    -   **Important**: Replace `<password>` with the actual password you created.
 
 6.  **Add to Vercel Environment Variables**:
-    -   In your Vercel project settings, add the following environment variables:
-        -   `MONGODB_URI`: Paste your full connection string from the previous step.
-        -   `MONGODB_DB_NAME`: Enter a name for your database, for example, `quicklink`.
+    -   In your Vercel project settings, add:
+        -   `MONGODB_URI`: Your full connection string.
+        -   `MONGODB_DB_NAME`: A name for your database (e.g., `quicklink`).
 
 ## ⚙️ Environment Variables
 
@@ -128,51 +154,35 @@ MONGODB_DB_NAME="your_database_name"
 If you want to contribute to this project or manage your own version, follow these steps:
 
 1.  **Fork the Repository**
-    -   Click the "Fork" button at the top-right corner of the original GitHub repository page. This creates a copy of the repository under your own GitHub account.
+    -   Click the "Fork" button at the top-right corner of the original GitHub repository page.
 
 2.  **Clone Your Fork**
-    -   Go to your forked repository on GitHub and click the "Code" button. Copy the URL.
-    -   Open your terminal and run the following command, replacing `<your-fork-url>` with the URL you copied:
+    -   Go to your forked repository and copy the URL.
     ```bash
     git clone <your-fork-url>
     cd quicklink-url-shortener
     ```
 
 3.  **Create a New Branch**
-    -   It's best practice to create a new branch for each new feature or fix you're working on.
     ```bash
     git checkout -b my-awesome-feature
     ```
 
 4.  **Make Your Changes**
-    -   Now you can open the code in your favorite editor and make your changes.
 
 5.  **Commit Your Changes**
-    -   Once you're happy with your changes, you need to stage and commit them.
     ```bash
-    # Stage all changes for the next commit
     git add .
-
-    # Commit the changes with a descriptive message
     git commit -m "feat: Add my awesome new feature"
     ```
 
 6.  **Push to Your Fork**
-    -   Push your committed changes from your local branch to your remote repository on GitHub.
     ```bash
     git push origin my-awesome-feature
     ```
 
 7.  **(Optional) Create a Pull Request**
-    -   If you want to merge your changes back into the original repository, go to your fork on GitHub. You should see a prompt to create a "Pull Request". Click it, fill out the details, and submit it for review.
-
-## ⚠️ Important Security Note
-
-This project's data persistence has been refactored to simulate a secure, server-side API. The original `public/users.json` and `public/shortened_urls.json` files are **no longer used** and represent a security risk.
-
-**After cloning, please DELETE the following files:**
-- `public/users.json`
-- `public/shortened_urls.json`
+    -   If you want to merge your changes back into the original repository, go to your fork on GitHub and create a "Pull Request".
 
 ## 🔑 Owner Access
 

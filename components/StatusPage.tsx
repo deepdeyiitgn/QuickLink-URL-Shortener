@@ -1,10 +1,13 @@
 import React, { useContext, useEffect, useState } from 'react';
+// FIX: Corrected import path for AuthContext
 import { AuthContext } from '../contexts/AuthContext';
 import { UrlContext } from '../contexts/UrlContext';
 import { QrContext } from '../contexts/QrContext';
 import { LoadingIcon } from './icons/IconComponents';
+// FIX: Corrected import path for api
 import { api } from '../api';
-import type { DbStatus } from '../types';
+// FIX: Corrected import path for types
+import type { DbStatus, AuthContextType } from '../types';
 
 const StatCard: React.FC<{ title: string; value: string | number; description: string; }> = ({ title, value, description }) => (
     <div className="bg-black/30 p-6 rounded-xl border border-white/10">
@@ -29,7 +32,8 @@ const StatusIndicator: React.FC<{ label: string; status: 'Operational' | 'Degrad
 
 
 const StatusPage: React.FC = () => {
-    const auth = useContext(AuthContext);
+    // FIX: Cast context to the correct type to resolve property errors
+    const auth = useContext(AuthContext) as AuthContextType;
     const urlContext = useContext(UrlContext);
     const qrContext = useContext(QrContext);
 

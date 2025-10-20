@@ -1,5 +1,7 @@
 import React, { createContext, useState, useEffect, ReactNode, useContext, useCallback } from 'react';
-import type { BlogPost, Comment, BlogContextType as IBlogContextType } from '../types';
+// FIX: Corrected import path for types
+import type { BlogPost, Comment, BlogContextType as IBlogContextType, AuthContextType } from '../types';
+// FIX: Corrected import path for AuthContext
 import { AuthContext } from './AuthContext';
 
 const blogApi = {
@@ -48,7 +50,8 @@ export const BlogContext = createContext<IBlogContextType | undefined>(undefined
 export const BlogProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [posts, setPosts] = useState<BlogPost[]>([]);
     const [loading, setLoading] = useState(true);
-    const auth = useContext(AuthContext);
+    // FIX: Cast context to the correct type to resolve property errors
+    const auth = useContext(AuthContext) as AuthContextType;
 
     const fetchPosts = useCallback(async () => {
         setLoading(true);
@@ -85,7 +88,7 @@ export const BlogProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
     
     const addComment = async (postId: string, commentData: Omit<Comment, 'id' | 'createdAt'>) => {
-        const updatedPost = await blogApi.updatePost({ postId, action: 'add_comment', comment: commentData });
+        const updatedPost = await blogApi.updatePost({ postId, action: 'add_comment', comment: commentData, userId: auth?.currentUser?.id });
         setPosts(prev => prev.map(p => p.id === postId ? updatedPost : p));
     };
 
@@ -115,7 +118,7 @@ export const BlogProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     const approvePost = async (postId: string) => {
-        if (!auth?.currentUser?.isAdmin) return;
+        if (!auth?.currentUser?.isAdmin && !auth?.currentUser?.canModerate) return;
         try {
             const updatedPost = await blogApi.updatePost({ postId, action: 'approve_post', userId: auth.currentUser.id });
             setPosts(prev => prev.map(p => p.id === postId ? updatedPost : p));

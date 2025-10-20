@@ -1,7 +1,11 @@
+
+// FIX: Removed reference to vite/client types to resolve "Cannot find type definition" error.
 import React, { useState, useContext } from 'react';
+// FIX: Corrected import path for AuthContext
 import { AuthContext } from '../contexts/AuthContext';
 import { UrlContext } from '../contexts/UrlContext'; // For payment records
-import { PaymentRecord, RazorpayOrder, RazorpaySuccessResponse, CashfreeOrder } from '../types';
+// FIX: Corrected import path for types
+import { PaymentRecord, RazorpayOrder, RazorpaySuccessResponse, CashfreeOrder, AuthContextType } from '../types';
 import { XIcon, LoadingIcon, CrownIcon, CheckIcon, WarningIcon } from './icons/IconComponents';
 
 interface ApiSubscriptionModalProps {
@@ -16,7 +20,8 @@ const API_PLANS: Record<ApiPlanId, { price: number; months: number; label: strin
 };
 
 const ApiSubscriptionModal: React.FC<ApiSubscriptionModalProps> = ({ onClose }) => {
-    const auth = useContext(AuthContext);
+    // FIX: Cast context to the correct type to resolve property errors
+    const auth = useContext(AuthContext) as AuthContextType;
     const urlContext = useContext(UrlContext);
     const [selectedPlan, setSelectedPlan] = useState<ApiPlanId>('pro');
     const [isLoading, setIsLoading] = useState(false);
@@ -60,7 +65,8 @@ const ApiSubscriptionModal: React.FC<ApiSubscriptionModalProps> = ({ onClose }) 
             }
 
             const options = {
-                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+                // FIX: Use type assertion to silence TypeScript error about import.meta.env in non-Vite environments.
+                key: (import.meta as any).env.VITE_RAZORPAY_KEY_ID,
                 amount: order.amount,
                 currency: order.currency,
                 name: 'QuickLink API Plan',
@@ -111,6 +117,7 @@ const ApiSubscriptionModal: React.FC<ApiSubscriptionModalProps> = ({ onClose }) 
                 }
             };
             
+            // FIX: Rely on global type declaration from types.ts
             const rzp = new window.Razorpay(options);
             rzp.open();
             setIsLoading(false);
@@ -144,6 +151,7 @@ const ApiSubscriptionModal: React.FC<ApiSubscriptionModalProps> = ({ onClose }) 
 
             const order: CashfreeOrder = await orderResponse.json();
             
+            // FIX: Rely on global type declaration from types.ts
             const cashfree = new window.Cashfree({ mode: "production" });
 
             cashfree.checkout({

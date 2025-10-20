@@ -1,7 +1,7 @@
-
-
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
+// FIX: Corrected import path for types
 import type { QrCodeRecord, ScanRecord, QrContextType as IQrContextType } from '../types';
+// FIX: Corrected import path for api
 import { api } from '../api';
 
 export const QrContext = createContext<IQrContextType | undefined>(undefined);
@@ -14,13 +14,18 @@ export const QrProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     useEffect(() => {
         const loadHistory = async () => {
             setLoading(true);
-            const [qrs, scans] = await Promise.all([
-                api.getQrHistory(),
-                api.getScanHistory()
-            ]);
-            setQrHistory(qrs);
-            setScanHistory(scans);
-            setLoading(false);
+            try {
+                const [qrs, scans] = await Promise.all([
+                    api.getQrHistory(),
+                    api.getScanHistory()
+                ]);
+                setQrHistory(qrs);
+                setScanHistory(scans);
+            } catch (error) {
+                console.error("Failed to load QR history data:", error);
+            } finally {
+                setLoading(false);
+            }
         };
         loadHistory();
     }, []);

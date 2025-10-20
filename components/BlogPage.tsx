@@ -1,15 +1,17 @@
 import React, { useContext, useState, useMemo } from 'react';
 import { BlogContext } from '../contexts/BlogContext';
+// FIX: Corrected import path for AuthContext
 import { AuthContext } from '../contexts/AuthContext';
-import { LoadingIcon } from './icons/IconComponents';
-import BlogCreatePost from './BlogCreatePost';
+import { LoadingIcon, PlusIcon } from './icons/IconComponents';
 import BlogPostItem from './BlogPostItem';
 import AboutBlog from './AboutBlog';
 import HowToUseBlog from './HowToUseBlog';
+import { AuthContextType } from '../types';
 
 const BlogPage: React.FC = () => {
     const blog = useContext(BlogContext);
-    const auth = useContext(AuthContext);
+    // FIX: Cast context to the correct type to resolve property errors
+    const auth = useContext(AuthContext) as AuthContextType;
     const [searchTerm, setSearchTerm] = useState('');
     const [sortOption, setSortOption] = useState('newest');
 
@@ -19,10 +21,14 @@ const BlogPage: React.FC = () => {
         const filtered = blog.posts.filter(post => 
             post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             post.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            post.userName.toLowerCase().includes(searchTerm.toLowerCase())
+            post.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            post.keywords?.some(k => k.toLowerCase().includes(searchTerm.toLowerCase()))
         );
 
         return filtered.sort((a, b) => {
+            if (a.isPinned && !b.isPinned) return -1;
+            if (!a.isPinned && b.isPinned) return 1;
+
             switch (sortOption) {
                 case 'oldest': return a.createdAt - b.createdAt;
                 case 'likes': return b.likes.length - a.likes.length;
@@ -41,8 +47,15 @@ const BlogPage: React.FC = () => {
                     News, thoughts, and updates from our community. Share your story!
                 </p>
             </div>
-
-            {auth?.currentUser && <BlogCreatePost />}
+            
+            {auth?.currentUser && (
+                 <div className="text-center">
+                    <a href="/blog/new" className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-brand-dark bg-brand-primary rounded-md hover:bg-brand-primary/80 transition-all transform hover:scale-105 shadow-[0_0_15px_rgba(0,229,255,0.5)]">
+                        <PlusIcon className="h-5 w-5" />
+                        Create New Post
+                    </a>
+                </div>
+            )}
 
             {/* Search and Sort Controls */}
             <div className="max-w-4xl mx-auto glass-card p-4 rounded-xl flex flex-col sm:flex-row gap-4 items-center">

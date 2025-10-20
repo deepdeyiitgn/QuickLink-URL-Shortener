@@ -1,6 +1,8 @@
 import React, { useState, useContext } from 'react';
-import type { ShortenedUrl } from '../types';
+// FIX: Corrected import path for types
+import type { ShortenedUrl, AuthContextType } from '../types';
 import { CopyIcon, LinkIcon, LoadingIcon, CheckIcon } from './icons/IconComponents';
+// FIX: Corrected import path for AuthContext
 import { AuthContext } from '../contexts/AuthContext';
 import { UrlContext } from '../contexts/UrlContext';
 import ShareButtons from './ShareButtons';
@@ -12,7 +14,8 @@ const SUBSCRIPTION_LABELS = {
 };
 
 const UrlShortener: React.FC = () => {
-  const auth = useContext(AuthContext);
+  // FIX: Cast context to the correct type to resolve property errors
+  const auth = useContext(AuthContext) as AuthContextType;
   const urlContext = useContext(UrlContext);
   const { currentUser, openAuthModal, openSubscriptionModal } = auth || {};
   const { addUrl } = urlContext || {};

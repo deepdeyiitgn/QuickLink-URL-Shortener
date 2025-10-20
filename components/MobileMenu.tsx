@@ -1,109 +1,60 @@
 import React, { useContext } from 'react';
+// FIX: Corrected import path for AuthContext
 import { AuthContext } from '../contexts/AuthContext';
-import { XIcon, LinkIcon, QrGeneratorIcon, QrCodeScannerIcon, NewspaperIcon, QuestionMarkCircleIcon, UserIcon, ShieldCheckIcon } from './icons/IconComponents';
+import { UserIcon } from './icons/IconComponents';
+import { AuthContextType } from '../types';
 
 interface MobileMenuProps {
-    isOpen: boolean;
-    onClose: () => void;
-    currentView: string;
+    onLinkClick: () => void;
 }
 
-const NavLink: React.FC<{ href: string; icon: React.FC<any>; label: string; isActive: boolean; onClick: () => void; }> = ({ href, icon: Icon, label, isActive, onClick }) => {
-    const activeClass = 'bg-brand-primary/10 text-brand-primary';
-    const inactiveClass = 'text-gray-300 hover:bg-white/5 hover:text-white';
-    return (
-        <a href={href} onClick={onClick} className={`flex items-center gap-4 px-4 py-3 rounded-md transition-colors ${isActive ? activeClass : inactiveClass}`}>
-            <Icon className="h-6 w-6" />
-            <span className="font-semibold">{label}</span>
-        </a>
-    );
-};
-
-const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, currentView }) => {
-    const auth = useContext(AuthContext);
+const MobileMenu: React.FC<MobileMenuProps> = ({ onLinkClick }) => {
+    // FIX: Cast context to the correct type to resolve property errors
+    const auth = useContext(AuthContext) as AuthContextType;
     const { currentUser, openAuthModal, logout } = auth || {};
-    
-    const handleLogout = () => {
-        if (logout) logout();
-        onClose();
+
+    const handleLinkClick = (path: string) => {
+        window.location.href = path;
+        onLinkClick();
     };
 
-    const handleOpenAuthModal = (mode: 'login' | 'signup') => {
-        if (openAuthModal) openAuthModal(mode);
-        onClose();
-    }
-
-    const navItems = [
-        { href: '/shortener', icon: LinkIcon, label: 'URL Shortener' },
-        { href: '/qr-generator', icon: QrGeneratorIcon, label: 'QR Generator' },
-        { href: '/qr-scanner', icon: QrCodeScannerIcon, label: 'QR Scanner' },
-        { href: '/blog', icon: NewspaperIcon, label: 'Blog' },
-        { href: '/faq', icon: QuestionMarkCircleIcon, label: 'FAQ' },
-    ];
-
     return (
-        <>
-            {/* Overlay */}
-            <div
-                className={`fixed inset-0 bg-black/60 z-40 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-                onClick={onClose}
-                aria-hidden="true"
-            />
-            {/* Menu Panel */}
-            <div
-                className={`fixed top-0 right-0 h-full w-72 bg-brand-dark border-l border-white/10 shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
-                role="dialog"
-                aria-modal="true"
-            >
-                <div className="p-4 flex flex-col h-full">
-                    <div className="flex justify-between items-center mb-6">
-                        <span className="font-bold text-lg text-white">Menu</span>
-                        <button onClick={onClose} className="p-2 text-gray-400 hover:text-white" aria-label="Close menu">
-                            <XIcon className="h-6 w-6" />
+        <div className="md:hidden" id="mobile-menu">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="/shortener" onClick={onLinkClick} className="mobile-nav-link">Shortener</a>
+                <a href="/qr-generator" onClick={onLinkClick} className="mobile-nav-link">QR Generator</a>
+                <a href="/blog" onClick={onLinkClick} className="mobile-nav-link">Blog</a>
+                <a href="/faq" onClick={onLinkClick} className="mobile-nav-link">FAQ</a>
+                <a href="/donate" onClick={onLinkClick} className="mobile-nav-link text-brand-secondary">Donate</a>
+            </div>
+            <div className="pt-4 pb-3 border-t border-gray-700">
+                {currentUser ? (
+                    <div className="px-2 space-y-1">
+                        <div className="flex items-center px-3 py-2">
+                            <UserIcon className="h-8 w-8 text-gray-400" />
+                            <div className="ml-3">
+                                <div className="text-base font-medium text-white">{currentUser.name}</div>
+                                <div className="text-sm font-medium text-gray-400">{currentUser.email}</div>
+                            </div>
+                        </div>
+                        <a href="/dashboard" onClick={onLinkClick} className="mobile-nav-link">Dashboard</a>
+                        <a href="/api-access" onClick={onLinkClick} className="mobile-nav-link">API Access</a>
+                        <button onClick={() => { logout?.(); onLinkClick(); }} className="mobile-nav-link w-full text-left">
+                            Sign Out
                         </button>
                     </div>
-
-                    <nav className="flex-grow space-y-2">
-                        {navItems.map(item => (
-                            <NavLink key={item.href} {...item} isActive={`/${currentView}` === item.href} onClick={onClose} />
-                        ))}
-                    </nav>
-
-                    <div className="pt-4 border-t border-white/20">
-                        {currentUser ? (
-                            <div className="space-y-2">
-                                {currentUser.isAdmin ? (
-                                    <NavLink href="/owner" icon={ShieldCheckIcon} label="Admin Dashboard" isActive={currentView === 'owner'} onClick={onClose} />
-                                ) : (
-                                    <NavLink href="/dashboard" icon={UserIcon} label="Dashboard" isActive={currentView === 'dashboard'} onClick={onClose} />
-                                )}
-                                <button
-                                    onClick={handleLogout}
-                                    className="w-full text-left px-4 py-3 rounded-md font-semibold text-gray-300 hover:bg-red-500/10 hover:text-red-400 transition-colors"
-                                >
-                                    Log Out
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="space-y-2">
-                                <button
-                                    onClick={() => handleOpenAuthModal('login')}
-                                    className="w-full text-left px-4 py-3 rounded-md font-semibold text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
-                                >
-                                    Sign In
-                                </button>
-                                <button
-                                    onClick={() => handleOpenAuthModal('signup')}
-                                    className="w-full text-left px-4 py-3 rounded-md font-semibold text-brand-dark bg-brand-primary hover:bg-brand-primary/80 transition-colors"
-                                >
-                                    Sign Up
-                                </button>
-                            </div>
-                        )}
+                ) : (
+                    <div className="px-2 space-y-2">
+                        <button onClick={() => { openAuthModal?.('login'); onLinkClick(); }} className="w-full text-left mobile-nav-link">
+                            Sign In
+                        </button>
+                        <button onClick={() => { openAuthModal?.('signup'); onLinkClick(); }} className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-brand-dark bg-brand-primary">
+                            Sign Up
+                        </button>
                     </div>
-                </div>
+                )}
             </div>
-        </>
+        </div>
     );
 };
 

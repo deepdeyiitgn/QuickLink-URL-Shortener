@@ -1,36 +1,9 @@
-// Vercel Serverless Function: /api/users
-// Handles GET, POST, and PUT requests for the 'users' collection in MongoDB.
-
-import { connectToDatabase } from './lib/mongodb.js';
+// api/users.ts
+import { connectToDatabase } from './lib/mongodb';
 import type { User } from '../types';
 
-// Server-side logic to create the owner account if it doesn't exist on first load.
-const initializeOwner = async (db: any): Promise<void> => {
-    const usersCollection = db.collection('users');
-    const ownerEmail = process.env.VITE_OWNER_EMAIL;
-    if (!ownerEmail) return;
-
-    const ownerExists = await usersCollection.findOne({ email: ownerEmail });
-    if (ownerExists) return;
-    
-    const ownerPassword = process.env.VITE_OWNER_PASSWORD;
-    if (ownerPassword) {
-        const ownerUser: User = {
-            id: 'owner_001',
-            name: 'Site Owner',
-            email: ownerEmail,
-            passwordHash: `hashed_${ownerPassword}`, // Simple hashing for this app
-            createdAt: Date.now(),
-            apiAccess: null,
-            settings: { warningThreshold: 24 },
-            isAdmin: true,
-            canSetCustomExpiry: true,
-        };
-        await usersCollection.insertOne(ownerUser);
-        console.log("Owner account created.");
-    }
-};
-
+// Super simple mock hash for demo purposes. DO NOT USE IN PRODUCTION.
+const mockHash = (str: string) => `hashed_${str}`;
 
 export default async function handler(req: any, res: any) {
     res.setHeader('Content-Type', 'application/json');
@@ -39,48 +12,65 @@ export default async function handler(req: any, res: any) {
         const usersCollection = db.collection('users');
 
         if (req.method === 'GET') {
-            await initializeOwner(db);
-            const users = await usersCollection.find({}).toArray();
+            const users = await usersCollection.find({}, { projection: { passwordHash: 0 } }).toArray();
             return res.status(200).json(users);
         }
 
-        if (req.method === 'POST') { // Create a single new user
-            const newUser: User = req.body;
-            if (!newUser || !newUser.email || !newUser.passwordHash) {
-                return res.status(400).json({ error: 'Invalid user data provided.' });
+        if (req.method === 'POST') { // Sign up
+            const { name, email, password } = req.body;
+            if (!name || !email || !password) {
+                return res.status(400).json({ error: 'Name, email, and password are required.' });
             }
 
-            // Capture IP Address from request headers
-            const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
-            newUser.ipAddress = Array.isArray(ip) ? ip[0] : ip;
-
-            const existingUser = await usersCollection.findOne({ email: newUser.email.toLowerCase() });
+            const existingUser = await usersCollection.findOne({ email: email.toLowerCase() });
             if (existingUser) {
                 return res.status(409).json({ error: 'An account with this email already exists.' });
             }
 
-            await usersCollection.insertOne({ ...newUser, email: newUser.email.toLowerCase() });
-            return res.status(201).json(newUser);
+            const newUser: User = {
+                id: `user_${Date.now()}`,
+                name,
+                email: email.toLowerCase(),
+                passwordHash: password, // In a real app, you would hash this: await bcrypt.hash(password, 10),
+                createdAt: Date.now(),
+                lastActive: Date.now(),
+                isAdmin: false,
+                canModerate: false,
+                canSetCustomExpiry: false,
+                isDonor: false,
+                status: 'active',
+                subscription: null,
+                apiAccess: null,
+            };
+
+            await usersCollection.insertOne(newUser);
+            const { passwordHash, ...userToReturn } = newUser;
+            return res.status(201).json(userToReturn);
         }
 
-        if (req.method === 'PUT') { // Update a single existing user
-            const updatedUser: User = req.body;
-            if (!updatedUser || !updatedUser.id) {
-                return res.status(400).json({ error: 'User ID is required for an update.' });
+        if (req.method === 'PUT') {
+            const { userId } = req.query;
+            const updateData = req.body;
+            if (!userId || !updateData) {
+                return res.status(400).json({ error: 'User ID and update data are required.' });
             }
             
-            const { id, ...userFieldsToUpdate } = updatedUser;
-            // Never allow changing the user's ID or email via this method.
-            delete (userFieldsToUpdate as Partial<User>).id;
-            delete (userFieldsToUpdate as Partial<User>).email;
-            
-            const result = await usersCollection.updateOne({ id: id }, { $set: userFieldsToUpdate });
-            
-            if (result.matchedCount === 0) {
+            // Prevent certain fields from being updated directly via this generic endpoint
+            delete updateData.id;
+            delete updateData.email;
+            delete updateData.passwordHash;
+
+            const result = await usersCollection.findOneAndUpdate(
+                { id: userId },
+                { $set: updateData },
+                { returnDocument: 'after', projection: { passwordHash: 0 } }
+            );
+
+            if (!result.value) {
                 return res.status(404).json({ error: 'User not found.' });
             }
             
-            return res.status(200).json({ success: true });
+            return res.status(200).json(result.value);
         }
 
         res.setHeader('Allow', ['GET', 'POST', 'PUT']);
