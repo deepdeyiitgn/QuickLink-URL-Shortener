@@ -13,19 +13,19 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ onLinkClick }) => {
     const auth = useContext(AuthContext) as AuthContextType;
     const { currentUser, openAuthModal, logout } = auth || {};
 
-    const handleLinkClick = (path: string) => {
-        window.location.href = path;
-        onLinkClick();
-    };
+    const linkClasses = "block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700";
 
     return (
         <div className="md:hidden" id="mobile-menu">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="/shortener" onClick={onLinkClick} className="mobile-nav-link">Shortener</a>
-                <a href="/qr-generator" onClick={onLinkClick} className="mobile-nav-link">QR Generator</a>
-                <a href="/blog" onClick={onLinkClick} className="mobile-nav-link">Blog</a>
-                <a href="/faq" onClick={onLinkClick} className="mobile-nav-link">FAQ</a>
-                <a href="/donate" onClick={onLinkClick} className="mobile-nav-link text-brand-secondary">Donate</a>
+                <a href="/" onClick={onLinkClick} className={linkClasses}>Home</a>
+                <a href="/tools" onClick={onLinkClick} className={linkClasses}>Tools</a>
+                <a href="/blog" onClick={onLinkClick} className={linkClasses}>Blog</a>
+                <a href="/about" onClick={onLinkClick} className={linkClasses}>About</a>
+                <a href="/contact" onClick={onLinkClick} className={linkClasses}>Contact</a>
+                <a href="/status" onClick={onLinkClick} className={linkClasses}>Status</a>
+                <a href="/faq" onClick={onLinkClick} className={linkClasses}>FAQ</a>
+                <a href="/donate" onClick={onLinkClick} className={`${linkClasses} text-brand-secondary hover:text-brand-secondary/80 hover:bg-brand-secondary/10`}>Donate</a>
             </div>
             <div className="pt-4 pb-3 border-t border-gray-700">
                 {currentUser ? (
@@ -37,15 +37,15 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ onLinkClick }) => {
                                 <div className="text-sm font-medium text-gray-400">{currentUser.email}</div>
                             </div>
                         </div>
-                        <a href="/dashboard" onClick={onLinkClick} className="mobile-nav-link">Dashboard</a>
-                        <a href="/api-access" onClick={onLinkClick} className="mobile-nav-link">API Access</a>
-                        <button onClick={() => { logout?.(); onLinkClick(); }} className="mobile-nav-link w-full text-left">
+                        <a href="/dashboard" onClick={onLinkClick} className={linkClasses}>Dashboard</a>
+                        <a href="/api-access" onClick={onLinkClick} className={linkClasses}>API Access</a>
+                        <button onClick={() => { logout?.(); onLinkClick(); }} className={`${linkClasses} w-full text-left`}>
                             Sign Out
                         </button>
                     </div>
                 ) : (
                     <div className="px-2 space-y-2">
-                        <button onClick={() => { openAuthModal?.('login'); onLinkClick(); }} className="w-full text-left mobile-nav-link">
+                        <button onClick={() => { openAuthModal?.('login'); onLinkClick(); }} className={`w-full text-left ${linkClasses}`}>
                             Sign In
                         </button>
                         <button onClick={() => { openAuthModal?.('signup'); onLinkClick(); }} className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-brand-dark bg-brand-primary">

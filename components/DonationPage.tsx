@@ -1,4 +1,5 @@
 
+
 // FIX: Removed reference to vite/client types to resolve "Cannot find type definition" error.
 import React, { useState, useContext, useEffect, useMemo } from 'react';
 // FIX: Corrected import path for AuthContext
@@ -80,7 +81,7 @@ const DonationPage: React.FC = () => {
         setPaymentMethod('razorpay');
         
         try {
-            const orderResponse = await fetch('/api/create-razorpay-order', {
+            const orderResponse = await fetch('/api/payments?action=create_order&provider=razorpay', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ amount, currency: 'INR' })
@@ -124,7 +125,7 @@ const DonationPage: React.FC = () => {
         setPaymentMethod('cashfree');
 
         try {
-            const orderResponse = await fetch('/api/create-cashfree-order', {
+            const orderResponse = await fetch('/api/payments?action=create_order&provider=cashfree', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ amount, currency: 'INR', user: currentUser })

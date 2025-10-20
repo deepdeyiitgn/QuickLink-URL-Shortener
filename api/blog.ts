@@ -3,19 +3,20 @@
 
 import { connectToDatabase } from './lib/mongodb';
 // FIX: Corrected import path for types
-import type { BlogPost, Comment } from '../types';
+import type { BlogPost, Comment, User } from '../types';
+import type { Filter, UpdateFilter } from 'mongodb';
 
 export default async function handler(req: any, res: any) {
     res.setHeader('Content-Type', 'application/json');
     try {
         const { db } = await connectToDatabase();
-        const postsCollection = db.collection('blog_posts');
-        const usersCollection = db.collection('users');
+        const postsCollection = db.collection<BlogPost>('blog_posts');
+        const usersCollection = db.collection<User>('users');
 
         if (req.method === 'GET') {
             const { userId } = req.query;
             const user = userId ? await usersCollection.findOne({ id: userId }) : null;
-            const query = (user && (user.isAdmin || user.canModerate)) ? {} : { status: 'approved' };
+            const query: Filter<BlogPost> = (user && (user.isAdmin || user.canModerate)) ? {} : { status: 'approved' };
             const posts = await postsCollection.find(query).sort({ isPinned: -1, createdAt: -1 }).toArray();
             return res.status(200).json(posts);
         }
@@ -31,6 +32,7 @@ export default async function handler(req: any, res: any) {
                 createdAt: Date.now(),
                 status: user.isAdmin ? 'approved' : 'pending',
                 userProfilePictureUrl: user.profilePictureUrl || undefined,
+                views: 0,
             };
             await postsCollection.insertOne(newPost);
             return res.status(201).json(newPost);
@@ -40,30 +42,38 @@ export default async function handler(req: any, res: any) {
             const { postId, action, userId, comment, ...updateData } = req.body;
             if (!postId || !action) return res.status(400).json({ error: "Post ID and action are required." });
             
-            const user = userId ? await usersCollection.findOne({ id: userId }) : null;
-            if (!user) return res.status(403).json({ error: "User action not permitted." });
-
-            let updateOperation;
+            let updateOperation: UpdateFilter<BlogPost>;
             switch(action) {
                 case 'toggle_like':
+                    const user = userId ? await usersCollection.findOne({ id: userId }) : null;
+                    if (!user) return res.status(403).json({ error: "User action not permitted." });
                     const post = await postsCollection.findOne({ id: postId });
+                    if (!post) return res.status(404).json({ error: 'Post not found.' });
                     const isLiked = post.likes.includes(userId);
                     updateOperation = isLiked ? { $pull: { likes: userId } } : { $push: { likes: userId } };
                     break;
                 case 'add_comment':
+                     const commentUser = userId ? await usersCollection.findOne({ id: userId }) : null;
+                     if (!commentUser) return res.status(403).json({ error: "User action not permitted." });
                     const newComment: Comment = { ...comment, id: `comment_${Date.now()}`, createdAt: Date.now() };
                     updateOperation = { $push: { comments: newComment } };
                     break;
                 case 'increment_share':
                     updateOperation = { $inc: { shares: 1 } };
                     break;
+                case 'increment_view':
+                    updateOperation = { $inc: { views: 1 } };
+                    break;
                 case 'toggle_pin':
-                    if (!user.isAdmin) return res.status(403).json({ error: "Unauthorized" });
+                    const pinUser = userId ? await usersCollection.findOne({ id: userId }) : null;
+                    if (!pinUser || !pinUser.isAdmin) return res.status(403).json({ error: "Unauthorized" });
                     const postToPin = await postsCollection.findOne({ id: postId });
+                    if (!postToPin) return res.status(404).json({ error: 'Post not found.' });
                     updateOperation = { $set: { isPinned: !postToPin.isPinned }};
                     break;
                 case 'approve_post':
-                    if (!user.isAdmin && !user.canModerate) return res.status(403).json({ error: "Unauthorized" });
+                    const approveUser = userId ? await usersCollection.findOne({ id: userId }) : null;
+                    if (!approveUser || (!approveUser.isAdmin && !approveUser.canModerate)) return res.status(403).json({ error: "Unauthorized" });
                     updateOperation = { $set: { status: 'approved' }};
                     break;
                 default:

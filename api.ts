@@ -30,13 +30,11 @@ export const api = {
     getPaymentHistory: (): Promise<PaymentRecord[]> => fetcher('/api/payments'),
     addPaymentRecord: (record: PaymentRecord): Promise<PaymentRecord> => fetcher('/api/payments', { method: 'POST', body: JSON.stringify(record) }),
     
-    // QR HISTORY
-    getQrHistory: (): Promise<QrCodeRecord[]> => fetcher('/api/qrhistory'),
-    addQrRecord: (record: QrCodeRecord): Promise<QrCodeRecord> => fetcher('/api/qrhistory', { method: 'POST', body: JSON.stringify(record) }),
-    
-    // SCAN HISTORY
-    getScanHistory: (): Promise<ScanRecord[]> => fetcher('/api/scanhistory'),
-    addScanRecord: (record: ScanRecord): Promise<ScanRecord> => fetcher('/api/scanhistory', { method: 'POST', body: JSON.stringify(record) }),
+    // QR & SCAN HISTORY (Consolidated)
+    getQrHistory: (): Promise<QrCodeRecord[]> => fetcher('/api/history?type=qr'),
+    addQrRecord: (record: QrCodeRecord): Promise<QrCodeRecord> => fetcher('/api/history?type=qr', { method: 'POST', body: JSON.stringify(record) }),
+    getScanHistory: (): Promise<ScanRecord[]> => fetcher('/api/history?type=scan'),
+    addScanRecord: (record: ScanRecord): Promise<ScanRecord> => fetcher('/api/history?type=scan', { method: 'POST', body: JSON.stringify(record) }),
 
     // DB STATUS
     getDbStatus: (): Promise<DbStatus> => fetcher('/api/status'),
@@ -45,16 +43,14 @@ export const api = {
     getDonations: (): Promise<Donation[]> => fetcher('/api/donations'),
     addDonation: (donation: Omit<Donation, 'id' | 'createdAt'>): Promise<{ success: boolean }> => fetcher('/api/donations', { method: 'POST', body: JSON.stringify(donation) }),
 
-    // TICKETS
-    createTicket: (ticket: Omit<Ticket, 'id' | 'createdAt' | 'status'>): Promise<Ticket> => fetcher('/api/tickets', { method: 'POST', body: JSON.stringify(ticket) }),
+    // SUPPORT (Consolidated)
+    createTicket: (ticket: Omit<Ticket, 'id' | 'createdAt' | 'status'>): Promise<Ticket> => fetcher('/api/support?type=ticket', { method: 'POST', body: JSON.stringify(ticket) }),
+    getNotifications: (userId: string): Promise<Notification[]> => fetcher(`/api/support?type=notification&userId=${userId}`),
+    markNotificationAsRead: (notificationId: string): Promise<{ success: boolean }> => fetcher('/api/support?type=notification', { method: 'PUT', body: JSON.stringify({ notificationId }) }),
     
-    // NOTIFICATIONS
-    getNotifications: (userId: string): Promise<Notification[]> => fetcher(`/api/notifications?userId=${userId}`),
-    markNotificationAsRead: (notificationId: string): Promise<{ success: boolean }> => fetcher('/api/notifications', { method: 'PUT', body: JSON.stringify({ notificationId }) }),
-    
-    // USERS
+    // USERS & AUTH (Consolidated)
     getAllUsers: (): Promise<User[]> => fetcher('/api/users'),
     updateUser: (userId: string, data: Partial<User>): Promise<User> => fetcher(`/api/users?userId=${userId}`, { method: 'PUT', body: JSON.stringify(data) }),
-    login: (email: string, password: string): Promise<User> => fetcher('/api/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
-    signup: (name: string, email: string, password: string): Promise<User> => fetcher('/api/users', { method: 'POST', body: JSON.stringify({ name, email, password }) }),
+    login: (email: string, password: string): Promise<User> => fetcher('/api/auth?action=login', { method: 'POST', body: JSON.stringify({ email, password }) }),
+    signup: (name: string, email: string, password: string): Promise<User> => fetcher('/api/auth?action=signup', { method: 'POST', body: JSON.stringify({ name, email, password }) }),
 };

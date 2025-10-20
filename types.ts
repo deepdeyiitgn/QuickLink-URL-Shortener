@@ -205,15 +205,17 @@ export interface BlogPost {
     shares: number;
     isPinned: boolean;
     status: 'pending' | 'approved' | 'rejected';
+    views: number;
 }
 
 export interface BlogContextType {
     posts: BlogPost[];
     loading: boolean;
-    addPost: (postData: Omit<BlogPost, 'id' | 'createdAt' | 'likes' | 'comments' | 'shares' | 'isPinned' | 'status' | 'userProfilePictureUrl'>) => Promise<void>;
+    addPost: (postData: Omit<BlogPost, 'id' | 'createdAt' | 'likes' | 'comments' | 'shares' | 'isPinned' | 'status' | 'userProfilePictureUrl' | 'views'>) => Promise<void>;
     toggleLike: (postId: string) => Promise<void>;
     addComment: (postId: string, commentData: Omit<Comment, 'id' | 'createdAt'>) => Promise<void>;
     incrementShares: (postId: string) => Promise<void>;
+    incrementView: (postId: string) => Promise<void>;
     deletePost: (postId: string) => Promise<void>;
     togglePinPost: (postId: string) => Promise<void>;
     approvePost: (postId: string) => Promise<void>;

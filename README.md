@@ -17,6 +17,7 @@ A modern, fast, and feature-rich platform built with React, TypeScript, and Tail
 - **Blog & Community Platform**:
   - **Rich Content Creation**: Users can create and publish blog posts with formatted text, raw HTML, images, and even audio uploads.
   - **Community Interaction**: Engage with content through a system of likes, threaded comments, and social sharing.
+  - **Post View Counter**: Tracks the number of unique views for each blog post (per browser session).
   - **Advanced Moderation**: Admins have full control with post-approval workflows, the ability to pin important posts to the top, and deletion rights.
   - **Live User Presence**: User badges (Premium, Owner, Blacklisted) and profile details update in real-time across all their posts and comments.
 

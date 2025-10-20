@@ -13,6 +13,18 @@ interface BlogPostPageProps {
 const BlogPostPage: React.FC<BlogPostPageProps> = ({ postId }) => {
     const blog = useContext(BlogContext);
     
+    // Set up view tracking for the post
+    useEffect(() => {
+        if (postId && blog?.incrementView) {
+            const viewedKey = `viewed-${postId}`;
+            // Only count the view if it hasn't been counted in this session
+            if (!sessionStorage.getItem(viewedKey)) {
+                blog.incrementView(postId);
+                sessionStorage.setItem(viewedKey, 'true');
+            }
+        }
+    }, [postId, blog]);
+
     const post = blog?.posts.find(p => p.id === postId);
 
     // Set document title for SEO

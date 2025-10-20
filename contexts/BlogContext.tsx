@@ -69,13 +69,14 @@ export const BlogProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         fetchPosts();
     }, [fetchPosts]);
 
-    const addPost = async (postData: Omit<BlogPost, 'id' | 'createdAt' | 'likes' | 'comments' | 'shares' | 'isPinned' | 'status' | 'userProfilePictureUrl'>) => {
+    const addPost = async (postData: Omit<BlogPost, 'id' | 'createdAt' | 'likes' | 'comments' | 'shares' | 'isPinned' | 'status' | 'userProfilePictureUrl' | 'views'>) => {
         const newPostData: Omit<BlogPost, 'id' | 'createdAt' | 'status'> = {
             ...postData,
             likes: [],
             comments: [],
             shares: 0,
             isPinned: false,
+            views: 0,
         };
         await blogApi.createPost(newPostData);
         await fetchPosts();
@@ -95,6 +96,18 @@ export const BlogProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const incrementShares = async (postId: string) => {
         const updatedPost = await blogApi.updatePost({ postId, action: 'increment_share' });
         setPosts(prev => prev.map(p => p.id === postId ? updatedPost : p));
+    };
+    
+    const incrementView = async (postId: string) => {
+        // Optimistically update UI
+        setPosts(prev => prev.map(p => p.id === postId ? { ...p, views: (p.views || 0) + 1 } : p));
+        // Then send request to server
+        try {
+            await blogApi.updatePost({ postId, action: 'increment_view' });
+        } catch (error) {
+            // If it fails, log the error. The UI will be corrected on the next full fetch.
+            console.error("Failed to increment view count on server:", error);
+        }
     };
 
     const deletePost = async (postId: string) => {
@@ -134,6 +147,7 @@ export const BlogProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         toggleLike,
         addComment,
         incrementShares,
+        incrementView,
         deletePost,
         togglePinPost,
         approvePost,

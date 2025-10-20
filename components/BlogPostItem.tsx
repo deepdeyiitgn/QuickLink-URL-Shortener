@@ -4,7 +4,7 @@ import { BlogPost, AuthContextType } from '../types';
 // FIX: Corrected import path for AuthContext
 import { AuthContext } from '../contexts/AuthContext';
 import { BlogContext } from '../contexts/BlogContext';
-import { HeartIcon, ChatBubbleIcon, ShareIcon, PinIcon, TrashIcon, WarningIcon } from './icons/IconComponents';
+import { HeartIcon, ChatBubbleIcon, ShareIcon, PinIcon, TrashIcon, WarningIcon, EyeIcon } from './icons/IconComponents';
 import BlogUserBadge from './BlogUserBadge';
 import BlogCommentSection from './BlogCommentSection';
 import { timeAgo } from '../utils/time';
@@ -164,19 +164,25 @@ const BlogPostItem: React.FC<BlogPostProps> = ({ post }) => {
                 </div>
             )}
 
-            <footer className="mt-6 pt-4 border-t border-white/20 flex items-center gap-6 text-gray-400">
-                <button onClick={handleLike} className={`flex items-center gap-2 hover:text-white transition-colors ${isLiked ? 'text-red-500' : ''}`}>
-                    <HeartIcon className={`h-6 w-6 ${isLiked ? 'fill-current' : 'fill-none'}`} />
-                    <span className="text-sm font-semibold">{post.likes.length}</span>
-                </button>
-                <button onClick={handleCommentClick} className="flex items-center gap-2 hover:text-white transition-colors">
-                    <ChatBubbleIcon className="h-6 w-6" />
-                    <span className="text-sm font-semibold">{post.comments.length}</span>
-                </button>
-                 <button onClick={handleShare} className="flex items-center gap-2 hover:text-white transition-colors">
-                    <ShareIcon className="h-6 w-6" />
-                    <span className="text-sm font-semibold">{post.shares}</span>
-                </button>
+            <footer className="mt-6 pt-4 border-t border-white/20 flex items-center justify-between text-gray-400">
+                <div className="flex items-center gap-6">
+                    <button onClick={handleLike} className={`flex items-center gap-2 hover:text-white transition-colors ${isLiked ? 'text-red-500' : ''}`}>
+                        <HeartIcon className={`h-6 w-6 ${isLiked ? 'fill-current' : 'fill-none'}`} />
+                        <span className="text-sm font-semibold">{post.likes.length}</span>
+                    </button>
+                    <button onClick={handleCommentClick} className="flex items-center gap-2 hover:text-white transition-colors">
+                        <ChatBubbleIcon className="h-6 w-6" />
+                        <span className="text-sm font-semibold">{post.comments.length}</span>
+                    </button>
+                     <button onClick={handleShare} className="flex items-center gap-2 hover:text-white transition-colors">
+                        <ShareIcon className="h-6 w-6" />
+                        <span className="text-sm font-semibold">{post.shares}</span>
+                    </button>
+                </div>
+                <div className="flex items-center gap-2">
+                    <EyeIcon className="h-6 w-6" />
+                    <span className="text-sm font-semibold">{post.views || 0}</span>
+                </div>
             </footer>
 
             {(showComments || isIndividualPostPage) && <BlogCommentSection postId={post.id} comments={post.comments} />}

@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 // FIX: Corrected import path for AuthContext
 import { AuthContext } from '../contexts/AuthContext';
-import { LogoIcon, UserIcon, MenuIcon, XIcon } from './icons/IconComponents';
+import { LogoIcon, UserIcon, MenuIcon, XIcon, ChevronDownIcon } from './icons/IconComponents';
 import MobileMenu from './MobileMenu';
 import { AuthContextType } from '../types';
 
@@ -20,6 +20,9 @@ const Header: React.FC = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    const navLinkClasses = "px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-colors";
+    const dropdownLinkClasses = "block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white w-full text-left";
+
     return (
         <header className={`sticky top-0 z-40 transition-all duration-300 ${isScrolled ? 'bg-brand-dark/80 backdrop-blur-lg border-b border-white/10' : 'bg-transparent'}`}>
             <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -30,12 +33,23 @@ const Header: React.FC = () => {
                             <span className="text-2xl font-bold">QuickLink</span>
                         </a>
                     </div>
-                    <div className="hidden md:flex items-center space-x-6">
-                        <a href="/shortener" className="nav-link">Shortener</a>
-                        <a href="/qr-generator" className="nav-link">QR Generator</a>
-                        <a href="/blog" className="nav-link">Blog</a>
-                        <a href="/faq" className="nav-link">FAQ</a>
-                        <a href="/donate" className="nav-link text-brand-secondary">Donate</a>
+                    <div className="hidden md:flex items-center space-x-2">
+                        <a href="/" className={navLinkClasses}>Home</a>
+                        <div className="relative group">
+                            <button className={`${navLinkClasses} flex items-center gap-1`}>
+                                Tools
+                                <ChevronDownIcon className="h-4 w-4" />
+                            </button>
+                            <div className="absolute left-0 mt-2 w-48 bg-brand-dark/90 backdrop-blur-sm border border-white/10 rounded-md shadow-lg py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto z-10">
+                                <a href="/shortener" className={dropdownLinkClasses}>URL Shortener</a>
+                                <a href="/qr-generator" className={dropdownLinkClasses}>QR Generator</a>
+                                <a href="/qr-scanner" className={dropdownLinkClasses}>QR Scanner</a>
+                            </div>
+                        </div>
+                        <a href="/blog" className={navLinkClasses}>Blog</a>
+                        <a href="/about" className={navLinkClasses}>About</a>
+                        <a href="/contact" className={navLinkClasses}>Contact</a>
+                        <a href="/donate" className={`${navLinkClasses} text-brand-secondary hover:text-brand-secondary/80 hover:bg-brand-secondary/10`}>Donate</a>
                     </div>
                     <div className="hidden md:flex items-center space-x-4">
                         {currentUser ? (
@@ -44,10 +58,10 @@ const Header: React.FC = () => {
                                     <UserIcon className="h-5 w-5" />
                                     <span>{currentUser.name}</span>
                                 </a>
-                                <div className="absolute right-0 mt-2 w-48 bg-brand-dark rounded-md shadow-lg py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto">
-                                    <a href="/dashboard" className="dropdown-link">Dashboard</a>
-                                    <a href="/api-access" className="dropdown-link">API Access</a>
-                                    <button onClick={logout} className="dropdown-link w-full text-left">Sign Out</button>
+                                <div className="absolute right-0 mt-2 w-48 bg-brand-dark/90 backdrop-blur-sm border border-white/10 rounded-md shadow-lg py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto">
+                                    <a href="/dashboard" className={dropdownLinkClasses}>Dashboard</a>
+                                    <a href="/api-access" className={dropdownLinkClasses}>API Access</a>
+                                    <button onClick={logout} className={dropdownLinkClasses}>Sign Out</button>
                                 </div>
                             </div>
                         ) : (

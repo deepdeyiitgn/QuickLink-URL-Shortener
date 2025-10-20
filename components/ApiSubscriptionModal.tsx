@@ -1,4 +1,5 @@
 
+
 // FIX: Removed reference to vite/client types to resolve "Cannot find type definition" error.
 import React, { useState, useContext } from 'react';
 // FIX: Corrected import path for AuthContext
@@ -40,7 +41,7 @@ const ApiSubscriptionModal: React.FC<ApiSubscriptionModalProps> = ({ onClose }) 
         const planDetails = API_PLANS[selectedPlan];
 
         try {
-            const orderResponse = await fetch('/api/create-razorpay-order', {
+            const orderResponse = await fetch('/api/payments?action=create_order&provider=razorpay', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ amount: planDetails.price, currency: 'INR' })
@@ -138,7 +139,7 @@ const ApiSubscriptionModal: React.FC<ApiSubscriptionModalProps> = ({ onClose }) 
         const planDetails = API_PLANS[selectedPlan];
 
         try {
-            const orderResponse = await fetch('/api/create-cashfree-order', {
+            const orderResponse = await fetch('/api/payments?action=create_order&provider=cashfree', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ amount: planDetails.price, currency: 'INR', user: currentUser })

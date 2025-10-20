@@ -1,12 +1,15 @@
 // This file manages the connection to the MongoDB Atlas database.
 // It uses a cached connection instance to improve performance in a serverless environment.
-import { MongoClient } from 'mongodb';
+// FIX: Import `Db` type from `mongodb` to use for explicit typing.
+import { MongoClient, Db } from 'mongodb';
 
 // Using a global variable to cache the connection promise.
 // This is a best practice for database connections in serverless functions.
 let cachedClient: MongoClient | null = null;
 
-export async function connectToDatabase() {
+// FIX: Add an explicit return type to `connectToDatabase`. This ensures the `db` object is correctly typed
+// when used in other files, resolving "Untyped function calls may not accept type arguments" errors.
+export async function connectToDatabase(): Promise<{ client: MongoClient; db: Db }> {
     // Moved the environment variable checks inside the function.
     // This prevents a crash on module load if the variables aren't set,
     // allowing the error to be caught gracefully by the API handler.
