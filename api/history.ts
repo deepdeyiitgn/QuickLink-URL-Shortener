@@ -1,7 +1,7 @@
 // Vercel Serverless Function: /api/history
 // Handles GET and POST requests for QR and Scan history collections.
 
-import { connectToDatabase } from './lib/mongodb';
+import { connectToDatabase } from './lib/mongodb.js';
 import type { QrCodeRecord, ScanRecord } from '../types';
 
 export default async function handler(req: any, res: any) {

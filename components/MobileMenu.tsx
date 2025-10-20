@@ -1,4 +1,5 @@
 import React, { useContext } from 'react';
+import { Link } from 'react-router-dom';
 // FIX: Corrected import path for AuthContext
 import { AuthContext } from '../contexts/AuthContext';
 import { UserIcon } from './icons/IconComponents';
@@ -18,14 +19,14 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ onLinkClick }) => {
     return (
         <div className="md:hidden" id="mobile-menu">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="/" onClick={onLinkClick} className={linkClasses}>Home</a>
-                <a href="/tools" onClick={onLinkClick} className={linkClasses}>Tools</a>
-                <a href="/blog" onClick={onLinkClick} className={linkClasses}>Blog</a>
-                <a href="/about" onClick={onLinkClick} className={linkClasses}>About</a>
-                <a href="/contact" onClick={onLinkClick} className={linkClasses}>Contact</a>
-                <a href="/status" onClick={onLinkClick} className={linkClasses}>Status</a>
-                <a href="/faq" onClick={onLinkClick} className={linkClasses}>FAQ</a>
-                <a href="/donate" onClick={onLinkClick} className={`${linkClasses} text-brand-secondary hover:text-brand-secondary/80 hover:bg-brand-secondary/10`}>Donate</a>
+                <Link to="/" onClick={onLinkClick} className={linkClasses}>Home</Link>
+                <Link to="/tools" onClick={onLinkClick} className={linkClasses}>Tools</Link>
+                <Link to="/blog" onClick={onLinkClick} className={linkClasses}>Blog</Link>
+                <Link to="/about" onClick={onLinkClick} className={linkClasses}>About</Link>
+                <Link to="/contact" onClick={onLinkClick} className={linkClasses}>Contact</Link>
+                <Link to="/status" onClick={onLinkClick} className={linkClasses}>Status</Link>
+                <Link to="/faq" onClick={onLinkClick} className={linkClasses}>FAQ</Link>
+                <Link to="/donate" onClick={onLinkClick} className={`${linkClasses} text-brand-secondary hover:text-brand-secondary/80 hover:bg-brand-secondary/10`}>Donate</Link>
             </div>
             <div className="pt-4 pb-3 border-t border-gray-700">
                 {currentUser ? (
@@ -37,8 +38,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ onLinkClick }) => {
                                 <div className="text-sm font-medium text-gray-400">{currentUser.email}</div>
                             </div>
                         </div>
-                        <a href="/dashboard" onClick={onLinkClick} className={linkClasses}>Dashboard</a>
-                        <a href="/api-access" onClick={onLinkClick} className={linkClasses}>API Access</a>
+                        <Link to="/dashboard" onClick={onLinkClick} className={linkClasses}>Dashboard</Link>
+                        <Link to="/api-access" onClick={onLinkClick} className={linkClasses}>API Access</Link>
                         <button onClick={() => { logout?.(); onLinkClick(); }} className={`${linkClasses} w-full text-left`}>
                             Sign Out
                         </button>

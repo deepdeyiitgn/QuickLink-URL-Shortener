@@ -1,4 +1,5 @@
 import React, { useContext, useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { BlogContext } from '../contexts/BlogContext';
 // FIX: Corrected import path for AuthContext
 import { AuthContext } from '../contexts/AuthContext';
@@ -50,10 +51,10 @@ const BlogPage: React.FC = () => {
             
             {auth?.currentUser && (
                  <div className="text-center">
-                    <a href="/blog/new" className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-brand-dark bg-brand-primary rounded-md hover:bg-brand-primary/80 transition-all transform hover:scale-105 shadow-[0_0_15px_rgba(0,229,255,0.5)]">
+                    <Link to="/blog/new" className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-brand-dark bg-brand-primary rounded-md hover:bg-brand-primary/80 transition-all transform hover:scale-105 shadow-[0_0_15px_rgba(0,229,255,0.5)]">
                         <PlusIcon className="h-5 w-5" />
                         Create New Post
-                    </a>
+                    </Link>
                 </div>
             )}
 

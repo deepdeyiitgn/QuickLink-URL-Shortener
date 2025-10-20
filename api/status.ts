@@ -1,7 +1,7 @@
 // Vercel Serverless Function: /api/status
 // This endpoint provides a health check for the database connection.
 
-import { connectToDatabase } from './lib/mongodb';
+import { connectToDatabase } from './lib/mongodb.js';
 
 export default async function handler(req: any, res: any) {
     res.setHeader('Content-Type', 'application/json');

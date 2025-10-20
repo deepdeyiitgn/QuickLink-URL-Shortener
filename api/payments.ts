@@ -1,7 +1,7 @@
 // Vercel Serverless Function: /api/payments
 // Handles GET/POST for payment records and POST for creating payment orders.
 
-import { connectToDatabase } from './lib/mongodb';
+import { connectToDatabase } from './lib/mongodb.js';
 import type { PaymentRecord } from '../types';
 
 // Helper function for Razorpay order creation

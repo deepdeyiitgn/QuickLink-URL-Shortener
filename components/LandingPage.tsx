@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { LinkIcon, QrCodeScannerIcon } from './icons/IconComponents';
 
 const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; children: React.ReactNode }> = ({ icon, title, children }) => (
@@ -13,12 +14,12 @@ const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; children: Re
 
 const LandingPage: React.FC = () => {
     const [isExiting, setIsExiting] = useState(false);
+    const navigate = useNavigate();
 
     const handleNavigate = () => {
         setIsExiting(true);
         setTimeout(() => {
-            window.history.pushState({}, '', '/tools');
-            window.dispatchEvent(new PopStateEvent('popstate'));
+            navigate('/tools');
         }, 500); // Duration must match the CSS animation
     };
 

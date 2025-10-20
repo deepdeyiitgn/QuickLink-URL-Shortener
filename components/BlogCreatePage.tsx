@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import BlogCreatePost from './BlogCreatePost';
 
 const BlogCreatePage: React.FC = () => {
@@ -9,7 +10,7 @@ const BlogCreatePage: React.FC = () => {
                 <p className="text-lg text-gray-400 max-w-2xl mx-auto">
                     Create a new post to share with the QuickLink community.
                 </p>
-                 <a href="/blog" className="text-brand-primary hover:underline mt-4 inline-block">&larr; Back to Blog</a>
+                 <Link to="/blog" className="text-brand-primary hover:underline mt-4 inline-block">&larr; Back to Blog</Link>
             </div>
             <BlogCreatePost />
         </div>

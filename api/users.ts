@@ -1,5 +1,5 @@
 // api/users.ts
-import { connectToDatabase } from './lib/mongodb';
+import { connectToDatabase } from './lib/mongodb.js';
 import type { User } from '../types';
 
 export default async function handler(req: any, res: any) {

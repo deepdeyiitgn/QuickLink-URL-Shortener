@@ -1,4 +1,5 @@
 import React, { useContext, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { BlogContext } from '../contexts/BlogContext';
 // FIX: Corrected import path for AuthContext
 import { AuthContext } from '../contexts/AuthContext';
@@ -52,7 +53,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ postId }) => {
 
     return (
         <div className="max-w-4xl mx-auto">
-             <a href="/blog" className="text-brand-primary hover:underline mb-8 inline-block">&larr; Back to Blog</a>
+             <Link to="/blog" className="text-brand-primary hover:underline mb-8 inline-block">&larr; Back to Blog</Link>
             <BlogPostItem post={post} />
         </div>
     );

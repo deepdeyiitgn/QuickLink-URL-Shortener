@@ -1,7 +1,7 @@
 // Vercel Serverless Function: /api/blog
 // Handles CRUD for blog posts
 
-import { connectToDatabase } from './lib/mongodb';
+import { connectToDatabase } from './lib/mongodb.js';
 // FIX: Corrected import path for types
 import type { BlogPost, Comment, User } from '../types';
 import type { Filter, UpdateFilter } from 'mongodb';

@@ -1,7 +1,7 @@
 // Vercel Serverless Function: /api/donations
 // Handles GET and POST for donations.
 
-import { connectToDatabase } from './lib/mongodb';
+import { connectToDatabase } from './lib/mongodb.js';
 // FIX: Corrected import path for types
 import type { Donation } from '../types';
 

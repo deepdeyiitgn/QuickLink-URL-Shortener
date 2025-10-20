@@ -1,4 +1,5 @@
 import React, { useContext, useState } from 'react';
+import { Link } from 'react-router-dom';
 // FIX: Corrected import path for types
 import { BlogPost, AuthContextType } from '../types';
 // FIX: Corrected import path for AuthContext
@@ -124,7 +125,7 @@ const BlogPostItem: React.FC<BlogPostProps> = ({ post }) => {
             
             <div className="prose prose-invert max-w-none prose-p:text-gray-300 prose-headings:text-white prose-strong:text-white prose-pre:bg-black/30 prose-pre:text-gray-300">
                 <h2 className="text-3xl font-bold mb-4">
-                    <a href={`/blog/post/${post.id}`} className="hover:text-brand-primary transition-colors">{post.title}</a>
+                    <Link to={`/blog/post/${post.id}`} className="hover:text-brand-primary transition-colors">{post.title}</Link>
                 </h2>
                 
                 {post.imageUrls && post.imageUrls.length > 0 && (
@@ -149,7 +150,7 @@ const BlogPostItem: React.FC<BlogPostProps> = ({ post }) => {
                     <>
                         <div dangerouslySetInnerHTML={{ __html: post.content.length > 500 ? `${post.content.substring(0, 500)}...` : post.content }} />
                         {post.content.length > 500 && (
-                            <a href={`/blog/post/${post.id}`} className="text-brand-primary hover:underline font-semibold">Read More</a>
+                            <Link to={`/blog/post/${post.id}`} className="text-brand-primary hover:underline font-semibold">Read More</Link>
                         )}
                     </>
                 )}

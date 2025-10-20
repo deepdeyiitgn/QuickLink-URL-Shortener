@@ -1,7 +1,7 @@
 // Vercel Serverless Function: /api/support
 // Handles tickets and notifications.
 
-import { connectToDatabase } from './lib/mongodb';
+import { connectToDatabase } from './lib/mongodb.js';
 import type { Ticket, Notification } from '../types';
 
 export default async function handler(req: any, res: any) {

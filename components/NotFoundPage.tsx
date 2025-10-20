@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const NotFoundPage: React.FC = () => {
     return (
@@ -8,9 +9,9 @@ const NotFoundPage: React.FC = () => {
             <p className="text-gray-400 mt-2">
                 The link you are looking for may have expired, been moved, or never existed.
             </p>
-            <a href="/" className="mt-8 inline-block px-6 py-3 bg-brand-primary text-brand-dark font-semibold rounded-md hover:bg-brand-primary/80 transition-all shadow-[0_0_10px_#00e5ff]">
+            <Link to="/" className="mt-8 inline-block px-6 py-3 bg-brand-primary text-brand-dark font-semibold rounded-md hover:bg-brand-primary/80 transition-all shadow-[0_0_10px_#00e5ff]">
                 Go to Homepage
-            </a>
+            </Link>
         </div>
     );
 };

@@ -1,4 +1,5 @@
 import React, { useState, useContext, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 // FIX: Corrected import path for AuthContext
 import { AuthContext } from '../contexts/AuthContext';
 import { BlogContext } from '../contexts/BlogContext';
@@ -19,6 +20,7 @@ const BlogCreatePost: React.FC = () => {
     // FIX: Cast context to the correct type to resolve property errors
     const auth = useContext(AuthContext) as AuthContextType;
     const blog = useContext(BlogContext);
+    const navigate = useNavigate();
     
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
@@ -114,7 +116,7 @@ const BlogCreatePost: React.FC = () => {
             if (imageInputRef.current) imageInputRef.current.value = '';
             if (audioInputRef.current) audioInputRef.current.value = '';
             // Ideally, redirect to blog page
-            window.location.href = '/blog';
+            navigate('/blog');
         } catch (err) {
             setError('Failed to create post. Please try again.');
         } finally {
