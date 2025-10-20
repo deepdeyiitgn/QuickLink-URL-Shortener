@@ -1,8 +1,8 @@
 // Vercel Serverless Function: /api/payments
-// Handles GET/POST for payment records and POST for creating payment orders.
+// Handles GET/POST for payment records and donations, and POST for creating payment orders.
 
 import { connectToDatabase } from './lib/mongodb.js';
-import type { PaymentRecord, Coupon, User } from '../types';
+import type { PaymentRecord, Coupon, User, Donation } from '../types';
 
 // Server-side coupon verification logic
 async function verifyAndApplyCoupon(db: any, code: string, baseAmount: number, userId: string): Promise<{ finalPrice: number; discountAmount: number }> {
@@ -37,14 +37,19 @@ async function verifyAndApplyCoupon(db: any, code: string, baseAmount: number, u
 // Helper function for Razorpay order creation
 async function createRazorpayOrder(req: any, res: any) {
     const { amount, currency, couponCode, userId } = req.body;
-    if (!amount || !currency || !userId) return res.status(400).json({ error: 'Amount, currency, and userId are required.' });
+    if (!amount || !currency) return res.status(400).json({ error: 'Amount and currency are required.' });
 
     const keyId = process.env.VITE_RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
     if (!keyId || !keySecret) return res.status(500).json({ error: 'Payment gateway (Razorpay) is not configured correctly.' });
 
-    const { db } = await connectToDatabase();
-    const { finalPrice } = await verifyAndApplyCoupon(db, couponCode, amount, userId);
+    let finalPrice = amount;
+    // Apply coupon only if userId is provided (not for anonymous donations)
+    if (couponCode && userId) {
+        const { db } = await connectToDatabase();
+        const result = await verifyAndApplyCoupon(db, couponCode, amount, userId);
+        finalPrice = result.finalPrice;
+    }
 
     const auth = btoa(`${keyId}:${keySecret}`);
     const options = {
@@ -113,24 +118,41 @@ export default async function handler(req: any, res: any) {
     res.setHeader('Content-Type', 'application/json');
     try {
         const { db } = await connectToDatabase();
-        const paymentsCollection = db.collection('payments');
+        const { action, provider, type } = req.query;
 
         if (req.method === 'GET') {
+            if (type === 'donation') {
+                const donationsCollection = db.collection('donations');
+                const donations = await donationsCollection.find({}).sort({ createdAt: -1 }).toArray();
+                return res.status(200).json(donations);
+            }
+            // Default GET is payment history
+            const paymentsCollection = db.collection('payments');
             const payments = await paymentsCollection.find({}).toArray();
             return res.status(200).json(payments);
         }
 
         if (req.method === 'POST') {
-            const { action, provider } = req.query;
-
             if (action === 'create_order') {
                 if (provider === 'razorpay') return createRazorpayOrder(req, res);
                 if (provider === 'cashfree') return createCashfreeOrder(req, res);
                 return res.status(400).json({ error: 'Invalid payment provider specified.' });
             }
 
+            if (type === 'donation') {
+                const donationsCollection = db.collection('donations');
+                const donationData: Omit<Donation, 'id' | 'createdAt'> = req.body;
+                if (!donationData || !donationData.amount) {
+                    return res.status(400).json({ error: 'Missing required fields for donation.' });
+                }
+                const newDonation: Donation = { ...donationData, id: `donation_${Date.now()}`, createdAt: Date.now() };
+                await donationsCollection.insertOne(newDonation);
+                return res.status(201).json({ success: true });
+            }
+
             // Default POST action: record a payment
             if (!req.body) return res.status(400).json({ error: 'Request body is missing.' });
+            const paymentsCollection = db.collection('payments');
             const newRecord: PaymentRecord = req.body;
             await paymentsCollection.insertOne(newRecord);
             return res.status(201).json(newRecord);

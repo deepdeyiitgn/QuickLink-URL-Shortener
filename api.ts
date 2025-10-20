@@ -26,22 +26,20 @@ export const api = {
     deleteSingleUrl: (id: string): Promise<{ success: boolean }> => fetcher(`/api/urls?id=${id}`, { method: 'DELETE' }),
     deleteUrlsForUser: (userId: string): Promise<{ success: boolean }> => fetcher(`/api/urls?userId=${userId}`, { method: 'DELETE' }),
 
-    // PAYMENTS
+    // PAYMENTS & DONATIONS
     getPaymentHistory: (): Promise<PaymentRecord[]> => fetcher('/api/payments'),
     addPaymentRecord: (record: PaymentRecord): Promise<PaymentRecord> => fetcher('/api/payments', { method: 'POST', body: JSON.stringify(record) }),
+    getDonations: (): Promise<Donation[]> => fetcher('/api/payments?type=donation'),
+    addDonation: (donation: Omit<Donation, 'id' | 'createdAt'>): Promise<{ success: boolean }> => fetcher('/api/payments?type=donation', { method: 'POST', body: JSON.stringify(donation) }),
     
     // QR & SCAN HISTORY (Consolidated)
     getQrHistory: (): Promise<QrCodeRecord[]> => fetcher('/api/history?type=qr'),
-    addQrRecord: (record: QrCodeRecord): Promise<QrCodeRecord> => fetcher('/api/history?type=qr', { method: 'POST', body: JSON.stringify(record) }),
+    addQrRecord: (record: Omit<QrCodeRecord, 'id'|'createdAt'>): Promise<QrCodeRecord> => fetcher('/api/history?type=qr', { method: 'POST', body: JSON.stringify(record) }),
     getScanHistory: (): Promise<ScanRecord[]> => fetcher('/api/history?type=scan'),
-    addScanRecord: (record: ScanRecord): Promise<ScanRecord> => fetcher('/api/history?type=scan', { method: 'POST', body: JSON.stringify(record) }),
+    addScanRecord: (record: Omit<ScanRecord, 'id'|'scannedAt'>): Promise<ScanRecord> => fetcher('/api/history?type=scan', { method: 'POST', body: JSON.stringify(record) }),
 
     // DB STATUS
     getDbStatus: (): Promise<DbStatus> => fetcher('/api/status'),
-
-    // DONATIONS
-    getDonations: (): Promise<Donation[]> => fetcher('/api/donations'),
-    addDonation: (donation: Omit<Donation, 'id' | 'createdAt'>): Promise<{ success: boolean }> => fetcher('/api/donations', { method: 'POST', body: JSON.stringify(donation) }),
 
     // SUPPORT (Consolidated)
     createTicket: (ticket: Omit<Ticket, 'id' | 'createdAt' | 'status' | 'replies'>): Promise<Ticket> => fetcher('/api/support?type=ticket', { method: 'POST', body: JSON.stringify(ticket) }),

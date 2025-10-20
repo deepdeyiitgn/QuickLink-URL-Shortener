@@ -12,7 +12,7 @@ export default async function handler(req: any, res: any) {
         const { db } = await connectToDatabase();
 
         if (type === 'ticket') {
-            const ticketsCollection = db.collection('tickets');
+            const ticketsCollection = db.collection<Ticket>('tickets');
             
             if (req.method === 'GET') {
                 let tickets;
@@ -51,13 +51,12 @@ export default async function handler(req: any, res: any) {
 
                     // If an admin/moderator replied, notify the user.
                     const replyingUser = await db.collection<User>('users').findOne({ id: newReply.userId });
-                    const ticketOwnerId = updateResult?.userId;
-
-                    if (replyingUser && (replyingUser.isAdmin || replyingUser.canModerate) && ticketOwnerId) {
+                    
+                    if (updateResult && replyingUser && (replyingUser.isAdmin || replyingUser.canModerate) && updateResult.userId) {
                         const notificationsCollection = db.collection('notifications');
                         const newNotif: Notification = {
                             id: `notif_${Date.now()}`,
-                            userId: ticketOwnerId,
+                            userId: updateResult.userId,
                             message: `You have a new reply on your ticket: "${updateResult.subject}"`,
                             createdAt: Date.now(),
                             isRead: false

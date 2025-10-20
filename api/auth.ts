@@ -31,6 +31,9 @@ export default async function handler(req: any, res: any) {
             if (user.passwordHash !== password) {
                 return res.status(401).json({ error: 'Invalid credentials.' });
             }
+            
+            // Update last active time on login
+            await usersCollection.updateOne({ id: user.id }, { $set: { lastActive: Date.now() } });
 
             // Don't send the password hash back to the client
             const { passwordHash, ...userWithoutPassword } = user;

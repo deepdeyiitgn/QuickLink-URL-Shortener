@@ -8,8 +8,8 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onBuyNow }) => {
-    const isOutOfStock = product.limitQuantity && product.stock !== undefined && product.stock <= 0;
-    const isExpired = product.availableUntil && product.availableUntil < Date.now();
+    const isOutOfStock = !!(product.limitQuantity && product.stock !== undefined && product.stock <= 0);
+    const isExpired = !!(product.availableUntil && product.availableUntil < Date.now());
     const isUnavailable = isOutOfStock || isExpired;
 
     const benefitText = product.benefit.type === 'API_DAYS'

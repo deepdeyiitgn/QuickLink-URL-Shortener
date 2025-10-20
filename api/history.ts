@@ -19,7 +19,9 @@ export default async function handler(req: any, res: any) {
         const historyCollection = db.collection(collectionName);
 
         if (req.method === 'GET') {
-            const history = await historyCollection.find({}).toArray();
+            // FIX: Use the correct sort key based on the collection type to prevent server errors.
+            const sortKey = type === 'scan' ? 'scannedAt' : 'createdAt';
+            const history = await historyCollection.find({}).sort({ [sortKey]: -1 }).toArray();
             return res.status(200).json(history);
         }
 
