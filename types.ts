@@ -26,6 +26,10 @@ export interface User {
   // Subscriptions
   subscription: Subscription | null;
   apiAccess: ApiAccess | null;
+  // Shop-related benefits
+  urlCredits?: {
+      permanent: number;
+  }
 }
 
 export interface Subscription {
@@ -39,7 +43,7 @@ export interface ApiAccess {
 }
 
 export interface ApiSubscription {
-  planId: 'trial' | 'basic' | 'pro';
+  planId: 'trial' | 'basic' | 'pro' | 'permanent';
   expiresAt: number;
 }
 
@@ -53,19 +57,22 @@ export interface AuthContextType {
   authModalMode: AuthModalMode;
   isSubscriptionModalOpen: boolean;
   isApiSubscriptionModalOpen: boolean;
+  isTicketModalOpen: boolean;
   openAuthModal: (mode: AuthModalMode) => void;
   closeAuthModal: () => void;
   openSubscriptionModal: () => void;
   closeSubscriptionModal: () => void;
   openApiSubscriptionModal: () => void;
   closeApiSubscriptionModal: () => void;
+  openTicketModal: () => void;
+  closeTicketModal: () => void;
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   updateUserData: (userId: string, data: Partial<User>) => Promise<User>;
   updateUserProfile: (data: { name: string, profilePictureUrl?: string }) => Promise<User>;
   generateApiKey: () => Promise<void>;
-  purchaseApiKey: (planId: 'basic' | 'pro', expiresAt: number) => Promise<void>;
+  purchaseApiKey: (planId: 'basic' | 'pro' | 'permanent', expiresAt: number) => Promise<void>;
   updateUserSubscription: (planId: 'monthly' | 'semi-annually' | 'yearly', expiresAt: number) => Promise<void>;
   updateUserAsDonor: (userId: string) => Promise<void>;
   getAllUsers: () => Promise<User[]>;
@@ -206,6 +213,7 @@ export interface BlogPost {
     isPinned: boolean;
     status: 'pending' | 'approved' | 'rejected';
     views: number;
+    alias?: string;
 }
 
 export interface BlogContextType {
@@ -228,21 +236,51 @@ export interface DbStatus {
     dbName: string;
 }
 
+export interface TicketReply {
+    id: string;
+    userId: string;
+    userName: string;
+    message: string;
+    createdAt: number;
+    isAdminReply: boolean;
+}
+
 export interface Ticket {
     id: string;
     userId: string | null;
     userName: string;
     userEmail: string;
+    phone?: string;
     subject: string;
     message: string;
     createdAt: number;
+    lastReplyAt: number;
     status: 'open' | 'closed' | 'in-progress';
+    replies: TicketReply[];
 }
+
 
 export interface Notification {
     id: string;
-    userId: string;
+    userId: string; // Can be 'all' for broadcast
     message: string;
     createdAt: number;
     isRead: boolean;
+    link?: string;
+}
+
+// Shop
+export type ProductType = 'url_pack' | 'api_plan' | 'custom';
+export interface Product {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    type: ProductType;
+    imageUrl?: string;
+    // Specific benefits
+    benefit: {
+        permanentUrls?: number;
+        apiPlan?: 'permanent';
+    }
 }

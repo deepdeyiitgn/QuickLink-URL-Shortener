@@ -1,7 +1,7 @@
 // api.ts
 // A simple API client to interact with the Vercel Serverless Functions.
 
-import type { ShortenedUrl, PaymentRecord, QrCodeRecord, ScanRecord, DbStatus, Donation, Ticket, Notification, User } from './types';
+import type { ShortenedUrl, PaymentRecord, QrCodeRecord, ScanRecord, DbStatus, Donation, Ticket, Notification, User, Product, BlogPost } from './types';
 
 const fetcher = async (url: string, options: RequestInit = {}) => {
     const res = await fetch(url, {
@@ -15,7 +15,9 @@ const fetcher = async (url: string, options: RequestInit = {}) => {
         const errorData = await res.json().catch(() => ({ error: 'An unknown error occurred' }));
         throw new Error(errorData.error || res.statusText);
     }
-    return res.json();
+    // Handle cases where the response might be empty (e.g., a 204 No Content)
+    const text = await res.text();
+    return text ? JSON.parse(text) : {};
 };
 
 export const api = {
@@ -39,18 +41,33 @@ export const api = {
     // DB STATUS
     getDbStatus: (): Promise<DbStatus> => fetcher('/api/status'),
 
-    // DONATIONS
-    getDonations: (): Promise<Donation[]> => fetcher('/api/donations'),
-    addDonation: (donation: Omit<Donation, 'id' | 'createdAt'>): Promise<{ success: boolean }> => fetcher('/api/donations', { method: 'POST', body: JSON.stringify(donation) }),
+    // STORE (Donations & Shop)
+    getDonations: (): Promise<Donation[]> => fetcher('/api/store?type=donations'),
+    addDonation: (donation: Omit<Donation, 'id' | 'createdAt'>): Promise<{ success: boolean }> => fetcher('/api/store?type=donations', { method: 'POST', body: JSON.stringify(donation) }),
+    getProducts: (): Promise<Product[]> => fetcher('/api/store?type=products'),
+    addProduct: (product: Omit<Product, 'id'>): Promise<Product> => fetcher('/api/store?type=products', { method: 'POST', body: JSON.stringify(product) }),
 
-    // SUPPORT (Consolidated)
-    createTicket: (ticket: Omit<Ticket, 'id' | 'createdAt' | 'status'>): Promise<Ticket> => fetcher('/api/support?type=ticket', { method: 'POST', body: JSON.stringify(ticket) }),
+    // SUPPORT (Tickets & Notifications)
+    createTicket: (ticket: Omit<Ticket, 'id' | 'createdAt' | 'status' | 'replies' | 'lastReplyAt'>): Promise<Ticket> => fetcher('/api/support?type=ticket', { method: 'POST', body: JSON.stringify(ticket) }),
+    getTickets: (userId?: string): Promise<Ticket[]> => fetcher(`/api/support?type=ticket${userId ? `&userId=${userId}` : ''}`),
+    replyToTicket: (ticketId: string, reply: { userId: string, message: string, isAdminReply: boolean }): Promise<Ticket> => fetcher(`/api/support?type=ticket&ticketId=${ticketId}&action=reply`, { method: 'PUT', body: JSON.stringify(reply) }),
+    updateTicketStatus: (ticketId: string, status: Ticket['status']): Promise<Ticket> => fetcher(`/api/support?type=ticket&ticketId=${ticketId}&action=status`, { method: 'PUT', body: JSON.stringify({ status }) }),
+
     getNotifications: (userId: string): Promise<Notification[]> => fetcher(`/api/support?type=notification&userId=${userId}`),
     markNotificationAsRead: (notificationId: string): Promise<{ success: boolean }> => fetcher('/api/support?type=notification', { method: 'PUT', body: JSON.stringify({ notificationId }) }),
-    
+    createBroadcastNotification: (notification: { title: string, message: string, imageUrl?: string }): Promise<Notification> => fetcher('/api/support?type=notification', { method: 'POST', body: JSON.stringify(notification) }),
+
     // USERS & AUTH (Consolidated)
     getAllUsers: (): Promise<User[]> => fetcher('/api/users'),
     updateUser: (userId: string, data: Partial<User>): Promise<User> => fetcher(`/api/users?userId=${userId}`, { method: 'PUT', body: JSON.stringify(data) }),
+    propagateUserChanges: (userId: string, data: { name: string, profilePictureUrl?: string }): Promise<{ success: boolean }> => fetcher(`/api/users?userId=${userId}&action=propagate_changes`, { method: 'PUT', body: JSON.stringify(data) }),
     login: (email: string, password: string): Promise<User> => fetcher('/api/auth?action=login', { method: 'POST', body: JSON.stringify({ email, password }) }),
     signup: (name: string, email: string, password: string): Promise<User> => fetcher('/api/auth?action=signup', { method: 'POST', body: JSON.stringify({ name, email, password }) }),
+
+    // BLOG
+    getPosts: (userId?: string): Promise<BlogPost[]> => fetcher(`/api/blog${userId ? `?userId=${userId}` : ''}`),
+    getPostBySlug: (slug: string): Promise<BlogPost> => fetcher(`/api/blog?postSlug=${slug}`),
+    createPost: (postData: Omit<BlogPost, 'id' | 'createdAt' | 'status'>): Promise<BlogPost> => fetcher('/api/blog', { method: 'POST', body: JSON.stringify(postData) }),
+    updatePost: (payload: any): Promise<BlogPost> => fetcher('/api/blog', { method: 'PUT', body: JSON.stringify(payload) }),
+    deletePost: (postId: string, userId: string): Promise<{ success: boolean }> => fetcher('/api/blog', { method: 'DELETE', body: JSON.stringify({ postId, userId }) }),
 };

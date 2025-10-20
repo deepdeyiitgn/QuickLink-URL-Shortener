@@ -14,6 +14,7 @@ export default async function handler(req: any, res: any) {
     try {
         const { db } = await connectToDatabase();
         const usersCollection = db.collection<User>('users');
+        const activityLogCollection = db.collection('activity_logs');
 
         if (action === 'login') {
             const { email, password } = req.body;
@@ -31,6 +32,17 @@ export default async function handler(req: any, res: any) {
             if (user.passwordHash !== password) {
                 return res.status(401).json({ error: 'Invalid credentials.' });
             }
+
+            // Log user activity
+            const userAgent = req.headers['user-agent'];
+            const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+            await activityLogCollection.insertOne({
+                userId: user.id,
+                action: 'login',
+                ip,
+                userAgent,
+                timestamp: Date.now(),
+            });
 
             // Don't send the password hash back to the client
             const { passwordHash, ...userWithoutPassword } = user;

@@ -1,8 +1,6 @@
-// FIX: Implemented the TicketModal component to resolve the initialization error.
+// components/TicketModal.tsx
 import React, { useState, useContext } from 'react';
-// FIX: Corrected import path for AuthContext
 import { AuthContext } from '../contexts/AuthContext';
-// FIX: Corrected import path for api
 import { api } from '../api';
 import { XIcon, LoadingIcon, CheckIcon } from './icons/IconComponents';
 import { AuthContextType } from '../types';
@@ -68,7 +66,7 @@ const TicketModal: React.FC<TicketModalProps> = ({ onClose }) => {
                     <div className="text-center">
                         <CheckIcon className="h-12 w-12 text-green-500 mx-auto mb-4 animate-check-pop" />
                         <h3 className="text-xl text-white font-semibold">Ticket Submitted!</h3>
-                        <p className="text-gray-400 mt-2">Our team will get back to you shortly. Closing this window...</p>
+                        <p className="text-gray-400 mt-2">Our team will get back to you shortly. You can track this ticket in your dashboard. Closing...</p>
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} className="space-y-4">

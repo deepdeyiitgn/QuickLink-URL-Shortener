@@ -8,25 +8,25 @@ import BlogPostItem from './BlogPostItem';
 import NotFoundPage from './NotFoundPage';
 
 interface BlogPostPageProps {
-    postId: string;
+    postSlug: string;
 }
 
-const BlogPostPage: React.FC<BlogPostPageProps> = ({ postId }) => {
+const BlogPostPage: React.FC<BlogPostPageProps> = ({ postSlug }) => {
     const blog = useContext(BlogContext);
     
+    const post = blog?.posts.find(p => p.id === postSlug || p.alias === postSlug);
+
     // Set up view tracking for the post
     useEffect(() => {
-        if (postId && blog?.incrementView) {
-            const viewedKey = `viewed-${postId}`;
+        if (post && blog?.incrementView) {
+            const viewedKey = `viewed-${post.id}`;
             // Only count the view if it hasn't been counted in this session
             if (!sessionStorage.getItem(viewedKey)) {
-                blog.incrementView(postId);
+                blog.incrementView(post.id);
                 sessionStorage.setItem(viewedKey, 'true');
             }
         }
-    }, [postId, blog]);
-
-    const post = blog?.posts.find(p => p.id === postId);
+    }, [post, blog]);
 
     // Set document title for SEO
     useEffect(() => {

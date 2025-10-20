@@ -48,7 +48,7 @@ const BlogPostItem: React.FC<BlogPostProps> = ({ post }) => {
     };
 
     const handleShare = () => {
-        const postUrl = `${window.location.origin}/blog/post/${post.id}`;
+        const postUrl = `${window.location.origin}/blog/post/${post.alias || post.id}`;
         if (navigator.share) {
             navigator.share({
                 title: post.title,
@@ -79,7 +79,7 @@ const BlogPostItem: React.FC<BlogPostProps> = ({ post }) => {
     const canDelete = isOwner || isModerator || (isAuthor && post.status === 'pending');
     
     // Check if the current view is the individual post page
-    const isIndividualPostPage = window.location.pathname.startsWith('/blog/post/');
+    const isIndividualPostPage = window.location.pathname.endsWith(`/blog/post/${post.alias || post.id}`);
 
     return (
         <article id={`post-${post.id}`} className="relative glass-card p-6 md:p-8 rounded-2xl animate-fade-in">
@@ -116,16 +116,16 @@ const BlogPostItem: React.FC<BlogPostProps> = ({ post }) => {
                 </div>
             </header>
 
-            {post.status === 'pending' && (isOwner || isModerator) && (
+            {post.status === 'pending' && (isOwner || isModerator || isAuthor) && (
                 <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg flex items-center gap-2 text-sm text-yellow-300">
                     <WarningIcon className="h-5 w-5" />
-                    <span>This post is pending approval and is only visible to admins/moderators.</span>
+                    <span>This post is pending approval. {isAuthor ? 'You can see it, but it is not public yet.' : 'It is only visible to admins/moderators.'}</span>
                 </div>
             )}
             
             <div className="prose prose-invert max-w-none prose-p:text-gray-300 prose-headings:text-white prose-strong:text-white prose-pre:bg-black/30 prose-pre:text-gray-300">
                 <h2 className="text-3xl font-bold mb-4">
-                    <Link to={`/blog/post/${post.id}`} className="hover:text-brand-primary transition-colors">{post.title}</Link>
+                    <Link to={`/blog/post/${post.alias || post.id}`} className="hover:text-brand-primary transition-colors">{post.title}</Link>
                 </h2>
                 
                 {post.imageUrls && post.imageUrls.length > 0 && (
@@ -148,45 +148,34 @@ const BlogPostItem: React.FC<BlogPostProps> = ({ post }) => {
                     <div dangerouslySetInnerHTML={{ __html: post.content }} />
                 ) : (
                     <>
-                        <div dangerouslySetInnerHTML={{ __html: post.content.length > 500 ? `${post.content.substring(0, 500)}...` : post.content }} />
-                        {post.content.length > 500 && (
-                            <Link to={`/blog/post/${post.id}`} className="text-brand-primary hover:underline font-semibold">Read More</Link>
-                        )}
+                        <div dangerouslySetInnerHTML={{ __html: post.content.length > 300 ? `${post.content.substring(0, 300)}...` : post.content }} />
+                        {post.content.length > 300 && <Link to={`/blog/post/${post.alias || post.id}`} className="text-brand-primary hover:underline">Read more</Link>}
                     </>
                 )}
-
             </div>
-            
-            {post.keywords && post.keywords.length > 0 && (
-                <div className="mt-4 flex flex-wrap gap-2">
-                    {post.keywords.map((keyword, index) => (
-                        <span key={index} className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded-full">#{keyword.trim()}</span>
-                    ))}
-                </div>
-            )}
 
             <footer className="mt-6 pt-4 border-t border-white/20 flex items-center justify-between text-gray-400">
-                <div className="flex items-center gap-6">
-                    <button onClick={handleLike} className={`flex items-center gap-2 hover:text-white transition-colors ${isLiked ? 'text-red-500' : ''}`}>
-                        <HeartIcon className={`h-6 w-6 ${isLiked ? 'fill-current' : 'fill-none'}`} />
-                        <span className="text-sm font-semibold">{post.likes.length}</span>
+                <div className="flex items-center gap-4">
+                    <button onClick={handleLike} className="flex items-center gap-1.5 hover:text-white transition-colors">
+                        <HeartIcon className={`h-5 w-5 ${isLiked ? 'text-red-500 fill-red-500' : ''}`} />
+                        <span className="text-sm">{post.likes.length}</span>
                     </button>
-                    <button onClick={handleCommentClick} className="flex items-center gap-2 hover:text-white transition-colors">
-                        <ChatBubbleIcon className="h-6 w-6" />
-                        <span className="text-sm font-semibold">{post.comments.length}</span>
+                    <button onClick={handleCommentClick} className="flex items-center gap-1.5 hover:text-white transition-colors">
+                        <ChatBubbleIcon className="h-5 w-5" />
+                        <span className="text-sm">{post.comments.length}</span>
                     </button>
-                     <button onClick={handleShare} className="flex items-center gap-2 hover:text-white transition-colors">
-                        <ShareIcon className="h-6 w-6" />
-                        <span className="text-sm font-semibold">{post.shares}</span>
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                        <EyeIcon className="h-5 w-5" />
+                        <span className="text-sm">{post.views || 0}</span>
+                    </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <EyeIcon className="h-6 w-6" />
-                    <span className="text-sm font-semibold">{post.views || 0}</span>
-                </div>
+                <button onClick={handleShare} className="flex items-center gap-1.5 hover:text-white transition-colors">
+                    <ShareIcon className="h-5 w-5" />
+                    <span className="text-sm">{post.shares}</span>
+                </button>
             </footer>
 
-            {(showComments || isIndividualPostPage) && <BlogCommentSection postId={post.id} comments={post.comments} />}
+            {showComments && <BlogCommentSection postId={post.id} comments={post.comments} />}
         </article>
     );
 };

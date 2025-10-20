@@ -17,6 +17,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [authModalMode, setAuthModalMode] = useState<AuthModalMode>('login');
     const [isSubscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
     const [isApiSubscriptionModalOpen, setApiSubscriptionModalOpen] = useState(false);
+    const [isTicketModalOpen, setTicketModalOpen] = useState(false);
 
     useEffect(() => {
         const loadUser = async () => {
@@ -67,6 +68,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const closeSubscriptionModal = () => setSubscriptionModalOpen(false);
     const openApiSubscriptionModal = () => setApiSubscriptionModalOpen(true);
     const closeApiSubscriptionModal = () => setApiSubscriptionModalOpen(false);
+    const openTicketModal = () => setTicketModalOpen(true);
+    const closeTicketModal = () => setTicketModalOpen(false);
     
     // User data updates
     const updateUserData = async (userId: string, data: Partial<User>): Promise<User> => {
@@ -80,7 +83,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const updateUserProfile = async (data: { name: string, profilePictureUrl?: string }): Promise<User> => {
         if (!currentUser) throw new Error("Not logged in");
-        return updateUserData(currentUser.id, data);
+        const updatedUser = await updateUserData(currentUser.id, data);
+        
+        // After successfully updating the user, trigger the backend to propagate these changes
+        // to all their posts and comments for data consistency.
+        await api.propagateUserChanges(currentUser.id, {
+            name: updatedUser.name,
+            profilePictureUrl: updatedUser.profilePictureUrl,
+        });
+        
+        return updatedUser;
     };
     
     const updateUserSubscription = async (planId: 'monthly' | 'semi-annually' | 'yearly', expiresAt: number) => {
@@ -100,7 +112,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         });
     };
 
-    const purchaseApiKey = async (planId: 'basic' | 'pro', expiresAt: number) => {
+    const purchaseApiKey = async (planId: 'basic' | 'pro' | 'permanent', expiresAt: number) => {
         if (!currentUser) throw new Error("Not logged in");
         const apiKey = currentUser.apiAccess?.apiKey || `qk_prod_${Date.now().toString(36)}`;
         await updateUserData(currentUser.id, {
@@ -120,6 +132,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isAuthModalOpen, authModalMode, openAuthModal, closeAuthModal,
         isSubscriptionModalOpen, openSubscriptionModal, closeSubscriptionModal,
         isApiSubscriptionModalOpen, openApiSubscriptionModal, closeApiSubscriptionModal,
+        isTicketModalOpen, openTicketModal, closeTicketModal,
         login, signup, logout,
         updateUserData, updateUserProfile,
         generateApiKey, purchaseApiKey, updateUserSubscription,

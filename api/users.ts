@@ -1,12 +1,16 @@
 // api/users.ts
 import { connectToDatabase } from './lib/mongodb.js';
-import type { User } from '../types';
+import type { User, BlogPost } from '../types';
+import { getUserBadge } from '../utils/userHelper';
 
 export default async function handler(req: any, res: any) {
     res.setHeader('Content-Type', 'application/json');
     try {
         const { db } = await connectToDatabase();
         const usersCollection = db.collection<User>('users');
+        const postsCollection = db.collection<BlogPost>('blog_posts');
+
+        const { userId, action } = req.query;
 
         if (req.method === 'GET') {
             const users = await usersCollection.find({}, { projection: { passwordHash: 0 } }).toArray();
@@ -14,10 +18,45 @@ export default async function handler(req: any, res: any) {
         }
 
         if (req.method === 'PUT') {
-            const { userId } = req.query;
+            if (!userId) {
+                return res.status(400).json({ error: 'User ID is required.' });
+            }
+
+            // Handle propagation of user profile changes
+            if (action === 'propagate_changes') {
+                const { name, profilePictureUrl } = req.body;
+                const user = await usersCollection.findOne({ id: userId });
+                if (!user) return res.status(404).json({ error: 'User not found.' });
+
+                const userBadge = getUserBadge(user);
+
+                // Update all posts by this user
+                await postsCollection.updateMany(
+                    { userId: userId },
+                    { $set: { 
+                        userName: name, 
+                        userProfilePictureUrl: profilePictureUrl,
+                        userBadge: userBadge
+                    }}
+                );
+
+                // Update all comments by this user
+                await postsCollection.updateMany(
+                    { "comments.userId": userId },
+                    { $set: { 
+                        "comments.$[elem].userName": name,
+                        "comments.$[elem].userBadge": userBadge
+                    }},
+                    { arrayFilters: [{ "elem.userId": userId }] }
+                );
+                
+                return res.status(200).json({ success: true, message: 'User changes propagated.' });
+            }
+
+            // Handle regular user data updates
             const updateData = req.body;
-            if (!userId || !updateData) {
-                return res.status(400).json({ error: 'User ID and update data are required.' });
+            if (!updateData) {
+                return res.status(400).json({ error: 'Update data is required.' });
             }
             
             // Prevent certain fields from being updated directly
@@ -25,20 +64,19 @@ export default async function handler(req: any, res: any) {
             delete updateData.email;
             delete updateData.passwordHash;
 
-            // Implicitly update last active time on any profile update
             const finalUpdateData = { ...updateData, lastActive: Date.now() };
 
-            const updatedUser = await usersCollection.findOneAndUpdate(
+            const result = await usersCollection.findOneAndUpdate(
                 { id: userId },
                 { $set: finalUpdateData },
                 { returnDocument: 'after', projection: { passwordHash: 0 } }
             );
 
-            if (!updatedUser) {
+            if (!result) {
                 return res.status(404).json({ error: 'User not found.' });
             }
             
-            return res.status(200).json(updatedUser);
+            return res.status(200).json(result);
         }
 
         res.setHeader('Allow', ['GET', 'PUT']);

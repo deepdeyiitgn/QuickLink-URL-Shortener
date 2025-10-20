@@ -14,9 +14,30 @@ export default async function handler(req: any, res: any) {
         const usersCollection = db.collection<User>('users');
 
         if (req.method === 'GET') {
-            const { userId } = req.query;
+            const { userId, postSlug } = req.query;
+
+            // Fetch a single post by slug (which can be an ID or a custom alias)
+            if (postSlug) {
+                const post = await postsCollection.findOne({ $or: [{ id: postSlug }, { alias: postSlug }] });
+                if (!post) {
+                    return res.status(404).json({ error: 'Post not found.' });
+                }
+                return res.status(200).json(post);
+            }
+
+            // Fetch all posts based on user permissions
             const user = userId ? await usersCollection.findOne({ id: userId }) : null;
-            const query: Filter<BlogPost> = (user && (user.isAdmin || user.canModerate)) ? {} : { status: 'approved' };
+            let query: Filter<BlogPost> = { status: 'approved' };
+
+            if (user) {
+                if (user.isAdmin || user.canModerate) {
+                    query = {}; // Admins/mods see all posts
+                } else {
+                    // Regular users see approved posts AND their own pending posts
+                    query = { $or: [{ status: 'approved' }, { userId: user.id }] };
+                }
+            }
+            
             const posts = await postsCollection.find(query).sort({ isPinned: -1, createdAt: -1 }).toArray();
             return res.status(200).json(posts);
         }
@@ -25,6 +46,14 @@ export default async function handler(req: any, res: any) {
             const postData: Omit<BlogPost, 'id' | 'createdAt' | 'status'> = req.body;
             const user = await usersCollection.findOne({ id: postData.userId });
             if (!user) return res.status(403).json({ error: "User not found." });
+
+            // Check for unique alias if provided
+            if (postData.alias) {
+                const existingPost = await postsCollection.findOne({ alias: postData.alias });
+                if (existingPost) {
+                    return res.status(409).json({ error: 'This custom URL alias is already taken. Please choose another one.' });
+                }
+            }
 
             const newPost: BlogPost = {
                 ...postData,
@@ -91,9 +120,12 @@ export default async function handler(req: any, res: any) {
             const post = await postsCollection.findOne({ id: postId });
             if (!user || !post) return res.status(404).json({ error: "Not found" });
             
-            if (!user.isAdmin && !user.canModerate && user.id !== post.userId) {
-                return res.status(403).json({ error: "You do not have permission to delete this post." });
+            // Allow user to delete their own pending posts, in addition to admin/mod permissions
+            const canDelete = user.isAdmin || user.canModerate || (user.id === post.userId && post.status === 'pending');
+            if (!canDelete) {
+                 return res.status(403).json({ error: "You do not have permission to delete this post." });
             }
+            
             await postsCollection.deleteOne({ id: postId });
             return res.status(200).json({ success: true });
         }

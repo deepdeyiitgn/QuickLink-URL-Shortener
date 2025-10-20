@@ -17,6 +17,7 @@ import FullScreenLoader from './components/FullScreenLoader';
 import NotFoundPage from './components/NotFoundPage';
 import RedirectPage from './components/RedirectPage'; // Assuming this component exists for redirection logic
 import BackToTopButton from './components/BackToTopButton';
+import TicketModal from './components/TicketModal'; // Added for support tickets
 
 // Lazy load pages for better performance
 const LandingPage = lazy(() => import('./components/LandingPage'));
@@ -36,6 +37,8 @@ const TermsPage = lazy(() => import('./components/TermsPage'));
 const BlogPage = lazy(() => import('./components/BlogPage'));
 const BlogCreatePage = lazy(() => import('./components/BlogCreatePage'));
 const BlogPostPage = lazy(() => import('./components/BlogPostPage'));
+const NotificationsPage = lazy(() => import('./components/NotificationsPage'));
+const ShopPage = lazy(() => import('./components/ShopPage'));
 
 // A wrapper to handle redirection logic based on alias in URL
 const MainContent: React.FC = () => {
@@ -69,7 +72,9 @@ const MainContent: React.FC = () => {
                     <Route path="/terms" element={<TermsPage />} />
                     <Route path="/blog" element={<BlogPage />} />
                     <Route path="/blog/new" element={<BlogCreatePage />} />
-                    <Route path="/blog/post/:postId" element={<BlogPostRouter />} />
+                    <Route path="/blog/post/:slug" element={<BlogPostRouter />} />
+                    <Route path="/notifications" element={<NotificationsPage />} />
+                    <Route path="/shop" element={<ShopPage />} />
                     <Route path="*" element={<NotFoundPage />} />
                 </Routes>
             </Suspense>
@@ -78,8 +83,8 @@ const MainContent: React.FC = () => {
 };
 
 const BlogPostRouter = () => {
-    const { postId } = useParams<{ postId: string }>();
-    return <BlogPostPage postId={postId!} />;
+    const { slug } = useParams<{ slug: string }>();
+    return <BlogPostPage postSlug={slug!} />;
 };
 
 const AppModals: React.FC = () => {
@@ -89,6 +94,7 @@ const AppModals: React.FC = () => {
     return (
         <>
             <AuthModal />
+            {auth.isTicketModalOpen && <TicketModal onClose={auth.closeTicketModal} />}
             {auth.isSubscriptionModalOpen && <SubscriptionModal onClose={auth.closeSubscriptionModal} />}
             {auth.isApiSubscriptionModalOpen && <ApiSubscriptionModal onClose={auth.closeApiSubscriptionModal} />}
         </>
