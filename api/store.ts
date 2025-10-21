@@ -14,7 +14,7 @@ async function handleDonationRequests(req: any, res: any, db: any) {
     
     if (req.method === 'POST') {
         const donationData: Omit<Donation, 'id' | 'createdAt'> = req.body;
-        if (!donationData || !donationData.amount || !donationData.userId || !donationData.userName) {
+        if (!donationData || !donationData.amount || !donationData.name) {
             return res.status(400).json({ error: 'Missing required fields for donation.' });
         }
         const newDonation: Donation = { ...donationData, id: `donation_${Date.now()}`, createdAt: Date.now() };
