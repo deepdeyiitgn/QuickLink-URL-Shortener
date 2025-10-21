@@ -1,11 +1,11 @@
 
 
 
+
 import React, { useState, useRef, useContext, useEffect } from 'react';
 // FIX: The 'Extension' export is a type, not a value. Use an inline type import to resolve the module error.
 // FIX: The combined import fails to resolve the type. Separating the default import and the named type import for better compatibility.
 import QRCodeStyling from 'qr-code-styling';
-import type { Extension } from 'qr-code-styling';
 import {
     LinkIcon, TextIcon, WifiIcon, VCardIcon, EmailIcon, SmsIcon, PhoneIcon, GeoIcon,
     CalendarIcon, BitcoinIcon, UpiIcon, ImageIcon, ColorPaletteIcon, ChevronDownIcon
@@ -143,7 +143,7 @@ const QrCodeGenerator: React.FC = () => {
         if (!qrCodeInstance.current) return;
         qrCodeInstance.current.download({
             name: `qrcode-${activeType}`,
-            extension: 'png' as Extension,
+            extension: 'png',
         });
         qrContext?.addQrCode({ userId: auth?.currentUser?.id || null, type: activeType, data: qrData });
     };
