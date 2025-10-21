@@ -80,6 +80,7 @@ const LiveActivityDashboard: React.FC = () => {
                             <div key={user.id} className="p-2 bg-black/40 rounded flex justify-between items-center">
                                 <p className="text-sm text-gray-300">{user.name}</p>
                                 <span className="text-xs text-green-400">Online</span>
+                            </div>
                         )) : <p className="text-sm text-gray-500">No users currently online.</p>}
                     </div>
                 </div>
