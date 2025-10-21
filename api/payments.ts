@@ -1,3 +1,4 @@
+
 // Vercel Serverless Function: /api/payments
 // Handles GET/POST for payment records and donations, and POST for creating payment orders.
 

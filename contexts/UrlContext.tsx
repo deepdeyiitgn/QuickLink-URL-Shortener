@@ -1,7 +1,5 @@
 import React, { createContext, useState, useEffect, ReactNode, useMemo } from 'react';
-// FIX: Corrected import path for types
 import type { ShortenedUrl, PaymentRecord, UrlContextType } from '../types';
-// FIX: Corrected import path for api
 import { api } from '../api';
 
 export const UrlContext = createContext<UrlContextType | undefined>(undefined);

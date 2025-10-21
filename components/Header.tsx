@@ -1,97 +1,111 @@
-
-
-import React, { useContext, useState, useEffect } from 'react';
-// FIX: Changed single quotes to double quotes for the import.
-import { Link } from "react-router-dom";
-// FIX: Corrected import path for AuthContext
+import React, { useState, useContext } from 'react';
+import { Link, NavLink } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
-import { LogoIcon, UserIcon, MenuIcon, XIcon, ChevronDownIcon } from './icons/IconComponents';
+import { LogoIcon, UserIcon, MenuIcon } from './icons/IconComponents';
 import MobileMenu from './MobileMenu';
-import { AuthContextType } from '../types';
+import NotificationPrompt from './NotificationPrompt';
 
 const Header: React.FC = () => {
-    // FIX: Cast context to the correct type to resolve property errors
-    const auth = useContext(AuthContext) as AuthContextType;
-    const { currentUser, openAuthModal, logout } = auth || {};
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isScrolled, setIsScrolled] = useState(false);
-
-    useEffect(() => {
-        const handleScroll = () => {
-            setIsScrolled(window.scrollY > 10);
+    const auth = useContext(AuthContext);
+    const { currentUser, logout, openAuthModal } = auth || {};
+    
+    const [isProfileMenuOpen, setProfileMenuOpen] = useState(false);
+    const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+    
+    const profileMenuRef = React.useRef<HTMLDivElement>(null);
+    // Simple hook to close profile dropdown when clicking outside
+    React.useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+                setProfileMenuOpen(false);
+            }
         };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [profileMenuRef]);
 
-    const navLinkClasses = "px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-colors";
-    const dropdownLinkClasses = "block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white w-full text-left";
+
+    const navLinks = [
+        { name: 'Tools', href: '/tools' },
+        { name: 'Shop', href: '/shop' },
+        { name: 'Blog', href: '/blog' },
+        { name: 'About', href: '/about' },
+        { name: 'Contact', href: '/contact' },
+        { name: 'Donate', href: '/donate' }
+    ];
+
+    const activeLinkClass = "text-brand-primary";
+    const inactiveLinkClass = "text-gray-300 hover:text-brand-light";
 
     return (
-        <header className={`sticky top-0 z-40 transition-all duration-300 ${isScrolled ? 'bg-brand-dark/80 backdrop-blur-lg border-b border-white/10' : 'bg-transparent'}`}>
-            <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-20">
-                    <div className="flex items-center">
-                        <Link to="/" className="flex-shrink-0 flex items-center gap-2 text-white">
+        <>
+            <header className="sticky top-0 z-40 bg-brand-dark/80 backdrop-blur-md border-b border-white/10">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex items-center justify-between h-20">
+                        {/* Logo */}
+                        <Link to="/" className="flex items-center gap-2 flex-shrink-0">
                             <LogoIcon className="h-8 w-8 text-brand-primary" />
-                            <span className="text-2xl font-bold">QuickLink</span>
+                            <span className="text-2xl font-bold text-white">QuickLink</span>
                         </Link>
-                    </div>
-                    <div className="hidden md:flex items-center space-x-2">
-                        <Link to="/" className={navLinkClasses}>Home</Link>
-                        <div className="relative group">
-                            <button className={`${navLinkClasses} flex items-center gap-1`}>
-                                Tools
-                                <ChevronDownIcon className="h-4 w-4" />
-                            </button>
-                            <div className="absolute left-0 mt-2 w-48 bg-brand-dark/90 backdrop-blur-sm border border-white/10 rounded-md shadow-lg py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto z-10">
-                                <Link to="/shortener" className={dropdownLinkClasses}>URL Shortener</Link>
-                                <Link to="/qr-generator" className={dropdownLinkClasses}>QR Generator</Link>
-                                <Link to="/qr-scanner" className={dropdownLinkClasses}>QR Scanner</Link>
+
+                        {/* Desktop Navigation */}
+                        <nav className="hidden md:flex items-center space-x-8">
+                            {navLinks.map(link => (
+                                <NavLink
+                                    key={link.name}
+                                    to={link.href}
+                                    className={({ isActive }) => `${isActive ? activeLinkClass : inactiveLinkClass} font-semibold transition-colors`}
+                                >
+                                    {link.name}
+                                </NavLink>
+                            ))}
+                        </nav>
+
+                        {/* Auth Buttons / User Menu */}
+                        <div className="flex items-center gap-4">
+                            {currentUser ? (
+                                <div className="relative" ref={profileMenuRef}>
+                                    <button onClick={() => setProfileMenuOpen(!isProfileMenuOpen)} className="flex items-center focus:outline-none">
+                                        {currentUser.profilePictureUrl ? (
+                                            <img src={currentUser.profilePictureUrl} alt="Profile" className="h-10 w-10 rounded-full object-cover border-2 border-brand-primary" />
+                                        ) : (
+                                            <div className="h-10 w-10 rounded-full bg-brand-secondary flex items-center justify-center">
+                                                <UserIcon className="h-6 w-6 text-white" />
+                                            </div>
+                                        )}
+                                    </button>
+                                    {isProfileMenuOpen && (
+                                        <div className="absolute right-0 mt-2 w-48 bg-brand-dark border border-white/10 rounded-lg shadow-lg py-1 animate-fade-in-down">
+                                            <Link to="/dashboard" className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10" onClick={() => setProfileMenuOpen(false)}>Dashboard</Link>
+                                            <Link to="/notifications" className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10" onClick={() => setProfileMenuOpen(false)}>Notifications</Link>
+                                            <button onClick={() => { logout?.(); setProfileMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/10">
+                                                Logout
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => openAuthModal && openAuthModal('login')}
+                                    className="hidden md:inline-block px-4 py-2 text-sm font-semibold text-brand-dark bg-brand-primary rounded-md hover:bg-brand-primary/80"
+                                >
+                                    Sign In
+                                </button>
+                            )}
+
+                            {/* Mobile Menu Button */}
+                            <div className="md:hidden">
+                                <button onClick={() => setMobileMenuOpen(true)} className="p-2 rounded-md text-gray-400 hover:text-white hover:bg-white/10">
+                                    <MenuIcon className="h-6 w-6" />
+                                </button>
                             </div>
                         </div>
-                        <Link to="/shop" className={navLinkClasses}>Shop</Link>
-                        <Link to="/blog" className={navLinkClasses}>Blog</Link>
-                        <Link to="/about" className={navLinkClasses}>About</Link>
-                        <Link to="/contact" className={navLinkClasses}>Contact</Link>
-                        <Link to="/donate" className={`${navLinkClasses} text-brand-secondary hover:text-brand-secondary/80 hover:bg-brand-secondary/10`}>Donate</Link>
-                    </div>
-                    <div className="hidden md:flex items-center space-x-4">
-                        {currentUser ? (
-                            <div className="flex items-center gap-4">
-                                <Link to="/notifications" title="Notifications" className="p-2 rounded-full text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                    </svg>
-                                </Link>
-                                <div className="relative group">
-                                    <Link to="/dashboard" className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
-                                        <UserIcon className="h-5 w-5" />
-                                        <span>{currentUser.name}</span>
-                                    </Link>
-                                    <div className="absolute right-0 mt-2 w-48 bg-brand-dark/90 backdrop-blur-sm border border-white/10 rounded-md shadow-lg py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto">
-                                        <Link to="/dashboard" className={dropdownLinkClasses}>Dashboard</Link>
-                                        <Link to="/api-access" className={dropdownLinkClasses}>API Access</Link>
-                                        <button onClick={logout} className={dropdownLinkClasses}>Sign Out</button>
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <>
-                                <button onClick={() => openAuthModal && openAuthModal('login')} className="px-4 py-2 text-sm font-medium rounded-md hover:bg-white/10 transition-colors">Sign In</button>
-                                <button onClick={() => openAuthModal && openAuthModal('signup')} className="px-4 py-2 text-sm font-medium text-brand-dark bg-brand-primary rounded-md hover:bg-brand-primary/80 transition-colors">Sign Up</button>
-                            </>
-                        )}
-                    </div>
-                    <div className="md:hidden flex items-center">
-                        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none">
-                            {isMenuOpen ? <XIcon className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
-                        </button>
                     </div>
                 </div>
-            </nav>
-            {isMenuOpen && <MobileMenu onLinkClick={() => setIsMenuOpen(false)} />}
-        </header>
+            </header>
+            <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setMobileMenuOpen(false)} navLinks={navLinks} />
+            <NotificationPrompt />
+        </>
     );
 };
 

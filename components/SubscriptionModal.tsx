@@ -1,9 +1,6 @@
-// FIX: Removed reference to vite/client types to resolve "Cannot find type definition" error.
 import React, { useState, useContext } from 'react';
-// FIX: Corrected import path for AuthContext
 import { AuthContext } from '../contexts/AuthContext';
 import { UrlContext } from '../contexts/UrlContext';
-// FIX: Corrected import path for types
 import { PaymentRecord, RazorpayOrder, RazorpaySuccessResponse, CashfreeOrder, AuthContextType } from '../types';
 import { XIcon, LoadingIcon, CrownIcon, CheckIcon, WarningIcon } from './icons/IconComponents';
 import CouponInput from './CouponInput';
@@ -22,8 +19,7 @@ const SUBSCRIPTION_PLANS: Record<PlanId, { price: number; days: number; label: s
 };
 
 const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ onClose }) => {
-    // FIX: Cast context to the correct type to resolve property errors
-    const auth = useContext(AuthContext) as AuthContextType;
+    const auth = useContext(AuthContext);
     const urlContext = useContext(UrlContext);
     const [selectedPlan, setSelectedPlan] = useState<PlanId>('yearly');
     const [isLoading, setIsLoading] = useState(false);

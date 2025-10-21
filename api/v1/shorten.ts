@@ -1,3 +1,4 @@
+
 // This is a Vercel serverless function for the Developer API endpoint.
 // It validates the API key and creates a short URL, storing it in MongoDB Atlas.
 

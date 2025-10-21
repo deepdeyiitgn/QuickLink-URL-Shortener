@@ -1,72 +1,71 @@
-// api.ts
-// A simple API client to interact with the Vercel Serverless Functions.
 
-import type { ShortenedUrl, PaymentRecord, QrCodeRecord, ScanRecord, DbStatus, Donation, Ticket, Notification, User, TicketReply, Product, Coupon } from './types';
+import type { User, ShortenedUrl, PaymentRecord, QrCodeRecord, ScanRecord, DbStatus, Ticket, Notification, Product, Coupon, BlogPost } from './types';
 
-const fetcher = async (url: string, options: RequestInit = {}) => {
-    const res = await fetch(url, {
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
-    });
-    if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ error: 'An unknown error occurred' }));
-        throw new Error(errorData.error || res.statusText);
+async function apiFetch(url: string, options: RequestInit = {}) {
+    const defaultOptions: RequestInit = {
+        headers: { 'Content-Type': 'application/json' },
+    };
+    const response = await fetch(url, { ...defaultOptions, ...options });
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.error || `HTTP error! status: ${response.status}`);
     }
-    return res.json();
-};
+    return data;
+}
 
 export const api = {
-    // URLS
-    getUrls: (): Promise<ShortenedUrl[]> => fetcher('/api/urls'),
-    addSingleUrl: (url: ShortenedUrl): Promise<{ success: boolean }> => fetcher('/api/urls', { method: 'POST', body: JSON.stringify(url) }),
-    extendMultipleUrls: (urlIds: string[], newExpiresAt: number): Promise<{ success: boolean }> => fetcher('/api/urls', { method: 'PUT', body: JSON.stringify({ urlIds, newExpiresAt }) }),
-    deleteSingleUrl: (id: string): Promise<{ success: boolean }> => fetcher(`/api/urls?id=${id}`, { method: 'DELETE' }),
-    deleteUrlsForUser: (userId: string): Promise<{ success: boolean }> => fetcher(`/api/urls?userId=${userId}`, { method: 'DELETE' }),
-
-    // PAYMENTS & DONATIONS
-    getPaymentHistory: (): Promise<PaymentRecord[]> => fetcher('/api/payments'),
-    addPaymentRecord: (record: PaymentRecord): Promise<PaymentRecord> => fetcher('/api/payments', { method: 'POST', body: JSON.stringify(record) }),
-    getDonations: (): Promise<Donation[]> => fetcher('/api/payments?type=donation'),
-    addDonation: (donation: Omit<Donation, 'id' | 'createdAt'>): Promise<{ success: boolean }> => fetcher('/api/payments?type=donation', { method: 'POST', body: JSON.stringify(donation) }),
+    // Auth
+    login: (email: string, password: string): Promise<User> => apiFetch('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'login', email, password }) }),
+    signup: (name: string, email: string, password: string): Promise<User> => apiFetch('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'signup', name, email, password }) }),
     
-    // QR & SCAN HISTORY (Consolidated)
-    getQrHistory: (): Promise<QrCodeRecord[]> => fetcher('/api/history?type=qr'),
-    addQrRecord: (record: Omit<QrCodeRecord, 'id'|'createdAt'>): Promise<QrCodeRecord> => fetcher('/api/history?type=qr', { method: 'POST', body: JSON.stringify(record) }),
-    getScanHistory: (): Promise<ScanRecord[]> => fetcher('/api/history?type=scan'),
-    addScanRecord: (record: Omit<ScanRecord, 'id'|'scannedAt'>): Promise<ScanRecord> => fetcher('/api/history?type=scan', { method: 'POST', body: JSON.stringify(record) }),
-
-    // DB STATUS
-    getDbStatus: (): Promise<DbStatus> => fetcher('/api/status'),
-
-    // SUPPORT (Consolidated)
-    createTicket: (ticket: Omit<Ticket, 'id' | 'createdAt' | 'status' | 'replies'>): Promise<Ticket> => fetcher('/api/support?type=ticket', { method: 'POST', body: JSON.stringify(ticket) }),
-    getUserTickets: (userId: string): Promise<Ticket[]> => fetcher(`/api/support?type=ticket&userId=${userId}`),
-    getAllTickets: (): Promise<Ticket[]> => fetcher('/api/support?type=ticket&scope=all'),
-    replyToTicket: (ticketId: string, reply: Omit<TicketReply, 'id' | 'createdAt'>): Promise<Ticket> => fetcher('/api/support?type=ticket', { method: 'PUT', body: JSON.stringify({ action: 'reply', ticketId, reply }) }),
-    updateTicketStatus: (ticketId: string, status: Ticket['status']): Promise<Ticket> => fetcher('/api/support?type=ticket', { method: 'PUT', body: JSON.stringify({ action: 'status', ticketId, status }) }),
+    // Users
+    getUsers: (): Promise<User[]> => apiFetch('/api/users'),
+    getUserById: (id: string): Promise<User> => apiFetch(`/api/users?id=${id}`),
+    updateUser: (id: string, updates: Partial<User> & { newApiKey?: boolean }): Promise<User> => apiFetch(`/api/users?id=${id}`, { method: 'PUT', body: JSON.stringify(updates) }),
+    updateUserDetails: (id: string, details: { browser: string; deviceType: string }): Promise<User> => apiFetch(`/api/users?id=${id}`, { method: 'PUT', body: JSON.stringify({ action: 'update_details', ...details }) }),
     
-    getNotifications: (userId: string): Promise<Notification[]> => fetcher(`/api/support?type=notification&userId=${userId}`),
-    markNotificationAsRead: (notificationId: string): Promise<{ success: boolean }> => fetcher('/api/support?type=notification', { method: 'PUT', body: JSON.stringify({ notificationId }) }),
-    createCustomNotification: (userId: 'all' | string, message: string): Promise<{ success: boolean }> => fetcher('/api/support?type=notification', { method: 'POST', body: JSON.stringify({ userId, message }) }),
+    // URLs
+    getUrls: (): Promise<ShortenedUrl[]> => apiFetch('/api/urls'),
+    addSingleUrl: (url: ShortenedUrl): Promise<{ success: boolean }> => apiFetch('/api/urls', { method: 'POST', body: JSON.stringify(url) }),
+    extendMultipleUrls: (urlIds: string[], newExpiresAt: number): Promise<{ success: boolean }> => apiFetch('/api/urls', { method: 'PUT', body: JSON.stringify({ urlIds, newExpiresAt }) }),
+    deleteSingleUrl: (id: string): Promise<{ success: boolean }> => apiFetch(`/api/urls?id=${id}`, { method: 'DELETE' }),
+    deleteUrlsForUser: (userId: string): Promise<{ success: boolean }> => apiFetch(`/api/urls?userId=${userId}`, { method: 'DELETE' }),
 
-    // USERS & AUTH (Consolidated)
-    getAllUsers: (): Promise<User[]> => fetcher('/api/users'),
-    updateUser: (userId: string, data: Partial<User>): Promise<User> => fetcher(`/api/users?userId=${userId}`, { method: 'PUT', body: JSON.stringify(data) }),
-    login: (email: string, password: string): Promise<User> => fetcher('/api/auth?action=login', { method: 'POST', body: JSON.stringify({ email, password }) }),
-    signup: (name: string, email: string, password: string): Promise<User> => fetcher('/api/auth?action=signup', { method: 'POST', body: JSON.stringify({ name, email, password }) }),
+    // History (QR & Scan)
+    getQrHistory: (): Promise<QrCodeRecord[]> => apiFetch('/api/history?type=qr'),
+    addQrRecord: (record: QrCodeRecord): Promise<QrCodeRecord> => apiFetch('/api/history?type=qr', { method: 'POST', body: JSON.stringify(record) }),
+    getScanHistory: (): Promise<ScanRecord[]> => apiFetch('/api/history?type=scan'),
+    addScanRecord: (record: ScanRecord): Promise<ScanRecord> => apiFetch('/api/history?type=scan', { method: 'POST', body: JSON.stringify(record) }),
+    
+    // Payments & Donations
+    getPaymentHistory: (): Promise<PaymentRecord[]> => apiFetch('/api/payments'),
+    addPaymentRecord: (record: PaymentRecord): Promise<PaymentRecord> => apiFetch('/api/payments', { method: 'POST', body: JSON.stringify(record) }),
+    getDonations: (): Promise<any[]> => apiFetch('/api/payments?type=donation'),
+    addDonation: (donation: Omit<any, 'id' | 'createdAt'>): Promise<{ success: boolean }> => apiFetch('/api/payments?type=donation', { method: 'POST', body: JSON.stringify(donation) }),
 
-    // SHOP & COUPONS
-    getProducts: (): Promise<Product[]> => fetcher('/api/shop?type=product'),
-    addProduct: (product: Omit<Product, 'id'|'createdAt'|'stock'>, adminId: string): Promise<Product> => fetcher('/api/shop?type=product', { method: 'POST', body: JSON.stringify({ product, adminId }) }),
-    deleteProduct: (productId: string, adminId: string): Promise<{ success: boolean }> => fetcher('/api/shop?type=product', { method: 'DELETE', body: JSON.stringify({ productId, adminId }) }),
+    // Status
+    getDbStatus: (): Promise<DbStatus> => apiFetch('/api/status'),
     
-    getCoupons: (adminId: string): Promise<Coupon[]> => fetcher(`/api/shop?type=coupon&adminId=${adminId}`),
-    addCoupon: (coupon: Omit<Coupon, 'id'|'createdAt'|'uses'>, adminId: string): Promise<Coupon> => fetcher('/api/shop?type=coupon', { method: 'POST', body: JSON.stringify({ coupon, adminId }) }),
-    deleteCoupon: (couponId: string, adminId: string): Promise<{ success: boolean }> => fetcher('/api/shop?type=coupon', { method: 'DELETE', body: JSON.stringify({ couponId, adminId }) }),
-    verifyCoupon: (code: string, userId: string): Promise<{ finalPrice: number, discountAmount: number, isValid: boolean, message: string }> => fetcher(`/api/shop?type=coupon&action=verify&code=${code}&userId=${userId}`),
-    
-    fulfillPurchase: (data: { userId: string, productId: string, paymentId: string, couponCode?: string }): Promise<{ success: boolean }> => fetcher('/api/shop?action=fulfill', { method: 'POST', body: JSON.stringify(data) }),
+    // Tickets
+    getUserTickets: (userId: string): Promise<Ticket[]> => apiFetch(`/api/support?type=ticket&userId=${userId}`),
+    getAllTickets: (): Promise<Ticket[]> => apiFetch(`/api/support?type=ticket&forAdmin=true&userId=temp`), // userId is placeholder, backend checks admin status
+    createTicket: (data: any): Promise<Ticket> => apiFetch('/api/support?type=ticket', { method: 'POST', body: JSON.stringify(data) }),
+    updateTicket: (ticketId: string, update: any): Promise<Ticket> => apiFetch('/api/support?type=ticket', { method: 'PUT', body: JSON.stringify({ ticketId, ...update }) }),
+
+    // Notifications
+    getNotifications: (userId: string): Promise<Notification[]> => apiFetch(`/api/support?type=notification&userId=${userId}`),
+    sendNotification: (data: any): Promise<Notification> => apiFetch('/api/support?type=notification', { method: 'POST', body: JSON.stringify(data) }),
+    markNotificationsRead: (userId: string): Promise<{ success: boolean }> => apiFetch('/api/support?type=notification', { method: 'PUT', body: JSON.stringify({ userId, action: 'mark_read' }) }),
+
+    // Blog
+    getBlogPosts: (userId?: string): Promise<BlogPost[]> => apiFetch(userId ? `/api/blog?userId=${userId}` : '/api/blog'),
+
+    // Shop & Coupons
+    getProducts: (): Promise<Product[]> => apiFetch('/api/shop?type=product'),
+    addProduct: (product: Omit<Product, 'id' | 'createdAt'>, adminId: string): Promise<Product> => apiFetch('/api/shop?type=product', { method: 'POST', body: JSON.stringify({ product, adminId }) }),
+    deleteProduct: (productId: string, adminId: string): Promise<{ success: true }> => apiFetch('/api/shop?type=product', { method: 'DELETE', body: JSON.stringify({ productId, adminId }) }),
+    getCoupons: (adminId: string): Promise<Coupon[]> => apiFetch(`/api/shop?type=coupon&adminId=${adminId}`),
+    addCoupon: (coupon: Omit<Coupon, 'id' | 'createdAt' | 'uses'>, adminId: string): Promise<Coupon> => apiFetch('/api/shop?type=coupon', { method: 'POST', body: JSON.stringify({ coupon, adminId }) }),
+    deleteCoupon: (couponId: string, adminId: string): Promise<{ success: true }> => apiFetch('/api/shop?type=coupon', { method: 'DELETE', body: JSON.stringify({ couponId, adminId }) }),
+    fulfillPurchase: (data: { userId: string, productId: string, paymentId: string, couponCode?: string }): Promise<{ success: true }> => apiFetch('/api/shop?action=fulfill', { method: 'POST', body: JSON.stringify(data) }),
 };

@@ -18,12 +18,14 @@ const TICKET_STATUS_STYLES: Record<Ticket['status'], string> = {
 };
 
 const UserManagement: React.FC = () => {
-    const auth = useContext(AuthContext) as AuthContextType;
+    const auth = useContext(AuthContext);
     const urlContext = useContext(UrlContext);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
+    if (!auth || !urlContext) return null;
+
     const { users, updateUserData } = auth;
-    const { deleteUrlsByUserId } = urlContext || {};
+    const { deleteUrlsByUserId } = urlContext;
 
     const handleRoleChange = async (userId: string, role: keyof User, value: boolean) => {
         try {
@@ -141,7 +143,7 @@ const TicketManagement: React.FC = () => {
 
 
 const OwnerDashboard: React.FC = () => {
-    const auth = useContext(AuthContext) as AuthContextType;
+    const auth = useContext(AuthContext);
     const [activeTab, setActiveTab] = useState('users');
     
     if (!auth || !auth.currentUser?.isAdmin) {

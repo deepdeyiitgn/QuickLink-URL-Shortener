@@ -1,202 +1,92 @@
 
-import React, { useContext, useState } from 'react';
-// FIX: Changed single quotes to double quotes for the import.
-import { Link } from "react-router-dom";
-// FIX: Corrected import path for types
+import React, { useContext } from 'react';
+import { Link } from 'react-router-dom';
 import { BlogPost, AuthContextType } from '../types';
-// FIX: Corrected import path for AuthContext
 import { AuthContext } from '../contexts/AuthContext';
 import { BlogContext } from '../contexts/BlogContext';
-import { HeartIcon, ChatBubbleIcon, ShareIcon, PinIcon, TrashIcon, WarningIcon, EyeIcon, CheckIcon } from './icons/IconComponents';
+import { timeAgo } from '../utils/time';
+import { HeartIcon, ChatBubbleIcon, ShareIcon, PinIcon, CheckIcon, TrashIcon } from './icons/IconComponents';
 import BlogUserBadge from './BlogUserBadge';
 import BlogCommentSection from './BlogCommentSection';
-import { timeAgo } from '../utils/time';
-import { getUserBadge } from '../utils/userHelper';
 
-interface BlogPostProps {
+interface BlogPostItemProps {
     post: BlogPost;
 }
 
-const BlogPostItem: React.FC<BlogPostProps> = ({ post }) => {
-    // FIX: Cast context to the correct type to resolve property errors
+const BlogPostItem: React.FC<BlogPostItemProps> = ({ post }) => {
     const auth = useContext(AuthContext) as AuthContextType;
     const blog = useContext(BlogContext);
-    const [showComments, setShowComments] = useState(false);
+    const { currentUser } = auth || {};
 
-    const author = auth?.users.find(u => u.id === post.userId);
-    const authorName = author?.name || post.userName;
-    const authorProfilePic = author?.profilePictureUrl || post.userProfilePictureUrl;
-    // Use the dynamic author object to get the most up-to-date badge
-    const authorBadge = getUserBadge(author || null);
-
-    const isLiked = auth?.currentUser && post.likes.includes(auth.currentUser.id);
-    const isOwner = auth?.currentUser?.isAdmin;
-    const isModerator = auth?.currentUser?.canModerate;
-    const isAuthor = auth?.currentUser?.id === post.userId;
-
-    const handleLike = () => {
-        if (auth?.currentUser && blog?.toggleLike) {
-            blog.toggleLike(post.id);
-        } else {
-            auth?.openAuthModal('login');
-        }
-    };
-    
-    const handleCommentClick = () => {
-        if (!auth?.currentUser) {
-            auth?.openAuthModal('login');
-        } else {
-            setShowComments(prev => !prev);
-        }
-    };
-
-    const handleShare = () => {
-        const postUrl = `${window.location.origin}/blog/post/${post.id}`;
-        if (navigator.share) {
-            navigator.share({
-                title: post.title,
-                text: `Check out this post on QuickLink: "${post.title}"`,
-                url: postUrl,
-            }).then(() => {
-                blog?.incrementShares(post.id);
-            });
-        } else {
-            // Fallback for desktop
-            navigator.clipboard.writeText(postUrl);
-            alert('Link copied to clipboard!');
-            blog?.incrementShares(post.id);
-        }
-    };
-
-    const handleDelete = () => {
-        if (window.confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
-            blog?.deletePost(post.id);
-        }
-    };
-
-    const handlePin = () => {
-        blog?.togglePinPost(post.id);
-    };
-
-    // Determine if the current user can delete this post
-    const canDelete = isOwner || isModerator || (isAuthor && post.status === 'pending');
-    
-    // Check if the current view is the individual post page
-    const isIndividualPostPage = window.location.pathname.startsWith('/blog/post/');
+    const isLiked = currentUser && post.likes.includes(currentUser.id);
+    const isOwner = currentUser && (currentUser.id === post.userId || currentUser.isAdmin || currentUser.canModerate);
 
     return (
-        <article id={`post-${post.id}`} className="relative glass-card p-6 md:p-8 rounded-2xl animate-fade-in">
-            {(isOwner || canDelete) && (
-                <div className="absolute top-4 right-4 flex items-center gap-2">
-                    {isOwner && (
-                        <button onClick={handlePin} title={post.isPinned ? "Unpin Post" : "Pin Post"} className="p-2 rounded-full bg-black/30 hover:bg-white/10 transition-colors">
-                            <PinIcon className={`h-5 w-5 ${post.isPinned ? 'text-yellow-400 fill-yellow-400/50' : 'text-gray-400 hover:text-yellow-300'}`} />
-                        </button>
-                    )}
-                    {canDelete && (
-                        <button onClick={handleDelete} title="Delete Post" className="p-2 rounded-full bg-black/30 hover:bg-white/10 transition-colors">
-                            <TrashIcon className="h-5 w-5 text-gray-400 hover:text-red-500" />
-                        </button>
-                    )}
-                </div>
-            )}
-            <header className="flex items-center gap-3 mb-4">
-                {authorProfilePic ? (
-                    <img src={authorProfilePic} alt={`${authorName}'s profile`} className="w-12 h-12 rounded-full object-cover border-2 border-brand-primary" />
+        <div className="glass-card p-6 md:p-8 rounded-2xl animate-fade-in" id={`post-${post.id}`}>
+            {post.isPinned && <div className="flex items-center gap-2 text-xs font-semibold text-yellow-400 mb-3"><PinIcon className="h-4 w-4" /> PINNED POST</div>}
+            
+            <div className="flex items-center gap-3 mb-4">
+                {post.userProfilePictureUrl ? (
+                    <img src={post.userProfilePictureUrl} alt={post.userName} className="h-10 w-10 rounded-full object-cover" />
                 ) : (
-                    <div className="w-12 h-12 bg-brand-secondary rounded-full flex items-center justify-center font-bold text-white text-xl">
-                        {authorName.charAt(0).toUpperCase()}
+                    <div className="h-10 w-10 bg-brand-secondary rounded-full flex items-center justify-center font-bold text-white">
+                        {post.userName.charAt(0).toUpperCase()}
                     </div>
                 )}
-                
                 <div>
                     <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-white">{authorName}</h3>
-                        <BlogUserBadge badge={authorBadge} />
-                        {post.isPinned && <span title="Pinned Post"><PinIcon className="h-4 w-4 text-yellow-400" /></span>}
+                        <span className="font-semibold text-white">{post.userName}</span>
+                        <BlogUserBadge badge={post.userBadge} />
                     </div>
                     <p className="text-xs text-gray-500">{timeAgo(post.createdAt)}</p>
                 </div>
-            </header>
+            </div>
 
-            {post.status === 'pending' && (isOwner || isModerator) && (
-                <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-yellow-300">
-                    <div className="flex items-center gap-2">
-                        <WarningIcon className="h-5 w-5 flex-shrink-0" />
-                        <span>This post is pending approval.</span>
-                    </div>
-                    <button onClick={() => blog?.approvePost(post.id)} className="w-full sm:w-auto flex-shrink-0 px-4 py-2 text-xs font-semibold bg-green-500/20 text-green-300 rounded-md hover:bg-green-500/30 flex items-center gap-2">
-                        <CheckIcon className="h-4 w-4" />
-                        Approve Post
-                    </button>
-                </div>
-            )}
-            
-            <div className="prose prose-invert max-w-none prose-p:text-gray-300 prose-headings:text-white prose-strong:text-white prose-pre:bg-black/30 prose-pre:text-gray-300">
-                <h2 className="text-3xl font-bold mb-4">
-                    <Link to={`/blog/post/${post.id}`} className="hover:text-brand-primary transition-colors">{post.title}</Link>
-                </h2>
-                
-                {post.imageUrls && post.imageUrls.length > 0 && (
-                    <div className={`my-4 grid gap-2 ${post.imageUrls.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
-                        {post.imageUrls.map((url, index) => (
-                             <img key={index} src={url} alt={`${post.title} - Image ${index + 1}`} className="w-full h-auto max-h-96 object-cover rounded-lg" />
-                        ))}
-                    </div>
-                )}
+            <Link to={`/blog/post/${post.id}`}><h2 className="text-3xl font-bold text-white hover:text-brand-primary transition-colors">{post.title}</h2></Link>
 
-                {post.audioUrl && (
-                    <div className="my-4">
-                        <audio controls src={post.audioUrl} className="w-full">
-                            Your browser does not support the audio element.
-                        </audio>
-                    </div>
-                )}
-                
-                {isIndividualPostPage ? (
+            <div className="mt-4 prose prose-invert prose-p:text-gray-300 prose-pre:bg-black/30 prose-pre:text-gray-300 max-w-none">
+                {post.postType === 'html' ? (
                     <div dangerouslySetInnerHTML={{ __html: post.content }} />
                 ) : (
-                    <>
-                        <div dangerouslySetInnerHTML={{ __html: post.content.length > 500 ? `${post.content.substring(0, 500)}...` : post.content }} />
-                        {post.content.length > 500 && (
-                            <Link to={`/blog/post/${post.id}`} className="text-brand-primary hover:underline font-semibold">Read More</Link>
-                        )}
-                    </>
+                    <pre className="whitespace-pre-wrap font-sans">{post.content}</pre>
                 )}
-
             </div>
             
-            {post.keywords && post.keywords.length > 0 && (
-                <div className="mt-4 flex flex-wrap gap-2">
-                    {post.keywords.map((keyword, index) => (
-                        <span key={index} className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded-full">#{keyword.trim()}</span>
-                    ))}
+            {post.imageUrls && post.imageUrls.length > 0 && (
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {post.imageUrls.map((url, idx) => <img key={idx} src={url} alt={`Post image ${idx+1}`} className="rounded-lg w-full object-cover" />)}
                 </div>
             )}
-
-            <footer className="mt-6 pt-4 border-t border-white/20 flex items-center justify-between text-gray-400">
-                <div className="flex items-center gap-6">
-                    <button onClick={handleLike} className={`flex items-center gap-2 hover:text-white transition-colors ${isLiked ? 'text-red-500' : ''}`}>
-                        <HeartIcon className={`h-6 w-6 ${isLiked ? 'fill-current' : 'fill-none'}`} />
-                        <span className="text-sm font-semibold">{post.likes.length}</span>
+            
+            {post.audioUrl && <audio src={post.audioUrl} controls className="mt-4 w-full" />}
+            
+            <div className="mt-6 pt-4 border-t border-white/20 flex items-center justify-between text-gray-400">
+                <div className="flex items-center gap-4">
+                    <button onClick={() => blog?.toggleLike(post.id)} disabled={!currentUser} className={`flex items-center gap-1.5 hover:text-pink-500 disabled:opacity-50 ${isLiked ? 'text-pink-500' : ''}`}>
+                        <HeartIcon className="h-5 w-5" />
+                        <span className="text-sm">{post.likes.length}</span>
                     </button>
-                    <button onClick={handleCommentClick} className="flex items-center gap-2 hover:text-white transition-colors">
-                        <ChatBubbleIcon className="h-6 w-6" />
-                        <span className="text-sm font-semibold">{post.comments.length}</span>
-                    </button>
-                     <button onClick={handleShare} className="flex items-center gap-2 hover:text-white transition-colors">
-                        <ShareIcon className="h-6 w-6" />
-                        <span className="text-sm font-semibold">{post.shares}</span>
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                        <ChatBubbleIcon className="h-5 w-5" />
+                        <span className="text-sm">{post.comments.length}</span>
+                    </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <EyeIcon className="h-6 w-6" />
-                    <span className="text-sm font-semibold">{post.views || 0}</span>
+                    {currentUser && (currentUser.isAdmin || currentUser.canModerate) && post.status === 'pending' && (
+                        <button onClick={() => blog?.approvePost(post.id)} className="p-1.5 hover:bg-green-500/20 rounded-full text-green-400"><CheckIcon className="h-4 w-4" /></button>
+                    )}
+                    {currentUser?.isAdmin && (
+                        <button onClick={() => blog?.togglePinPost(post.id)} className="p-1.5 hover:bg-yellow-500/20 rounded-full text-yellow-400"><PinIcon className="h-4 w-4" /></button>
+                    )}
+                    {isOwner && (
+                        <button onClick={() => window.confirm('Are you sure?') && blog?.deletePost(post.id)} className="p-1.5 hover:bg-red-500/20 rounded-full text-red-400"><TrashIcon className="h-4 w-4" /></button>
+                    )}
+                    <button onClick={() => blog?.incrementShares(post.id)} className="p-1.5 hover:bg-white/20 rounded-full"><ShareIcon className="h-5 w-5" /></button>
                 </div>
-            </footer>
-
-            {(showComments || isIndividualPostPage) && <BlogCommentSection postId={post.id} comments={post.comments} />}
-        </article>
+            </div>
+            
+            <BlogCommentSection postId={post.id} comments={post.comments} />
+        </div>
     );
 };
 

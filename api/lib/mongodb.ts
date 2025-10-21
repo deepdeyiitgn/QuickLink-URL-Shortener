@@ -1,3 +1,4 @@
+
 // This file manages the connection to the MongoDB Atlas database.
 // It uses a cached connection instance to improve performance in a serverless environment.
 // FIX: Import `Db` type from `mongodb` to use for explicit typing.

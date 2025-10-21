@@ -1,44 +1,58 @@
-// api/users.ts
+// Vercel Serverless Function: /api/users
+// Handles GET and PUT requests for the 'users' collection.
+
 import { connectToDatabase } from './lib/mongodb.js';
 import type { User } from '../types';
 
 export default async function handler(req: any, res: any) {
     res.setHeader('Content-Type', 'application/json');
+
     try {
         const { db } = await connectToDatabase();
-        const usersCollection = db.collection<User>('users');
+        const usersCollection = db.collection('users');
 
         if (req.method === 'GET') {
-            const users = await usersCollection.find({}, { projection: { passwordHash: 0 } }).toArray();
-            return res.status(200).json(users);
+            const { id } = req.query;
+            if (id) {
+                const user = await usersCollection.findOne({ id: id as string });
+                if (!user) return res.status(404).json({ error: 'User not found.' });
+                return res.status(200).json(user);
+            } else {
+                // Return all users (should be admin protected in a real app)
+                const allUsers = await usersCollection.find({}).toArray();
+                return res.status(200).json(allUsers);
+            }
         }
 
         if (req.method === 'PUT') {
-            const { userId } = req.query;
-            const updateData = req.body;
-            if (!userId || !updateData) {
-                return res.status(400).json({ error: 'User ID and update data are required.' });
+            const { id } = req.query;
+            const { action, ...updateData } = req.body;
+
+            if (!id) {
+                return res.status(400).json({ error: 'User ID is required in the query.' });
             }
-            
-            // Prevent certain fields from being updated directly
-            delete updateData.id;
-            delete updateData.email;
-            delete updateData.passwordHash;
 
-            // Implicitly update last active time on any profile update
-            const finalUpdateData = { ...updateData, lastActive: Date.now() };
+            if (action === 'update_details') {
+                const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+                updateData.ipAddress = ip;
+            }
 
-            const updatedUser = await usersCollection.findOneAndUpdate(
-                { id: userId },
-                { $set: finalUpdateData },
-                { returnDocument: 'after', projection: { passwordHash: 0 } }
+            // Always update lastActive on any PUT request
+            updateData.lastActive = Date.now();
+
+            const result = await usersCollection.findOneAndUpdate(
+                { id: id as string },
+                { $set: updateData },
+                { returnDocument: 'after' }
             );
 
-            if (!updatedUser) {
-                return res.status(404).json({ error: 'User not found.' });
+            // FIX: The modern MongoDB driver returns the document directly in the `value` property.
+            // Changed `result.value` to just `result` to correctly access the updated document.
+            if (!result) {
+                return res.status(404).json({ error: 'User not found to update.' });
             }
             
-            return res.status(200).json(updatedUser);
+            return res.status(200).json(result);
         }
 
         res.setHeader('Allow', ['GET', 'PUT']);

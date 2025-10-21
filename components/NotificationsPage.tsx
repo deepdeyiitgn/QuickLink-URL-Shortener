@@ -1,13 +1,15 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import { api } from '../api';
-import { Notification } from '../types';
-import { LoadingIcon, CheckIcon } from './icons/IconComponents';
+import type { Notification, AuthContextType } from '../types';
+import { LoadingIcon } from './icons/IconComponents';
 import { timeAgo } from '../utils/time';
 
 const NotificationsPage: React.FC = () => {
-    const auth = useContext(AuthContext);
+    const auth = useContext(AuthContext) as AuthContextType;
     const { currentUser } = auth || {};
+
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -16,44 +18,64 @@ const NotificationsPage: React.FC = () => {
             api.getNotifications(currentUser.id)
                 .then(setNotifications)
                 .finally(() => setLoading(false));
-        } else {
-            setLoading(false);
         }
     }, [currentUser]);
 
-    const handleMarkAsRead = async (id: string) => {
-        setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
-        await api.markNotificationAsRead(id);
+    const handleMarkAllAsRead = async () => {
+        if (!currentUser) return;
+        await api.markNotificationsRead(currentUser.id);
+        setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
     };
 
-    if (loading) {
-        return <div className="text-center py-20"><LoadingIcon className="h-12 w-12 animate-spin text-brand-primary" /></div>;
-    }
+    const NotificationItem: React.FC<{ notification: Notification }> = ({ notification }) => {
+        const content = (
+            <div className={`p-4 rounded-lg transition-colors ${notification.isRead ? 'bg-black/20' : 'bg-brand-primary/10'}`}>
+                <div className="flex justify-between items-start">
+                    <h3 className="font-semibold text-white">{notification.title}</h3>
+                    {!notification.isRead && <div className="w-2.5 h-2.5 bg-brand-primary rounded-full flex-shrink-0 mt-1.5"></div>}
+                </div>
+                <p className="text-sm text-gray-400 mt-1">{notification.message}</p>
+                <p className="text-xs text-gray-500 mt-2">{timeAgo(notification.createdAt)}</p>
+            </div>
+        );
 
-    if (!currentUser) {
-        return <div className="text-center py-20"><h1 className="text-2xl">Please log in to see your notifications.</h1></div>;
-    }
-    
+        return notification.link ? <Link to={notification.link}>{content}</Link> : <div>{content}</div>;
+    };
+
     return (
-        <div className="glass-card p-6 md:p-8 rounded-2xl max-w-3xl mx-auto">
-            <h1 className="text-3xl font-bold text-white mb-6">Notifications</h1>
-            <div className="space-y-4">
-                {notifications.length > 0 ? (
-                    notifications.map(notification => (
-                        <div key={notification.id} className={`p-4 rounded-lg flex items-start gap-4 ${notification.isRead ? 'bg-black/20 opacity-70' : 'bg-black/40'}`}>
-                            <div className="flex-grow">
-                                <p className="text-gray-300">{notification.message}</p>
-                                <span className="text-xs text-gray-500">{timeAgo(notification.createdAt)}</span>
-                            </div>
-                            {!notification.isRead && (
-                                <button onClick={() => handleMarkAsRead(notification.id)} className="flex-shrink-0 p-2 text-xs flex items-center gap-1 bg-white/10 rounded-md hover:bg-white/20">
-                                    <CheckIcon className="h-4 w-4" /> Mark as Read
-                                </button>
-                            )}
+        <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-8">
+                <h1 className="text-4xl font-bold text-white">Notifications</h1>
+            </div>
+
+            <div className="glass-card p-6 md:p-8 rounded-2xl">
+                {loading ? (
+                    <div className="text-center py-20">
+                        <LoadingIcon className="h-10 w-10 animate-spin text-brand-primary mx-auto" />
+                    </div>
+                ) : notifications.length > 0 ? (
+                    <>
+                        <div className="text-right mb-4">
+                            <button 
+                                onClick={handleMarkAllAsRead}
+                                className="text-sm text-brand-primary hover:underline"
+                                disabled={notifications.every(n => n.isRead)}
+                            >
+                                Mark all as read
+                            </button>
                         </div>
-                    ))
+                        <div className="space-y-4">
+                            {notifications.map(n => <NotificationItem key={n.id} notification={n} />)}
+                        </div>
+                    </>
                 ) : (
-                    <p className="text-gray-400 text-center py-8">You have no new notifications.</p>
+                    <div className="text-center py-20">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-16 w-16 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        <h2 className="mt-4 text-xl font-semibold text-white">No New Notifications</h2>
+                        <p className="text-gray-500 mt-2">You're all caught up!</p>
+                    </div>
                 )}
             </div>
         </div>

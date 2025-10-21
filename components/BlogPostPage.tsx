@@ -1,7 +1,8 @@
 
+
 import React, { useContext, useEffect } from 'react';
 // FIX: Changed single quotes to double quotes for the import.
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { BlogContext } from '../contexts/BlogContext';
 // FIX: Corrected import path for AuthContext
 import { AuthContext } from '../contexts/AuthContext';
@@ -9,11 +10,10 @@ import { LoadingIcon } from './icons/IconComponents';
 import BlogPostItem from './BlogPostItem';
 import NotFoundPage from './NotFoundPage';
 
-interface BlogPostPageProps {
-    postId: string;
-}
-
-const BlogPostPage: React.FC<BlogPostPageProps> = ({ postId }) => {
+// FIX: Removed the postId prop and interface, and now using useParams to get the postId directly from the URL.
+// This makes the component self-contained and fixes the prop-drilling issue from App.tsx.
+const BlogPostPage: React.FC = () => {
+    const { postId } = useParams<{ postId: string }>();
     const blog = useContext(BlogContext);
     
     // Set up view tracking for the post

@@ -1,7 +1,5 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
-// FIX: Corrected import path for types
 import type { QrCodeRecord, ScanRecord, QrContextType as IQrContextType } from '../types';
-// FIX: Corrected import path for api
 import { api } from '../api';
 
 export const QrContext = createContext<IQrContextType | undefined>(undefined);

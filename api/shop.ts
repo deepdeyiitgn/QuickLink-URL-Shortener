@@ -1,3 +1,4 @@
+
 // Vercel Serverless Function: /api/shop
 // Handles all logic for products, coupons, and purchase fulfillment.
 
@@ -19,7 +20,7 @@ async function handleGetProducts(req: any, res: any, db: any) {
         $and: [
             { isActive: true },
             { $or: [{ availableUntil: null }, { availableUntil: { $gt: Date.now() } }] },
-            { $or: [{ limitQuantity: null }, { stock: { $gt: 0 } }] }
+            { $or: [{ limitQuantity: null }, { limitQuantity: false }, { stock: { $gt: 0 } }] }
         ]
     }).toArray();
     return res.status(200).json(products);
@@ -33,7 +34,7 @@ async function handleAddProduct(req: any, res: any, db: any) {
         ...product,
         id: `prod_${Date.now()}`,
         createdAt: Date.now(),
-        stock: product.limitQuantity || undefined,
+        stock: product.limitQuantity ? product.stock : undefined,
     };
     await db.collection('products').insertOne(newProduct);
     return res.status(201).json(newProduct);

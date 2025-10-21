@@ -1,201 +1,100 @@
-# QuickLink: The All-in-One Link & Community Platform
+# QuickLink - URL Shortener, QR Suite, & Community Blog
 
-A modern, fast, and feature-rich platform built with React, TypeScript, and Tailwind CSS. QuickLink has evolved beyond a simple utility into a complete solution for link management, content sharing, and community interaction. This project is now feature-complete, secure, and ready for deployment.
+**QuickLink** is a modern, high-performance, full-stack web application that provides a suite of powerful tools for the modern web, including a top-ranking URL shortener, a versatile QR code generator and scanner, and a dynamic community blog. The project is built with React, TypeScript, and Vite on the frontend, and a serverless backend using Vercel Functions with a MongoDB Atlas database.
 
-## ✨ Features
+This project is now **feature-complete, stable, and ready for deployment**.
 
-- **Advanced URL Shortening**: 
-  - Quickly convert long URLs into short, shareable links.
-  - Personalize your links with **Custom Aliases** (e.g., `/#my-event`).
-  - Set custom expiration dates for links, with extended durations for subscribed users.
+## ✨ Final Feature List
 
-- **Comprehensive QR Code Suite**:
-  - **Powerful Generator**: A free tool to create a wide variety of static QR codes (URL, Wi-Fi, vCard, Events, Payments, and more).
-  - **Deep Customization**: Brand your QR codes by customizing colors and embedding your own logo.
-  - **Versatile Scanner**: An integrated scanner that reads QR codes instantly using either the device camera or by uploading an image file.
+- **URL Shortener**: Convert long URLs into short, shareable links with support for custom aliases and expiration dates based on user subscription status.
+- **QR Code Suite**:
+    - **Generator**: Create custom QR codes for various data types (URL, Wi-Fi, vCard, Text, etc.) with options to add logos and change colors.
+    - **Scanner**: Instantly scan QR codes using a device camera or by uploading an image file, all within the browser.
+- **E-commerce Shop**: A complete shop system allowing admins to create limited-edition digital products (e.g., subscription extensions) with automated benefit fulfillment.
+- **Advanced Coupon System**: Admins can create and manage discount coupons (percentage or flat-rate) with various limits (expiration, quantity, one-per-user).
+- **Community Blog**: A user-driven blog where registered users can create posts with rich content (HTML, images, audio).
+- **Advanced Admin Controls**:
+    - **Comprehensive Dashboard**: Clean, tabbed interfaces for both users and admins.
+    - **User Management**: Admins can view all users, manage their roles (Admin, Moderator), grant premium access, and view session analytics (IP, browser, device).
+    - **Content Moderation**: Admins can approve/disapprove blog posts and delete individual user-created short links.
+    - **Notification System**: Admins can send custom push notifications (with images and templates) to individual users or all users.
+- **Dynamic User Badges**: A robust badge system (Normal, Premium, Team, Owner) that displays on all user content and updates retroactively across past posts and comments when a user's status changes.
+- **Polished User Experience**:
+    - **Festive UI Theme**: A "Diwali & Winter" theme with animated gradients and a subtle snowfall effect.
+    - **Responsive Design**: A modern, slide-out mobile menu and fully responsive layouts that fix all previously reported UI bugs.
+    - **One-Time Loader**: A full-screen loader appears only on the initial page load for a faster perceived performance.
+    - **Live Footer Clock**: The footer features a real-time glowing clock displaying the date, time, and day.
+- **Monetization & Support**:
+    - **Subscription Tiers**: Multiple payment gateways (Razorpay, Cashfree) for one-time subscription purchases.
+    - **Strategic Ad Placement**: Dismissible Google AdSense units are placed in non-intrusive locations, with core tool areas and dashboards remaining ad-free.
+    - **Anti-Adblocker System**: A polite, timed modal encourages users to disable adblockers and provides helpful guides.
+- **Security & Analytics**:
+    - **User Session Tracking**: Automatically captures user IP, browser, and device type on login for admin review.
+    - **Secure API**: Serverless functions protect sensitive operations and validate all incoming data.
 
-- **Blog & Community Platform**:
-  - **Rich Content Creation**: Users can create and publish blog posts with formatted text, raw HTML, images, and even audio uploads.
-  - **Community Interaction**: Engage with content through a system of likes, threaded comments, and social sharing.
-  - **Post View Counter**: Tracks the number of unique views for each blog post (per browser session).
-  - **Advanced Moderation**: Admins have full control with post-approval workflows, the ability to pin important posts to the top, and deletion rights.
-  - **Live User Presence**: User badges (Premium, Owner, Blacklisted) and profile details update in real-time across all their posts and comments.
+## 🚀 Getting Started
 
-- **Full Support Ticket System**:
-  - **Integrated Helpdesk**: Logged-in users can create support tickets through a dedicated portal.
-  - **Threaded Conversations**: Enables persistent, back-and-forth communication between users and administrators.
-  - **Admin Management**: Admins can view, reply to, and manage the status of all user tickets directly from the Owner Dashboard.
+### Prerequisites
 
-- **Centralized Notification System**:
-  - **User Alerts**: A dedicated notification panel alerts users to important events.
-  - **Automated Triggers**: Notifications are automatically generated for replies to support tickets, approval status of blog posts, and changes to account status (e.g., being banned or unbanned).
+- [Node.js](https://nodejs.org/) (version 18.x or higher)
+- [Vercel Account](https://vercel.com/signup) for deployment
+- [MongoDB Atlas Account](https://www.mongodb.com/cloud/atlas/register) for the database
+- [Razorpay Account](https://razorpay.com/) for payment processing
 
-- **Secure Payment & Donation Integration**:
-  - **Flexible Subscriptions**: Securely process one-time payments for link and API subscriptions using Razorpay and Cashfree.
-  - **Donation System**: A dedicated page allows the community to support the platform through one-time donations.
-  - **Supporter Recognition**: A public leaderboard showcases top contributors, and donors receive a "Premium" badge as a thank-you.
+### Environment Variables
 
-- **Powerful Dashboards & API**:
-  - **User Dashboard**: A central hub for users to manage their profile, subscription status, API key, and view their support ticket history.
-  - **Owner Dashboard**: An administrative command center to view all users, links, API keys, QR/scan history, and manage the entire support ticket system.
-  - **Developer API**: A dedicated portal where users can generate an API key (with a 1-month free trial) and purchase subscriptions to use the URL shortening service in their own applications.
+Create a `.env` file in the root of your project and add the following variables. These are crucial for the application to function.
 
-- **Enhanced Security & Analytics**:
-  - **User Moderation**: Admins can ban users, which restricts their access to site tools while maintaining their content with a "Blacklisted" status.
-  - **Activity Logging**: The system automatically logs a user's IP address, device type, and browser on login and subsequent activity, providing valuable analytics and security insights for the site owner.
-  - **Live Status Page**: A public page displaying real-time site metrics and the operational status of all core services, including database connectivity.
+```
+# MongoDB Connection
+MONGODB_URI="your_mongodb_atlas_connection_string"
+MONGODB_DB_NAME="your_database_name"
 
-- **Server-Side Persistence**: The application uses **MongoDB Atlas** for all data storage, making user accounts, links, blog posts, and history persistent and accessible from any device.
+# Razorpay API Keys (for payment processing)
+VITE_RAZORPAY_KEY_ID="your_razorpay_key_id"
+RAZORPAY_KEY_SECRET="your_razorpay_key_secret"
+```
 
-## 🚀 How to Run Locally
+### Local Development
 
-1.  **Prerequisites**: Make sure you have Node.js and npm (or yarn) installed.
-2.  **Clone the repository**:
+1.  **Clone the repository:**
     ```bash
     git clone <repository-url>
-    cd quicklink-url-shortener
+    cd <repository-directory>
     ```
-3.  **Install dependencies**:
+
+2.  **Install dependencies:**
     ```bash
     npm install
     ```
-4.  **Configure Environment Variables**:
-    -   Create a file named `.env` in the root of the project.
-    -   Copy the contents from the `.env.example` section below and fill in your own values.
-5.  **Start the development server**:
+
+3.  **Run the development server:**
     ```bash
     npm run dev
     ```
-6.  Open your browser and navigate to the local URL provided by your development server (e.g., `http://localhost:5173`).
+    The application will be available at `http://localhost:3000`.
 
-## 部署 (Deployment)
+### 👑 Creating an Owner/Admin Account
 
-This project is optimized for deployment on platforms like Vercel.
+The application does not have a public admin registration page for security reasons. To create an owner account, follow these steps:
 
-### Deploying to Vercel (Recommended)
-
-1.  **Push to GitHub**: Make sure your project code is pushed to a GitHub repository.
-2.  **Sign up/Log in to Vercel**: Connect your GitHub account to Vercel.
-3.  **Import Project**: From your Vercel dashboard, click "Add New... > Project" and select your GitHub repository.
-4.  **Configure Project**:
-    -   Vercel should automatically detect that this is a Vite project. If not, set the **Framework Preset** to `Vite`.
-    -   The **Build Command** should be `npm run build` and the **Output Directory** should be `dist`.
-5.  **Set up MongoDB Atlas Database (Required)**
-    -   Follow the **"Setting up MongoDB Atlas"** guide below to create your free database.
-6.  **Add Environment Variables**:
-    -   Navigate to your Vercel project's **Settings > Environment Variables**.
-    -   Add all the required variables from the `.env.example` file, including your new `MONGODB_URI`, `MONGODB_DB_NAME`, and payment gateway secrets.
-7.  **Deploy**: Click the "Deploy" button. Vercel will build your site and deploy the serverless functions, which will connect to your MongoDB database.
-
-### Setting up MongoDB Atlas (Required for Deployment)
-
-This application requires a MongoDB database to store all its data. You can get a free database from MongoDB Atlas.
-
-1.  **Create a MongoDB Atlas Account**:
-    -   Go to the [MongoDB Atlas website](https://www.mongodb.com/cloud/atlas/register) and sign up for a free account.
-
-2.  **Create a Free Cluster**:
-    -   After signing up, you will be prompted to create a new cluster. Choose the **M0 (Free)** option.
-    -   Select a cloud provider and region.
-    -   Click **"Create Cluster"**.
-
-3.  **Create a Database User**:
-    -   In your cluster's dashboard, go to **Database Access** under "Security".
-    -   Click **"Add New Database User"**. Enter a **username** and **password** (save these securely).
-    -   Grant the user the **"Read and write to any database"** privilege.
-    -   Click **"Add User"**.
-
-4.  **Configure Network Access**:
-    -   Go to **Network Access** under "Security".
-    -   Click **"Add IP Address"** and select **"ALLOW ACCESS FROM ANYWHERE"** (`0.0.0.0/0`). This is necessary for Vercel's serverless functions to connect.
-    -   Click **"Confirm"**.
-
-5.  **Get Your Connection String**:
-    -   Go to your cluster's **Database** dashboard and click **"Connect"**.
-    -   Select the **"Drivers"** option.
-    -   Copy the connection string (URI). It will look like:
-        `mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority`
-    -   **Important**: Replace `<password>` with the actual password you created.
-
-6.  **Add to Vercel Environment Variables**:
-    -   In your Vercel project settings, add:
-        -   `MONGODB_URI`: Your full connection string.
-        -   `MONGODB_DB_NAME`: A name for your database (e.g., `quicklink`).
-
-## ⚙️ Environment Variables
-
-To run this project, you will need to create a `.env` file in the root of your project and add the following environment variables.
-
-***.env.example***
-```
-# Owner Account Credentials
-VITE_OWNER_EMAIL="admin@example.com"
-VITE_OWNER_PASSWORD="your_secret_password"
-
-# Razorpay Public Key
-VITE_RAZORPAY_KEY_ID="your_razorpay_key_id_here"
-
-# --- SERVER-SIDE ONLY ---
-# These should be set in your Vercel deployment environment variables.
-
-# Razorpay Secret Key
-RAZORPAY_KEY_SECRET="your_razorpay_key_secret_here"
-
-# Cashfree Credentials
-CASHFREE_CLIENT_ID="your_cashfree_client_id"
-CASHFREE_CLIENT_SECRET="your_cashfree_client_secret"
-
-# MongoDB Connection Details
-MONGODB_URI="your_mongodb_atlas_connection_string"
-MONGODB_DB_NAME="your_database_name"
-```
-
-## 💻 How to Contribute & Push Code
-
-If you want to contribute to this project or manage your own version, follow these steps:
-
-1.  **Fork the Repository**
-    -   Click the "Fork" button at the top-right corner of the original GitHub repository page.
-
-2.  **Clone Your Fork**
-    -   Go to your forked repository and copy the URL.
-    ```bash
-    git clone <your-fork-url>
-    cd quicklink-url-shortener
+1.  **Sign up for a regular user account** through the application's UI.
+2.  **Connect to your MongoDB Atlas database** using a tool like MongoDB Compass or the online Data Explorer.
+3.  Navigate to your database and open the `users` collection.
+4.  Find the user document you just created (you can identify it by the email address).
+5.  **Manually edit the document** and set the `isAdmin` field to `true`.
+    ```json
+    {
+      "isAdmin": true
+    }
     ```
+6.  Save the changes. The next time you log in with that account, you will have full administrator privileges, including access to the Admin Panel in the dashboard.
 
-3.  **Create a New Branch**
-    ```bash
-    git checkout -b my-awesome-feature
-    ```
+## 部署
 
-4.  **Make Your Changes**
+This project is optimized for deployment on [Vercel](https://vercel.com/). The API has been consolidated to **10 serverless functions**, which is within the 12-function limit of Vercel's free "Hobby" plan.
 
-5.  **Commit Your Changes**
-    ```bash
-    git add .
-    git commit -m "feat: Add my awesome new feature"
-    ```
-
-6.  **Push to Your Fork**
-    ```bash
-    git push origin my-awesome-feature
-    ```
-
-7.  **(Optional) Create a Pull Request**
-    -   If you want to merge your changes back into the original repository, go to your fork on GitHub and create a "Pull Request".
-
-## 🔑 Owner Access
-
-The owner account provides access to an administrative dashboard. The credentials are now managed via environment variables. To log in as the owner, ensure you have the `VITE_OWNER_EMAIL` and `VITE_OWNER_PASSWORD` variables set in your `.env` file.
-
-## 💻 Technology Stack
-
-- **Frontend**: React, TypeScript
-- **Styling**: Tailwind CSS
-- **Payments**: Razorpay, Cashfree
-- **Backend**: Vercel Serverless Functions (Node.js)
-- **Database**: **MongoDB Atlas**
-- **Icons**: Heroicons (via inline SVG components)
-- **State Management**: React Context API
-- **Build Tool**: Vite
+1.  **Push your code to a Git repository** (e.g., GitHub, GitLab).
+2.  **Import the project on Vercel** from your Git repository.
+3.  **Configure Environment Variables:** In your Vercel project settings, add the same environment variables from your `.env` file.
+4.  **Deploy.** Vercel will automatically detect the Vite frontend and the serverless functions in the `/api` directory and deploy the application.

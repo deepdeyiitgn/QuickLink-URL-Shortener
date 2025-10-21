@@ -1,260 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/quicklink-logo.svg">
-    
-    <!-- SEO & Metadata -->
-    <title>Top URL Shortener, QR Generator & Scanner API | Free Blog for JEE 2027 Prep by Deep Dey - QuickLink</title>
-    <meta name="description" content="QuickLink is your top 10 solution for a free URL shortener, powerful QR generator, and instant QR scan tool. Leverage our URL shortener API for your projects. Explore our blog featuring exclusive content for JEE 2027 preparation by Deep Dey. Create, share, and connect effortlessly." />
-    <meta name="keywords" content="URL shortener, link shortener, free url shortener, custom url shortener, shorten url, short link generator, branded links, custom alias, link management, qr code generator, free qr code, qr code maker, create qr code, wifi qr code, vcard qr code, text qr code, static qr code, dynamic qr code, url shortener api, link shrinker, tiny url, bitly alternative, rebrandly alternative, link tracking, url redirect, seo friendly urls, shorten links for social media, twitter url shortener, facebook url shortener, instagram bio link, whatsapp link shortener, permanent link, temporary link, expiring links, url management dashboard, qr code for website, qr code for contact, qr code for email, qr code for sms, qr code for location, geo qr code, payment qr code, upi qr code, secure short links, fast url shortener, easy url shortener, best url shortener, online tool, free web tool, productivity tool, marketing tool, digital marketing, social media marketing, link branding, custom domain shortener, url alias, shorten my url, make url shorter, link shortener service, shorten long url, create shortlink, free link shortener, online url shortener, quick link, short url service, shorten url online, custom short url, web address shortener, short website link, create tiny url, link compressor, url minimizer, url shortener free unlimited, best free url shortener, safe url shortener, trusted link shortener, qr code generator free, generate qr code online, make a qr code, custom qr code, qr code with logo, free qr code generator for url, pdf qr code, business card qr code, event qr code, google maps qr code, bitcoin qr code, crypto qr code, shortner url, shortner url api, qr generetor, qr scan, blog, jee 2027, deep dey jee, jee prep blog, jee aspirants, iit jee, engineering entrance exam" />
-    <meta name="author" content="Deep Dey">
-    <meta name="robots" content="index, follow">
-    <!-- Set the primary canonical URL -->
-    <link rel="canonical" href="https://shorturl.deepdeyiitk.com/" />
-    <!-- As requested, adding a second canonical link for the Vercel domain. Note: Typically, only one canonical URL is recommended per page. -->
-    <link rel="canonical" href="https://quick-link-url-shortener.vercel.app/" />
-
-
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://shorturl.deepdeyiitk.com/">
-    <meta property="og:title" content="Top URL Shortener, QR Generator & Scanner API | Free Blog for JEE 2027 Prep by Deep Dey - QuickLink">
-    <meta property="og:description" content="QuickLink is your top 10 solution for a free URL shortener, powerful QR generator, and instant QR scan tool. Leverage our URL shortener API for your projects. Explore our blog featuring exclusive content for JEE 2027 preparation by Deep Dey.">
-    <meta property="og:image" content="/quicklink-logo.svg">
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://shorturl.deepdeyiitk.com/">
-    <meta property="twitter:title" content="Top URL Shortener, QR Generator & Scanner API | Free Blog for JEE 2027 Prep by Deep Dey - QuickLink">
-    <meta property="twitter:description" content="QuickLink is your top 10 solution for a free URL shortener, powerful QR generator, and instant QR scan tool. Leverage our URL shortener API for your projects. Explore our blog featuring exclusive content for JEE 2027 preparation by Deep Dey.">
-    <meta property="twitter:image" content="/quicklink-logo.svg">
+    <link rel="icon" type="image/svg+xml" href="/quicklink-logo.svg" />
+    <title>QuickLink URL Shortener & JEE Blog [2]</title>
+    <meta name="description" content="A top-ranking URL shortener, QR generator, and QR scanner with a developer API. Also features a blog with content for JEE 2027 aspirants by Deep Dey." />
 
     <!-- Google AdSense -->
-    <meta name="google-adsense-account" content="ca-pub-2533086861741403">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2533086861741403" crossorigin="anonymous"></script>
+    
+    <!-- QR Scanner Library -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
-    <!-- JSON-LD Structured Data for Rich SEO -->
-    <script type="application/ld+json">
+    <script type="importmap">
     {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "QuickLink",
-      "url": "https://shorturl.deepdeyiitk.com/",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": {
-          "@type": "EntryPoint",
-          "urlTemplate": "https://shorturl.deepdeyiitk.com/{search_term_string}"
-        },
-        "query-input": "required name=search_term_string"
+      "imports": {
+        "react": "https://aistudiocdn.com/react@^19.2.0",
+        "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+        "react/": "https://aistudiocdn.com/react@^19.2.0/",
+        "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.4",
+        "qr-code-styling": "https://aistudiocdn.com/qr-code-styling@^1.9.2",
+        "react-dom": "https://aistudiocdn.com/react-dom@^19.2.0",
+        "mongodb": "https://aistudiocdn.com/mongodb@^6.20.0",
+        "path": "https://aistudiocdn.com/path@^0.12.7",
+        "vite": "https://aistudiocdn.com/vite@^7.1.11",
+        "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.0.4"
       }
     }
     </script>
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "QuickLink: URL Shortener, QR Generator & API with JEE 2027 Blog",
-      "operatingSystem": "Web",
-      "applicationCategory": "ProductivityApplication",
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.9",
-        "ratingCount": "1280"
-      },
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "author": {
-        "@type": "Person",
-        "name": "Deep Dey"
-      }
-    }
-    </script>
-
-    <!-- Scripts -->
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      /* Animated Gradient Background */
-      .gradient-bg {
-        background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #1c1c3c);
-        background-size: 400% 400%;
-        animation: gradient-flow 15s ease infinite;
-      }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Roboto+Slab:wght@400;700&display=swap');
+        
+        :root {
+            --brand-primary: #00e5ff;
+            --brand-secondary: #846cff;
+            --brand-dark: #0a0a1a;
+            --brand-light: #e0f7fa;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--brand-dark);
+            color: var(--brand-light);
+            margin: 0;
+            overflow-x: hidden;
+        }
 
-      @keyframes gradient-flow {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-      }
-      
-      /* Glassmorphism Card Style */
-      .glass-card {
-        background: rgba(255, 255, 255, 0.08);
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-      }
-      .glass-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.45);
-      }
-      
-      /* Glowing Border Effect for inputs */
-      .input-glow:focus-within {
-        border-color: transparent;
-        box-shadow: 0 0 0 2px #00e5ff, 0 0 10px #00e5ff;
-      }
-      
-      /* Aurora Text Effect */
-      .aurora-text {
-        text-shadow: 0 0 5px rgba(0, 229, 255, 0.5), 0 0 10px rgba(0, 229, 255, 0.5), 0 0 15px rgba(255, 46, 99, 0.5);
-      }
-      
-      /* Particle effect container */
-      #particles-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: -1;
-        overflow: hidden;
-      }
-      .particle {
-        position: absolute;
-        background-color: #00e5ff;
-        border-radius: 50%;
-        opacity: 0.6;
-        animation: float 25s infinite ease-in-out;
-      }
-      .particle.p2 { background-color: #ff2e63; }
-      @keyframes float {
-        0% { transform: translateY(0px) translateX(0px); }
-        50% { transform: translateY(-100vh) translateX(50vw); }
-        100% { transform: translateY(0px) translateX(0px); }
-      }
-      /* New styles for landing page and tool selection */
-      .boom-out {
-        animation: boom-out 0.5s ease-in forwards;
-      }
-      @keyframes boom-out {
-        0% { transform: scale(1); opacity: 1; }
-        100% { transform: scale(1.5); opacity: 0; }
-      }
-      .feature-card {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        transition: background 0.3s ease, transform 0.3s ease;
-      }
-      .feature-card:hover {
-        background: rgba(255, 255, 255, 0.1);
-        transform: translateY(-5px);
-      }
-       .tool-card {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        padding: 2rem;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 1rem;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        color: white;
-      }
-      .tool-card:hover {
-        transform: translateY(-10px) scale(1.03);
-        background: rgba(0, 229, 255, 0.1);
-        border-color: rgba(0, 229, 255, 0.5);
-        box-shadow: 0 0 25px rgba(0, 229, 255, 0.3);
-      }
-      /* Styles for Legal Pages */
-      .legal-text {
-        font-family: 'Poppins', sans-serif;
-      }
-      .legal-text strong {
-          color: #f0f8ff; /* Alice Blue - a slightly brighter white */
-          font-weight: 600;
-      }
-      /* Footer glowing text animation */
-      .footer-glow {
-        animation: footer-glow-animation 4s ease-in-out infinite;
-        text-shadow: 0 0 5px rgba(255, 255, 255, 0.2), 0 0 10px rgba(0, 229, 255, 0.3), 0 0 15px rgba(255, 46, 99, 0.3);
-      }
-      @keyframes footer-glow-animation {
-        0%, 100% {
-          text-shadow: 0 0 5px rgba(255, 255, 255, 0.2), 0 0 10px rgba(0, 229, 255, 0.3), 0 0 15px rgba(255, 46, 99, 0.3);
+        .gradient-bg {
+            background: radial-gradient(circle at 10% 20%, rgba(132, 108, 255, 0.2), transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(0, 229, 255, 0.2), transparent 40%),
+                        var(--brand-dark);
+            position: relative;
+            overflow: hidden;
         }
-        50% {
-          text-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 0 15px rgba(0, 229, 255, 0.5), 0 0 25px rgba(255, 46, 99, 0.5);
+
+        .glass-card {
+            background: rgba(10, 10, 26, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
         }
-      }
+
+        .animate-aurora {
+            background: linear-gradient(70deg, var(--brand-primary), var(--brand-secondary), var(--brand-primary));
+            background-size: 200% auto;
+            color: #000;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: aurora-glow 4s linear infinite;
+        }
+        @keyframes aurora-glow { to { background-position: 200% center; } }
+
+        .footer-glow {
+            text-shadow: 0 0 8px rgba(0, 229, 255, 0.5), 0 0 16px rgba(132, 108, 255, 0.3);
+            animation: subtle-pulse 5s infinite alternate;
+        }
+        @keyframes subtle-pulse {
+            from { opacity: 0.8; }
+            to { opacity: 1; }
+        }
+        
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        .animate-fade-in-down { animation: fadeInDown 0.5s ease-out forwards; }
+        .animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; animation-delay: 0.2s; opacity: 0; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .animate-check-pop { animation: check-pop 0.5s ease-out; }
+        @keyframes check-pop {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Form Inputs */
+        input, textarea, select {
+            background-color: rgba(0,0,0,0.3) !important;
+            border: 1px solid rgba(255,255,255,0.2) !important;
+            border-radius: 0.375rem !important;
+            color: white !important;
+            transition: ring 0.2s;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none !important;
+            box-shadow: none !important;
+            --tw-ring-color: var(--brand-primary) !important;
+            border-color: var(--brand-primary) !important;
+        }
+        
+        .admin-input {
+            background-color: #1a1a2e !important;
+            border: 1px solid var(--brand-secondary) !important;
+            color: var(--brand-light) !important;
+        }
+        .contact-input { width: 100%; }
+
+        /* Prose styles for legal pages */
+        .legal-text { font-family: 'Roboto Slab', serif; }
+        .prose-invert h1, .prose-invert h2, .prose-invert h3 { font-family: 'Inter', sans-serif; }
+        
+        /* Tool Selection Card */
+        .tool-card {
+            display: block;
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            background: rgba(10, 10, 26, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        .tool-card:hover {
+            transform: translateY(-5px);
+            background: rgba(10, 10, 26, 0.8);
+            border-color: var(--brand-primary);
+        }
+
     </style>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              'brand-primary': '#00e5ff', // Cyan
-              'brand-secondary': '#ff2e63', // Magenta
-              'brand-dark': '#0a0a1a', // Deep Space Blue
-              'brand-light': '#f0f8ff', // Alice Blue (off-white)
-            },
-            animation: {
-              'fade-in': 'fade-in 0.6s ease-out forwards',
-              'check-pop': 'check-pop 0.3s ease-out forwards',
-              'aurora': 'aurora 5s ease-in-out infinite',
-            },
-            keyframes: {
-              'fade-in': {
-                '0%': { opacity: '0', transform: 'translateY(20px)' },
-                '100%': { opacity: '1', transform: 'translateY(0)' },
-              },
-              'check-pop': {
-                '0%': { transform: 'scale(0.5)', opacity: '0' },
-                '80%': { transform: 'scale(1.2)', opacity: '1' },
-                '100%': { transform: 'scale(1)', opacity: '1' },
-              },
-              'aurora': {
-                '0%, 100%': { 'text-shadow': '0 0 5px #00e5ff, 0 0 10px #ff2e63, 0 0 15px #00e5ff' },
-                '50%': { 'text-shadow': '0 0 10px #ff2e63, 0 0 15px #00e5ff, 0 0 20px #ff2e63' },
-              },
-            },
-          }
-        }
-      }
-    </script>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-  <script type="importmap">
-{
-  "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react-dom": "https://aistudiocdn.com/react-dom@^19.2.0",
-    "mongodb": "https://aistudiocdn.com/mongodb@^6.20.0",
-    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.4",
-    "qr-code-styling": "https://aistudiocdn.com/qr-code-styling@^1.9.2",
-    "path": "https://aistudiocdn.com/path@^0.12.7",
-    "vite": "https://aistudiocdn.com/vite@^7.1.11",
-    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.0.4"
-  }
-}
-</script>
+<link rel="stylesheet" href="/index.css">
 
-  <script>
+ <script>
 // =======================
 // Persistent Background Music (SPA + Multi-track) 
 // =======================
@@ -335,9 +222,8 @@ if (!window.bgMusicManager) {
    
     </script>
 
-
-<!-- START: Added Festival Popup Styles -->
 <style>
+
   /* Diwali Popup Styles */
   .diwali-popup {
     display: none;
@@ -587,7 +473,359 @@ if (!window.bgMusicManager) {
     }
   }
 </style>
-<style>
+
+<script>
+  // Show Diwali popup with timer logic
+  document.addEventListener('DOMContentLoaded', () => {
+    // Create snow container
+    const snowContainer = document.createElement('div');
+    snowContainer.className = 'snow-container';
+    document.body.appendChild(snowContainer);
+
+    // Create snow animation
+    function createSnowflake() {
+      const snowflake = document.createElement('div');
+      snowflake.className = 'snowflake';
+      snowflake.style.left = Math.random() * 100 + 'vw';
+      snowflake.style.animation = `snowfall ${Math.random() * 3 + 2}s linear forwards`;
+      snowflake.style.opacity = Math.random();
+      snowflake.style.transform = `scale(${Math.random()})`;
+      snowContainer.appendChild(snowflake);
+      snowflake.addEventListener('animationend', () => {
+        snowflake.remove();
+      });
+    }
+    setInterval(createSnowflake, 100);
+
+    // Diwali dates (2025-2045)
+    const diwaliDates = [
+      '2025-10-20', '2026-11-08', '2027-10-29', '2028-10-17', '2029-11-05',
+      '2030-10-26', '2031-11-14', '2032-11-02', '2033-10-22', '2034-11-10',
+      '2035-10-30', '2036-10-19', '2037-11-07', '2038-10-27', '2039-10-17',
+      '2040-11-04', '2041-10-25', '2042-11-12', '2043-11-01', '2044-10-20', '2045-11-08'
+    ];
+
+    // Helper to get next Diwali date
+    function getNextDiwali(now) {
+      for (let i = 0; i < diwaliDates.length; i++) {
+        const d = new Date(diwaliDates[i] + 'T00:00:00');
+        if (d > now) return {
+          date: d,
+          idx: i
+        };
+      }
+      return null;
+    }
+
+    // Timer state
+    let timerState = 'diwali'; // 'diwali' or 'upcoming'
+    let timerIdx = null;
+    let timerEnd = null;
+
+    // Create and show Diwali popup
+    setTimeout(() => {
+      const popup = document.createElement('div');
+      popup.className = 'diwali-popup';
+      popup.innerHTML = `
+            <div class="diwali-popup-content" style="position:relative;">
+              <button class="close-diwali-popup">&times;</button>
+              <div id="lighting-wire" style="position:absolute;top:0;left:0;width:100%;height:48px;pointer-events:none;z-index:10;">
+                <svg width="100%" height="48" viewBox="0 0 500 48" style="overflow:visible;">
+                  <path d="M10,20 Q250,-10 490,20" stroke="#8B4513" stroke-width="4" fill="none"/>
+                  <g>
+                    <circle cx="40" cy="16" r="8" fill="#FFD700"/>
+                    <circle cx="90" cy="12" r="7" fill="#FF9933"/>
+                    <circle cx="140" cy="18" r="8" fill="#4CAF50"/>
+                    <circle cx="190" cy="10" r="7" fill="#E91E63"/>
+                    <circle cx="240" cy="14" r="8" fill="#FFC107"/>
+                    <circle cx="290" cy="12" r="7" fill="#FF0000"/>
+                    <circle cx="340" cy="18" r="8" fill="#FFD700"/>
+                    <circle cx="390" cy="10" r="7" fill="#4CAF50"/>
+                    <circle cx="440" cy="16" r="8" fill="#FF9933"/>
+                  </g>
+                </svg>
+              </div>
+              <div class="diya-container">
+                <div class="diya-svg">
+                  <svg viewBox="0 0 100 100" width="100" height="100">
+                    <path d="M50 70 C20 70 20 40 50 40 C80 40 80 70 50 70" fill="#CD853F"/>
+                    <ellipse cx="50" cy="40" rx="15" ry="5" fill="#8B4513"/>
+                  </svg>
+                  <div class="flame"></div>
+                </div>
+              </div>
+              <h2 class="diwali-title">Happy Diwali! 🪔</h2>
+              <div class="diwali-decoration">
+                <svg viewBox="0 0 100 20" width="100%" height="40">
+                  <pattern id="rangoli" patternUnits="userSpaceOnUse" width="20" height="20">
+                    <circle cx="10" cy="10" r="3" fill="#ff9933"/>
+                    <circle cx="10" cy="10" r="6" fill="none" stroke="#ff9933" stroke-width="0.5"/>
+                  </pattern>
+                  <rect width="100" height="20" fill="url(#rangoli)"/>
+                </svg>
+              </div>
+              <p class="diwali-message">
+                May the festival of lights brighten your studies and illuminate your path to success! <br><br>
+                Study with joy, learn with passion! ✨
+              </p>
+              <div id="diwali-timer" style="font-size:1.2rem;color:#FFD700;margin:12px 0;"></div>
+              <div class="diwali-footer">
+                <img src="https://i.postimg.cc/MHYsLfPz/Neon-Green-Circle-Frame-Fitness-You-Tube-Profile-Picturedurga-puja.png" alt="StudyBot Logo" class="diwali-logo">
+                <span>~ StudyBot Team</span>
+              </div>
+            </div>
+            <div class="firework"></div>
+            <div class="firework"></div>
+            <div class="firework"></div>
+          `;
+      document.body.appendChild(popup);
+
+      // Animate popup entrance
+      requestAnimationFrame(() => {
+        popup.style.display = 'flex';
+        popup.style.opacity = '0';
+        requestAnimationFrame(() => {
+          popup.style.transition = 'opacity 0.5s ease';
+          popup.style.opacity = '1';
+        });
+      });
+
+      // Timer logic
+      const timerEl = popup.querySelector('#diwali-timer');
+      // Add skyshots and lanterns containers (background)
+      const skyshotContainer = document.createElement('div');
+      skyshotContainer.id = 'skyshot-container';
+      skyshotContainer.style.position = 'fixed';
+      skyshotContainer.style.top = '0';
+      skyshotContainer.style.left = '0';
+      skyshotContainer.style.width = '100vw';
+      skyshotContainer.style.height = '100vh';
+      skyshotContainer.style.pointerEvents = 'none';
+      skyshotContainer.style.zIndex = '9998';
+      document.body.appendChild(skyshotContainer);
+
+      const lanternContainer = document.createElement('div');
+      lanternContainer.id = 'lantern-container';
+      lanternContainer.style.position = 'fixed';
+      lanternContainer.style.left = '0';
+      lanternContainer.style.width = '100vw';
+      lanternContainer.style.height = '100vh';
+      lanternContainer.style.top = '0';
+      lanternContainer.style.pointerEvents = 'none';
+      lanternContainer.style.zIndex = '9998';
+      document.body.appendChild(lanternContainer);
+
+      // Add skyshots and lanterns containers (above popup)
+      const popupSkyshot = document.createElement('div');
+      popupSkyshot.id = 'popup-skyshot';
+      popupSkyshot.style.position = 'absolute';
+      popupSkyshot.style.top = '0';
+      popupSkyshot.style.left = '0';
+      popupSkyshot.style.width = '100%';
+      popupSkyshot.style.height = '100%';
+      popupSkyshot.style.pointerEvents = 'none';
+      popupSkyshot.style.zIndex = '100';
+      popup.querySelector('.diwali-popup-content').appendChild(popupSkyshot);
+
+      const popupLantern = document.createElement('div');
+      popupLantern.id = 'popup-lantern';
+      popupLantern.style.position = 'absolute';
+      popupLantern.style.left = '0';
+      popupLantern.style.width = '100%';
+      popupLantern.style.height = '100%';
+      popupLantern.style.top = '0';
+      popupLantern.style.pointerEvents = 'none';
+      popupLantern.style.zIndex = '101';
+      popup.querySelector('.diwali-popup-content').appendChild(popupLantern);
+
+      // Skyshot animation (background and popup)
+      function launchSkyshot(target, width, height) {
+        const shot = document.createElement('div');
+        shot.className = 'skyshot';
+        const x = Math.random() * width * 0.8 + width * 0.1;
+        shot.style.left = x + 'px';
+        shot.style.bottom = '0px';
+        shot.style.position = 'absolute';
+        shot.style.width = '6px';
+        shot.style.height = '60px';
+        shot.style.background = 'linear-gradient(to top, #FFD700 0%, #ff9933 100%)';
+        shot.style.borderRadius = '3px';
+        shot.style.opacity = '0.8';
+        shot.style.zIndex = '9999';
+        target.appendChild(shot);
+        let t = 0;
+        const duration = 60 + Math.random() * 40;
+        const interval = setInterval(() => {
+          t += 4;
+          shot.style.bottom = t + 'px';
+          if (t > height * (0.5 + Math.random() * 0.3)) {
+            clearInterval(interval);
+            createBlast(x, t, target);
+            shot.remove();
+          }
+        }, 12);
+      }
+
+      function createBlast(x, y, target) {
+        for (let i = 0; i < 18; i++) {
+          const p = document.createElement('div');
+          p.className = 'blast-particle';
+          p.style.position = 'absolute';
+          p.style.left = x + 'px';
+          p.style.bottom = y + 'px';
+          p.style.width = '8px';
+          p.style.height = '8px';
+          p.style.borderRadius = '50%';
+          p.style.background = `hsl(${Math.random()*60+30},100%,60%)`;
+          p.style.opacity = '0.9';
+          p.style.zIndex = '9999';
+          target.appendChild(p);
+          const angle = (i / 18) * 2 * Math.PI;
+          const dist = 60 + Math.random() * 40;
+          let step = 0;
+          const blastInterval = setInterval(() => {
+            step += 1.5;
+            p.style.left = (x + Math.cos(angle) * dist * step / 20) + 'px';
+            p.style.bottom = (y + Math.sin(angle) * dist * step / 20) + 'px';
+            p.style.opacity = (1 - step / 20).toFixed(2);
+            if (step > 20) {
+              clearInterval(blastInterval);
+              p.remove();
+            }
+          }, 18);
+        }
+      }
+      // Lantern animation (background and popup)
+      function launchLantern(target, width, height) {
+        const lantern = document.createElement('div');
+        lantern.className = 'lantern-real';
+        lantern.style.position = 'absolute';
+        lantern.style.left = (Math.random() * 80 + 10) * (width / 100) + 'px';
+        lantern.style.bottom = '0px';
+        lantern.style.width = '32px';
+        lantern.style.height = '48px';
+        lantern.style.zIndex = '9999';
+        lantern.innerHTML = `<svg width="32" height="48" viewBox="0 0 32 48"><ellipse cx="16" cy="24" rx="14" ry="20" fill="url(#lg)"/><defs><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFD700"/><stop offset="100%" stop-color="#ff9933"/></linearGradient></defs><ellipse cx="16" cy="40" rx="6" ry="4" fill="#fff" opacity="0.7"/><rect x="14" y="44" width="4" height="4" rx="2" fill="#FFD700"/></svg>`;
+        target.appendChild(lantern);
+        let t = 0;
+        const floatHeight = height * (0.7 + Math.random() * 0.2);
+        const interval = setInterval(() => {
+          t += 2.5;
+          lantern.style.bottom = t + 'px';
+          lantern.style.opacity = (1 - t / floatHeight).toFixed(2);
+          if (t > floatHeight) {
+            clearInterval(interval);
+            lantern.remove();
+          }
+        }, 22);
+      }
+
+      // Start effects
+      let skyshotInterval = setInterval(() => launchSkyshot(skyshotContainer, window.innerWidth, window.innerHeight), 1200);
+      let lanternInterval = setInterval(() => launchLantern(lanternContainer, window.innerWidth, window.innerHeight), 1800);
+      let popupSkyshotInterval = setInterval(() => launchSkyshot(popupSkyshot, popupSkyshot.offsetWidth, popupSkyshot.offsetHeight), 1800);
+      let popupLanternInterval = setInterval(() => launchLantern(popupLantern, popupLantern.offsetWidth, popupLantern.offsetHeight), 2200);
+
+      // Timer logic
+      function updateTimer() {
+        const now = new Date();
+        let next = getNextDiwali(now);
+        if (!next) {
+          timerEl.textContent = 'No upcoming Diwali dates.';
+          return;
+        }
+        timerIdx = next.idx;
+        let diwaliDate = next.date;
+        let diff = diwaliDate - now;
+        let days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        let hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        let mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        let secs = Math.floor((diff % (1000 * 60)) / 1000);
+        if (diff > 0 && diff < 1000 * 60 * 60 * 24 * 31) {
+          timerState = 'diwali';
+          timerEl.textContent = `Diwali will start in: ${days}d ${hours}h ${mins}m ${secs}s`;
+          timerEnd = diwaliDate;
+        } else {
+          timerState = 'upcoming';
+          timerEl.textContent = `Upcoming Diwali will be: ${diwaliDate.toDateString()}`;
+          timerEnd = diwaliDate;
+        }
+      }
+
+      updateTimer();
+      let timerInterval = setInterval(() => {
+        updateTimer();
+        if (timerState === 'diwali' && timerEnd) {
+          const now = new Date();
+          if (now >= timerEnd) {
+            clearInterval(timerInterval);
+            timerEl.textContent = 'Diwali is here! 🎉';
+            setTimeout(() => {
+              setTimeout(() => {
+                timerIdx = timerIdx + 1;
+                if (timerIdx < diwaliDates.length) {
+                  timerState = 'upcoming';
+                  timerEnd = new Date(diwaliDates[timerIdx] + 'T00:00:00');
+                  timerEl.textContent = `Upcoming Diwali will be: ${timerEnd.toDateString()}`;
+                  timerInterval = setInterval(updateTimer, 1000);
+                } else {
+                  timerEl.textContent = 'No upcoming Diwali dates.';
+                }
+              }, 3 * 24 * 60 * 60 * 1000);
+            }, 2000);
+          }
+        }
+      }, 1000);
+
+      // Handle close button
+      const closeBtn = popup.querySelector('.close-diwali-popup');
+      closeBtn.addEventListener('click', () => {
+        popup.style.opacity = '0';
+        setTimeout(() => {
+          popup.remove();
+          // Remove skyshots and lanterns
+          skyshotContainer.remove();
+          lanternContainer.remove();
+          popupSkyshot.remove();
+          popupLantern.remove();
+        }, 500);
+        clearInterval(timerInterval);
+        clearInterval(skyshotInterval);
+        clearInterval(lanternInterval);
+        clearInterval(popupSkyshotInterval);
+        clearInterval(popupLanternInterval);
+      });
+    }, 1000);
+  });
+</script>
+
+   <!-- Navaratri & Dussehra Popup | Dates: 22 Sept 2025 – 2 Oct 2025 ~04 oct 2025  14:02:10 pm-->
+
+
+  <div id="festive-popup-container">
+  <div id="festive-popup-overlay">
+    <div id="festive-popup">
+      <button id="close-popup-btn" title="Close">&times;</button>
+      <h2 id="popup-title"></h2>
+      <p id="popup-message"></p>
+      <div id="countdown-timer"></div>
+      <div id="stopwatch" style="display:none;"></div>
+      <div class="popup-buttons">
+        <button class="popup-btn" id="generate-flowers-btn">🌸 Shower Flowers</button>
+        <button class="popup-btn" id="get-blessed-btn">🙏 Receive Blessings</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="blessing-popup-overlay">
+    <div id="blessing-popup">
+      <h3 id="blessing-title"></h3>
+      <p id="blessing-message"></p>
+      <button class="popup-btn" id="close-blessing-btn">Close</button>
+    </div>
+  </div>
+
+  <style>
     @import url('https://fonts.googleapis.com/css2?family=Lobster&family=Poppins:wght@400;600&display=swap');
 
     #festive-popup-overlay, #blessing-popup-overlay {
@@ -621,7 +859,7 @@ if (!window.bgMusicManager) {
       animation: zoomIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       transform-origin: center;
     }
-    
+
     #blessing-popup {
         background: #fff;
         color: #333;
@@ -688,7 +926,7 @@ if (!window.bgMusicManager) {
       transform: translateY(-3px);
       box-shadow: 0 6px 20px rgba(0,0,0,0.3);
     }
-    
+
     #blessing-popup h3 {
       font-family: 'Lobster', cursive;
       font-size: 2rem;
@@ -731,386 +969,8 @@ if (!window.bgMusicManager) {
       }
     }
   </style>
-<!-- END: Added Festival Popup Styles -->
 
-<link rel="stylesheet" href="/index.css">
-</head>
-  <body class="bg-brand-dark text-brand-light">
-    <div id="particles-container"></div>
-    <div id="root"></div>
-    <div id="portal-root"></div>
-    <script type="module" src="/index.tsx"></script>
-    <script>
-      // Particle generator script
-      const container = document.getElementById('particles-container');
-      const numParticles = 30;
-      for (let i = 0; i < numParticles; i++) {
-        const particle = document.createElement('div');
-        particle.classList.add('particle');
-        if (i % 3 === 0) particle.classList.add('p2');
-        const size = Math.random() * 5 + 1;
-        particle.style.width = `${size}px`;
-        particle.style.height = `${size}px`;
-        particle.style.left = `${Math.random() * 100}vw`;
-        particle.style.top = `${Math.random() * 100}vh`;
-        particle.style.animationDelay = `${Math.random() * 25}s`;
-        particle.style.animationDuration = `${15 + Math.random() * 15}s`;
-        container.appendChild(particle);
-      }
-    </script>
-    
-    <!-- START: Added Festival Popup HTML and Scripts -->
-
-    <!-- Navaratri & Dussehra Popup | Dates: 22 Sept 2025 – 2 Oct 2025 ~04 oct 2025  14:02:10 pm-->
-    <div id="festive-popup-container">
-      <div id="festive-popup-overlay">
-        <div id="festive-popup">
-          <button id="close-popup-btn" title="Close">&times;</button>
-          <h2 id="popup-title"></h2>
-          <p id="popup-message"></p>
-          <div id="countdown-timer"></div>
-          <div id="stopwatch" style="display:none;"></div>
-          <div class="popup-buttons">
-            <button class="popup-btn" id="generate-flowers-btn">🌸 Shower Flowers</button>
-            <button class="popup-btn" id="get-blessed-btn">🙏 Receive Blessings</button>
-          </div>
-        </div>
-      </div>
-
-      <div id="blessing-popup-overlay">
-        <div id="blessing-popup">
-          <h3 id="blessing-title"></h3>
-          <p id="blessing-message"></p>
-          <button class="popup-btn" id="close-blessing-btn">Close</button>
-        </div>
-      </div>
-    </div>
-    
-    <script>
-      // Show Diwali popup with timer logic
-      document.addEventListener('DOMContentLoaded', () => {
-        // Create snow container
-        const snowContainer = document.createElement('div');
-        snowContainer.className = 'snow-container';
-        document.body.appendChild(snowContainer);
-
-        // Create snow animation
-        function createSnowflake() {
-          const snowflake = document.createElement('div');
-          snowflake.className = 'snowflake';
-          snowflake.style.left = Math.random() * 100 + 'vw';
-          snowflake.style.animation = `snowfall ${Math.random() * 3 + 2}s linear forwards`;
-          snowflake.style.opacity = Math.random();
-          snowflake.style.transform = `scale(${Math.random()})`;
-          snowContainer.appendChild(snowflake);
-          snowflake.addEventListener('animationend', () => {
-            snowflake.remove();
-          });
-        }
-        //setInterval(createSnowflake, 100); // Snow effect can be performance intensive, disabled by default.
-
-        // Diwali dates (2025-2045)
-        const diwaliDates = [
-          '2025-10-20', '2026-11-08', '2027-10-29', '2028-10-17', '2029-11-05',
-          '2030-10-26', '2031-11-14', '2032-11-02', '2033-10-22', '2034-11-10',
-          '2035-10-30', '2036-10-19', '2037-11-07', '2038-10-27', '2039-10-17',
-          '2040-11-04', '2041-10-25', '2042-11-12', '2043-11-01', '2044-10-20', '2045-11-08'
-        ];
-
-        // Helper to get next Diwali date
-        function getNextDiwali(now) {
-          for (let i = 0; i < diwaliDates.length; i++) {
-            const d = new Date(diwaliDates[i] + 'T00:00:00');
-            if (d > now) return {
-              date: d,
-              idx: i
-            };
-          }
-          return null;
-        }
-
-        // Timer state
-        let timerState = 'diwali'; // 'diwali' or 'upcoming'
-        let timerIdx = null;
-        let timerEnd = null;
-
-        // Create and show Diwali popup
-        setTimeout(() => {
-          const popup = document.createElement('div');
-          popup.className = 'diwali-popup';
-          popup.innerHTML = `
-                <div class="diwali-popup-content" style="position:relative;">
-                  <button class="close-diwali-popup">&times;</button>
-                  <div id="lighting-wire" style="position:absolute;top:0;left:0;width:100%;height:48px;pointer-events:none;z-index:10;">
-                    <svg width="100%" height="48" viewBox="0 0 500 48" style="overflow:visible;">
-                      <path d="M10,20 Q250,-10 490,20" stroke="#8B4513" stroke-width="4" fill="none"/>
-                      <g>
-                        <circle cx="40" cy="16" r="8" fill="#FFD700"/>
-                        <circle cx="90" cy="12" r="7" fill="#FF9933"/>
-                        <circle cx="140" cy="18" r="8" fill="#4CAF50"/>
-                        <circle cx="190" cy="10" r="7" fill="#E91E63"/>
-                        <circle cx="240" cy="14" r="8" fill="#FFC107"/>
-                        <circle cx="290" cy="12" r="7" fill="#FF0000"/>
-                        <circle cx="340" cy="18" r="8" fill="#FFD700"/>
-                        <circle cx="390" cy="10" r="7" fill="#4CAF50"/>
-                        <circle cx="440" cy="16" r="8" fill="#FF9933"/>
-                      </g>
-                    </svg>
-                  </div>
-                  <div class="diya-container">
-                    <div class="diya-svg">
-                      <svg viewBox="0 0 100 100" width="100" height="100">
-                        <path d="M50 70 C20 70 20 40 50 40 C80 40 80 70 50 70" fill="#CD853F"/>
-                        <ellipse cx="50" cy="40" rx="15" ry="5" fill="#8B4513"/>
-                      </svg>
-                      <div class="flame"></div>
-                    </div>
-                  </div>
-                  <h2 class="diwali-title">Happy Diwali! 🪔</h2>
-                  <div class="diwali-decoration">
-                    <svg viewBox="0 0 100 20" width="100%" height="40">
-                      <pattern id="rangoli" patternUnits="userSpaceOnUse" width="20" height="20">
-                        <circle cx="10" cy="10" r="3" fill="#ff9933"/>
-                        <circle cx="10" cy="10" r="6" fill="none" stroke="#ff9933" stroke-width="0.5"/>
-                      </pattern>
-                      <rect width="100" height="20" fill="url(#rangoli)"/>
-                    </svg>
-                  </div>
-                  <p class="diwali-message">
-                    May the festival of lights brighten your studies and illuminate your path to success! <br><br>
-                    Study with joy, learn with passion! ✨
-                  </p>
-                  <div id="diwali-timer" style="font-size:1.2rem;color:#FFD700;margin:12px 0;"></div>
-                  <div class="diwali-footer">
-                    <img src="https://i.postimg.cc/MHYsLfPz/Neon-Green-Circle-Frame-Fitness-You-Tube-Profile-Picturedurga-puja.png" alt="StudyBot Logo" class="diwali-logo">
-                    <span>~ StudyBot Team</span>
-                  </div>
-                </div>
-                <div class="firework"></div>
-                <div class="firework"></div>
-                <div class="firework"></div>
-              `;
-          document.body.appendChild(popup);
-
-          // Animate popup entrance
-          requestAnimationFrame(() => {
-            popup.style.display = 'flex';
-            popup.style.opacity = '0';
-            requestAnimationFrame(() => {
-              popup.style.transition = 'opacity 0.5s ease';
-              popup.style.opacity = '1';
-            });
-          });
-
-          // Timer logic
-          const timerEl = popup.querySelector('#diwali-timer');
-          // Add skyshots and lanterns containers (background)
-          const skyshotContainer = document.createElement('div');
-          skyshotContainer.id = 'skyshot-container';
-          skyshotContainer.style.position = 'fixed';
-          skyshotContainer.style.top = '0';
-          skyshotContainer.style.left = '0';
-          skyshotContainer.style.width = '100vw';
-          skyshotContainer.style.height = '100vh';
-          skyshotContainer.style.pointerEvents = 'none';
-          skyshotContainer.style.zIndex = '9998';
-          document.body.appendChild(skyshotContainer);
-
-          const lanternContainer = document.createElement('div');
-          lanternContainer.id = 'lantern-container';
-          lanternContainer.style.position = 'fixed';
-          lanternContainer.style.left = '0';
-          lanternContainer.style.width = '100vw';
-          lanternContainer.style.height = '100vh';
-          lanternContainer.style.top = '0';
-          lanternContainer.style.pointerEvents = 'none';
-          lanternContainer.style.zIndex = '9998';
-          document.body.appendChild(lanternContainer);
-
-          // Add skyshots and lanterns containers (above popup)
-          const popupSkyshot = document.createElement('div');
-          popupSkyshot.id = 'popup-skyshot';
-          popupSkyshot.style.position = 'absolute';
-          popupSkyshot.style.top = '0';
-          popupSkyshot.style.left = '0';
-          popupSkyshot.style.width = '100%';
-          popupSkyshot.style.height = '100%';
-          popupSkyshot.style.pointerEvents = 'none';
-          popupSkyshot.style.zIndex = '100';
-          popup.querySelector('.diwali-popup-content').appendChild(popupSkyshot);
-
-          const popupLantern = document.createElement('div');
-          popupLantern.id = 'popup-lantern';
-          popupLantern.style.position = 'absolute';
-          popupLantern.style.left = '0';
-          popupLantern.style.width = '100%';
-          popupLantern.style.height = '100%';
-          popupLantern.style.top = '0';
-          popupLantern.style.pointerEvents = 'none';
-          popupLantern.style.zIndex = '101';
-          popup.querySelector('.diwali-popup-content').appendChild(popupLantern);
-
-          // Skyshot animation (background and popup)
-          function launchSkyshot(target, width, height) {
-            const shot = document.createElement('div');
-            shot.className = 'skyshot';
-            const x = Math.random() * width * 0.8 + width * 0.1;
-            shot.style.left = x + 'px';
-            shot.style.bottom = '0px';
-            shot.style.position = 'absolute';
-            shot.style.width = '6px';
-            shot.style.height = '60px';
-            shot.style.background = 'linear-gradient(to top, #FFD700 0%, #ff9933 100%)';
-            shot.style.borderRadius = '3px';
-            shot.style.opacity = '0.8';
-            shot.style.zIndex = '9999';
-            target.appendChild(shot);
-            let t = 0;
-            const duration = 60 + Math.random() * 40;
-            const interval = setInterval(() => {
-              t += 4;
-              shot.style.bottom = t + 'px';
-              if (t > height * (0.5 + Math.random() * 0.3)) {
-                clearInterval(interval);
-                createBlast(x, t, target);
-                shot.remove();
-              }
-            }, 12);
-          }
-
-          function createBlast(x, y, target) {
-            for (let i = 0; i < 18; i++) {
-              const p = document.createElement('div');
-              p.className = 'blast-particle';
-              p.style.position = 'absolute';
-              p.style.left = x + 'px';
-              p.style.bottom = y + 'px';
-              p.style.width = '8px';
-              p.style.height = '8px';
-              p.style.borderRadius = '50%';
-              p.style.background = `hsl(${Math.random()*60+30},100%,60%)`;
-              p.style.opacity = '0.9';
-              p.style.zIndex = '9999';
-              target.appendChild(p);
-              const angle = (i / 18) * 2 * Math.PI;
-              const dist = 60 + Math.random() * 40;
-              let step = 0;
-              const blastInterval = setInterval(() => {
-                step += 1.5;
-                p.style.left = (x + Math.cos(angle) * dist * step / 20) + 'px';
-                p.style.bottom = (y + Math.sin(angle) * dist * step / 20) + 'px';
-                p.style.opacity = (1 - step / 20).toFixed(2);
-                if (step > 20) {
-                  clearInterval(blastInterval);
-                  p.remove();
-                }
-              }, 18);
-            }
-          }
-          // Lantern animation (background and popup)
-          function launchLantern(target, width, height) {
-            const lantern = document.createElement('div');
-            lantern.className = 'lantern-real';
-            lantern.style.position = 'absolute';
-            lantern.style.left = (Math.random() * 80 + 10) * (width / 100) + 'px';
-            lantern.style.bottom = '0px';
-            lantern.style.width = '32px';
-            lantern.style.height = '48px';
-            lantern.style.zIndex = '9999';
-            lantern.innerHTML = `<svg width="32" height="48" viewBox="0 0 32 48"><ellipse cx="16" cy="24" rx="14" ry="20" fill="url(#lg)"/><defs><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFD700"/><stop offset="100%" stop-color="#ff9933"/></linearGradient></defs><ellipse cx="16" cy="40" rx="6" ry="4" fill="#fff" opacity="0.7"/><rect x="14" y="44" width="4" height="4" rx="2" fill="#FFD700"/></svg>`;
-            target.appendChild(lantern);
-            let t = 0;
-            const floatHeight = height * (0.7 + Math.random() * 0.2);
-            const interval = setInterval(() => {
-              t += 2.5;
-              lantern.style.bottom = t + 'px';
-              lantern.style.opacity = (1 - t / floatHeight).toFixed(2);
-              if (t > floatHeight) {
-                clearInterval(interval);
-                lantern.remove();
-              }
-            }, 22);
-          }
-
-          // Start effects
-          let skyshotInterval = setInterval(() => launchSkyshot(skyshotContainer, window.innerWidth, window.innerHeight), 1200);
-          let lanternInterval = setInterval(() => launchLantern(lanternContainer, window.innerWidth, window.innerHeight), 1800);
-          let popupSkyshotInterval = setInterval(() => launchSkyshot(popupSkyshot, popupSkyshot.offsetWidth, popupSkyshot.offsetHeight), 1800);
-          let popupLanternInterval = setInterval(() => launchLantern(popupLantern, popupLantern.offsetWidth, popupLantern.offsetHeight), 2200);
-
-          // Timer logic
-          function updateTimer() {
-            const now = new Date();
-            let next = getNextDiwali(now);
-            if (!next) {
-              timerEl.textContent = 'No upcoming Diwali dates.';
-              return;
-            }
-            timerIdx = next.idx;
-            let diwaliDate = next.date;
-            let diff = diwaliDate - now;
-            let days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            let hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            let mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            let secs = Math.floor((diff % (1000 * 60)) / 1000);
-            if (diff > 0 && diff < 1000 * 60 * 60 * 24 * 31) {
-              timerState = 'diwali';
-              timerEl.textContent = `Diwali will start in: ${days}d ${hours}h ${mins}m ${secs}s`;
-              timerEnd = diwaliDate;
-            } else {
-              timerState = 'upcoming';
-              timerEl.textContent = `Upcoming Diwali will be: ${diwaliDate.toDateString()}`;
-              timerEnd = diwaliDate;
-            }
-          }
-
-          updateTimer();
-          let timerInterval = setInterval(() => {
-            updateTimer();
-            if (timerState === 'diwali' && timerEnd) {
-              const now = new Date();
-              if (now >= timerEnd) {
-                clearInterval(timerInterval);
-                timerEl.textContent = 'Diwali is here! 🎉';
-                setTimeout(() => {
-                  setTimeout(() => {
-                    timerIdx = timerIdx + 1;
-                    if (timerIdx < diwaliDates.length) {
-                      timerState = 'upcoming';
-                      timerEnd = new Date(diwaliDates[timerIdx] + 'T00:00:00');
-                      timerEl.textContent = `Upcoming Diwali will be: ${timerEnd.toDateString()}`;
-                      timerInterval = setInterval(updateTimer, 1000);
-                    } else {
-                      timerEl.textContent = 'No upcoming Diwali dates.';
-                    }
-                  }, 3 * 24 * 60 * 60 * 1000);
-                }, 2000);
-              }
-            }
-          }, 1000);
-
-          // Handle close button
-          const closeBtn = popup.querySelector('.close-diwali-popup');
-          closeBtn.addEventListener('click', () => {
-            popup.style.opacity = '0';
-            setTimeout(() => {
-              popup.remove();
-              // Remove skyshots and lanterns
-              skyshotContainer.remove();
-              lanternContainer.remove();
-              popupSkyshot.remove();
-              popupLantern.remove();
-            }, 500);
-            clearInterval(timerInterval);
-            clearInterval(skyshotInterval);
-            clearInterval(lanternInterval);
-            clearInterval(popupSkyshotInterval);
-            clearInterval(popupLanternInterval);
-          });
-        }, 1000);
-      });
-    </script>
-    <script>
+  <script>
     document.addEventListener('DOMContentLoaded', function() {
       // --- Configuration ---
       const festiveData = {
@@ -1249,7 +1109,15 @@ if (!window.bgMusicManager) {
       // Initialize the popup
       showMainPopup();
     });
-    </script>
-    <!-- END: Added Festival Popup HTML and Scripts -->
-  </body>
+  </script>
+</div>
+
+</div>
+</head>
+<body>
+    <div id="root"></div>
+    <div id="portal-root"></div>
+    
+    <script type="module" src="/index.tsx"></script>
+</body>
 </html>

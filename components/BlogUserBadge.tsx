@@ -1,3 +1,4 @@
+
 import React from 'react';
 // FIX: Corrected import path for types
 import type { UserBadge } from '../types';

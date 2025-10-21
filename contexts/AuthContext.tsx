@@ -1,142 +1,217 @@
-// contexts/AuthContext.tsx
-import React, { createContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
+import type { User, AuthContextType, AuthModalMode, Subscription, ApiAccess } from '../types';
 import { api } from '../api';
-import type { User, AuthContextType, AuthModalMode } from '../types';
-
-// Super simple mock hash for demo purposes. DO NOT USE IN PRODUCTION.
-const mockHash = (str: string) => `hashed_${str}`;
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Simple User Agent Parser
+const parseUserAgent = () => {
+    const ua = navigator.userAgent;
+    let deviceType = 'Desktop';
+    if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
+        deviceType = 'Tablet';
+    } else if (/Mobile|iP(hone|od)|Android|BlackBerry|IEMobile|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) {
+        deviceType = 'Mobile';
+    }
+    
+    let browser = 'Unknown';
+    if (ua.includes("Firefox")) browser = "Firefox";
+    else if (ua.includes("SamsungBrowser")) browser = "Samsung Browser";
+    else if (ua.includes("Opera") || ua.includes("OPR")) browser = "Opera";
+    else if (ua.includes("Trident")) browser = "Internet Explorer";
+    else if (ua.includes("Edge")) browser = "Edge";
+    else if (ua.includes("Chrome")) browser = "Chrome";
+    else if (ua.includes("Safari")) browser = "Safari";
+
+    return { browser, deviceType };
+};
+
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [users, setUsers] = useState<User[]>([]);
-    const [loading, setLoading] = useState(true);
-
     const [isAuthModalOpen, setAuthModalOpen] = useState(false);
     const [authModalMode, setAuthModalMode] = useState<AuthModalMode>('login');
     const [isSubscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
     const [isApiSubscriptionModalOpen, setApiSubscriptionModalOpen] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [isFetchingDetails, setIsFetchingDetails] = useState(false);
+
+    const getAllUsers = useCallback(async () => {
+        try {
+            const allUsers = await api.getUsers();
+            setUsers(allUsers);
+            return allUsers;
+        } catch (error) {
+            console.error("Failed to fetch all users:", error);
+            return [];
+        }
+    }, []);
+
+    const handleUserUpdate = (updatedUser: User) => {
+        setCurrentUser(updatedUser);
+        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+        setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
+    };
 
     useEffect(() => {
         const loadUser = async () => {
             setLoading(true);
             const storedUser = localStorage.getItem('currentUser');
-            let user: User | null = null;
             if (storedUser) {
-                user = JSON.parse(storedUser);
+                const user: User = JSON.parse(storedUser);
+                // Immediately set user to avoid UI flicker
                 setCurrentUser(user);
-            }
-            // Fetch all users if anyone is logged in to support dynamic badges
-            if (user) {
-                await getAllUsers();
+                
+                // Then, silently refresh data from the server
+                try {
+                    const freshUser = await api.getUserById(user.id);
+                    handleUserUpdate(freshUser); // Use handler to update both state and localStorage
+                } catch {
+                    // If refresh fails (e.g., user deleted), log out
+                    logout();
+                }
             }
             setLoading(false);
         };
         loadUser();
     }, []);
 
-    const handleUserUpdate = (user: User) => {
-        setCurrentUser(user);
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        // Also update the user in the global users list
-        setUsers(prev => prev.map(u => u.id === user.id ? user : u));
-    };
+    // Effect to fetch user details if they are missing
+    useEffect(() => {
+        const fetchDetails = async () => {
+            if (currentUser && !currentUser.ipAddress) {
+                setIsFetchingDetails(true);
+                try {
+                    const { browser, deviceType } = parseUserAgent();
+                    const updatedUser = await api.updateUserDetails(currentUser.id, { browser, deviceType });
+                    handleUserUpdate(updatedUser);
+                } catch (error) {
+                    console.error("Failed to update user details:", error);
+                } finally {
+                    setIsFetchingDetails(false);
+                }
+            }
+        };
+        fetchDetails();
+    }, [currentUser]);
+
+    // Fetch all users if the current user is an admin
+    useEffect(() => {
+        if (currentUser?.isAdmin) {
+            getAllUsers();
+        }
+    }, [currentUser?.isAdmin, getAllUsers]);
+
 
     const login = async (email: string, password: string) => {
-        const user = await api.login(email, mockHash(password));
+        const user = await api.login(email, password);
         handleUserUpdate(user);
-        // Fetch all users on login
-        await getAllUsers();
     };
 
     const signup = async (name: string, email: string, password: string) => {
         const user = await api.signup(name, email, password);
         handleUserUpdate(user);
-        // Fetch all users on signup
-        await getAllUsers();
     };
 
     const logout = () => {
         setCurrentUser(null);
-        setUsers([]); // Clear users list on logout
         localStorage.removeItem('currentUser');
     };
 
-    const getAllUsers = async (): Promise<User[]> => {
-        const allUsers = await api.getAllUsers();
-        setUsers(allUsers);
-        return allUsers;
-    }
-    
-    // ... modal functions
-    const openAuthModal = (mode: AuthModalMode) => { setAuthModalMode(mode); setAuthModalOpen(true); };
-    const closeAuthModal = () => setAuthModalOpen(false);
-    const openSubscriptionModal = () => setSubscriptionModalOpen(true);
-    const closeSubscriptionModal = () => setSubscriptionModalOpen(false);
-    const openApiSubscriptionModal = () => setApiSubscriptionModalOpen(true);
-    const closeApiSubscriptionModal = () => setApiSubscriptionModalOpen(false);
-    
-    // User data updates
-    const updateUserData = async (userId: string, data: Partial<User>): Promise<User> => {
-        const updatedUser = await api.updateUser(userId, data);
-        setUsers(prev => prev.map(u => u.id === userId ? { ...u, ...updatedUser } : u));
-        if (currentUser?.id === userId) {
-            // Merge with existing currentUser state to avoid overwriting properties not returned by API
-            handleUserUpdate({ ...currentUser, ...updatedUser });
-        }
-        return updatedUser;
+    const openAuthModal = (mode: AuthModalMode) => {
+        setAuthModalMode(mode);
+        setAuthModalOpen(true);
     };
 
-    const updateUserProfile = async (data: { name: string, profilePictureUrl?: string }): Promise<User> => {
+    const closeAuthModal = () => setAuthModalOpen(false);
+    
+    const openSubscriptionModal = () => setSubscriptionModalOpen(true);
+    const closeSubscriptionModal = () => setSubscriptionModalOpen(false);
+    
+    const openApiSubscriptionModal = () => setApiSubscriptionModalOpen(true);
+    const closeApiSubscriptionModal = () => setApiSubscriptionModalOpen(false);
+
+    const updateUserSubscription = async (planId: Subscription['planId'], expiresAt: number) => {
         if (!currentUser) throw new Error("Not logged in");
-        return updateUserData(currentUser.id, data);
+        const updatedUser = await api.updateUser(currentUser.id, { subscription: { planId, expiresAt } });
+        handleUserUpdate(updatedUser);
     };
     
-    const updateUserSubscription = async (planId: 'monthly' | 'semi-annually' | 'yearly', expiresAt: number) => {
+    const updateUserProfile = async (updates: Partial<User>) => {
         if (!currentUser) throw new Error("Not logged in");
-        await updateUserData(currentUser.id, { subscription: { planId, expiresAt }, isDonor: true });
+        const updatedUser = await api.updateUser(currentUser.id, updates);
+        handleUserUpdate(updatedUser);
     };
 
     const generateApiKey = async () => {
         if (!currentUser) throw new Error("Not logged in");
-        const apiKey = `qk_test_${Date.now().toString(36)}`;
-        const trialExpiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
-        await updateUserData(currentUser.id, {
-            apiAccess: {
-                apiKey,
-                subscription: { planId: 'trial', expiresAt: trialExpiresAt }
-            }
-        });
+        const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+        const subscription = { planId: 'trial' as const, expiresAt: Date.now() + thirtyDays };
+        // FIX: The backend's special 'newApiKey' flow expects a 'subscription' object with an API plan,
+        // which conflicts with the main User['subscription'] type. Casting to 'any' to bypass this
+        // specific client-side type error while matching the backend's expectation.
+        const updatedUser = await api.updateUser(currentUser.id, { newApiKey: true, subscription } as any);
+        handleUserUpdate(updatedUser);
     };
 
-    const purchaseApiKey = async (planId: 'basic' | 'pro', expiresAt: number) => {
+    const purchaseApiKey = async (planId: ApiAccess['subscription']['planId'], expiresAt: number) => {
         if (!currentUser) throw new Error("Not logged in");
-        const apiKey = currentUser.apiAccess?.apiKey || `qk_prod_${Date.now().toString(36)}`;
-        await updateUserData(currentUser.id, {
-            apiAccess: {
-                apiKey,
-                subscription: { planId, expiresAt }
-            },
-            isDonor: true // Purchasing anything makes them a "premium" user
-        });
-    };
-    
-    const updateUserAsDonor = async (userId: string) => {
-        await updateUserData(userId, { isDonor: true });
+        const newApiAccess: ApiAccess = {
+            apiKey: currentUser.apiAccess?.apiKey || '', // Should exist, but fallback
+            subscription: { planId, expiresAt }
+        };
+        const updatedUser = await api.updateUser(currentUser.id, { apiAccess: newApiAccess });
+        handleUserUpdate(updatedUser);
     };
 
-    const value: AuthContextType = {
-        currentUser, users, loading,
-        isAuthModalOpen, authModalMode, openAuthModal, closeAuthModal,
-        isSubscriptionModalOpen, openSubscriptionModal, closeSubscriptionModal,
-        isApiSubscriptionModalOpen, openApiSubscriptionModal, closeApiSubscriptionModal,
-        login, signup, logout,
-        updateUserData, updateUserProfile,
-        generateApiKey, purchaseApiKey, updateUserSubscription,
+    const updateUserAsDonor = async (userId: string) => {
+        const updatedUser = await api.updateUser(userId, { isDonor: true });
+        if (currentUser && currentUser.id === userId) {
+            handleUserUpdate(updatedUser);
+        } else {
+             setUsers(prev => prev.map(u => u.id === userId ? updatedUser : u));
+        }
+    };
+
+    const updateUserData = async (userId: string, updates: Partial<User>) => {
+        const updatedUser = await api.updateUser(userId, updates);
+        if (currentUser && currentUser.id === userId) {
+            setCurrentUser(updatedUser);
+        }
+        setUsers(prev => prev.map(u => u.id === userId ? updatedUser : u));
+    };
+
+    const value = useMemo(() => ({
+        currentUser,
+        users,
+        isAuthModalOpen,
+        authModalMode,
+        isSubscriptionModalOpen,
+        isApiSubscriptionModalOpen,
+        loading,
+        isFetchingDetails,
+        login,
+        signup,
+        logout,
+        openAuthModal,
+        closeAuthModal,
+        openSubscriptionModal,
+        closeSubscriptionModal,
+        openApiSubscriptionModal,
+        closeApiSubscriptionModal,
+        updateUserSubscription,
+        updateUserProfile,
+        generateApiKey,
+        purchaseApiKey,
         updateUserAsDonor,
         getAllUsers,
-    };
+        updateUserData,
+    }), [currentUser, users, isAuthModalOpen, authModalMode, isSubscriptionModalOpen, isApiSubscriptionModalOpen, loading, isFetchingDetails, getAllUsers]);
 
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+    return (
+        <AuthContext.Provider value={value}>
+            {children}
+        </AuthContext.Provider>
+    );
 };

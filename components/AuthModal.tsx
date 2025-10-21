@@ -1,12 +1,10 @@
 import React, { useState, useContext, useEffect } from 'react';
-// FIX: Corrected import path for AuthContext
 import { AuthContext } from '../contexts/AuthContext';
 import { XIcon, LoadingIcon } from './icons/IconComponents';
 import { AuthContextType } from '../types';
 
 const AuthModal: React.FC = () => {
-  // FIX: Cast context to the correct type to resolve property errors
-  const auth = useContext(AuthContext) as AuthContextType;
+  const auth = useContext(AuthContext);
   const [isSignUp, setIsSignUp] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');

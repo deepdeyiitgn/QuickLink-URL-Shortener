@@ -1,3 +1,4 @@
+
 // FIX: Corrected import path for types
 import type { User, UserBadge } from '../types';
 

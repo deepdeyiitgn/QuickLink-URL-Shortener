@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Ticket, TicketReply, AuthContextType } from '../types';
+import { Ticket, AuthContextType } from '../types';
 import { AuthContext } from '../contexts/AuthContext';
 import { api } from '../api';
 import { timeAgo } from '../utils/time';
@@ -9,85 +9,99 @@ interface TicketConversationProps {
     ticket: Ticket;
     onBack: () => void;
     onUpdate: (updatedTicket: Ticket) => void;
-    isAdminView?: boolean;
+    isAdminView: boolean;
 }
 
-const TICKET_STATUS_OPTIONS: Ticket['status'][] = ['open', 'in-progress', 'closed'];
+const TICKET_STATUS_STYLES: Record<Ticket['status'], string> = {
+    open: 'bg-green-500/20 text-green-300',
+    'in-progress': 'bg-blue-500/20 text-blue-300',
+    closed: 'bg-red-500/20 text-red-300',
+};
 
 const TicketConversation: React.FC<TicketConversationProps> = ({ ticket, onBack, onUpdate, isAdminView }) => {
     const auth = useContext(AuthContext) as AuthContextType;
+    const { currentUser } = auth;
     const [reply, setReply] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleReply = async () => {
-        if (!reply.trim() || !auth.currentUser) return;
+    const handleSubmitReply = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!reply.trim() || !currentUser) return;
         setIsLoading(true);
-        const newReply: Omit<TicketReply, 'id' | 'createdAt'> = {
-            userId: auth.currentUser.id,
-            userName: auth.currentUser.name,
-            text: reply,
-        };
-        const updatedTicket = await api.replyToTicket(ticket.id, newReply);
-        onUpdate(updatedTicket);
-        setReply('');
-        setIsLoading(false);
-    };
-    
-    const handleStatusChange = async (newStatus: Ticket['status']) => {
-        const updatedTicket = await api.updateTicketStatus(ticket.id, newStatus);
-        onUpdate(updatedTicket);
+        try {
+            const updatedTicket = await api.updateTicket(ticket.id, {
+                action: 'add_reply',
+                userId: currentUser.id,
+                message: reply,
+            });
+            onUpdate(updatedTicket);
+            setReply('');
+        } catch (error) {
+            console.error("Failed to add reply", error);
+            alert('Failed to send reply.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    const conversation = [{
-        userId: ticket.userId,
-        userName: ticket.userName,
-        text: ticket.message,
-        createdAt: ticket.createdAt
-    }, ...ticket.replies];
+    const handleChangeStatus = async (newStatus: Ticket['status']) => {
+        if (!currentUser) return;
+        try {
+            const updatedTicket = await api.updateTicket(ticket.id, {
+                action: 'change_status',
+                userId: currentUser.id,
+                newStatus,
+            });
+            onUpdate(updatedTicket);
+        } catch (error) {
+             console.error("Failed to change status", error);
+             alert('Failed to change status.');
+        }
+    };
 
     return (
         <div>
-            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4">
-                <button onClick={onBack} className="text-sm text-brand-primary hover:underline">&larr; Back to all tickets</button>
-                {isAdminView && (
-                     <div className="flex items-center gap-2">
-                        <label htmlFor="status-select" className="text-sm text-gray-400">Status:</label>
-                        <select
-                            id="status-select"
-                            value={ticket.status}
-                            onChange={(e) => handleStatusChange(e.target.value as Ticket['status'])}
-                            className="bg-black/30 text-sm rounded-md border-white/20 text-white focus:ring-brand-primary"
-                        >
-                            {TICKET_STATUS_OPTIONS.map(s => <option key={s} value={s}>{s.replace('-', ' ')}</option>)}
-                        </select>
-                    </div>
+            <div className="flex justify-between items-start mb-4">
+                <div>
+                    <button onClick={onBack} className="text-sm text-brand-primary hover:underline mb-2">&larr; Back to Tickets</button>
+                    <h3 className="text-xl font-bold text-white">{ticket.subject}</h3>
+                    <p className="text-xs text-gray-400">From: {ticket.userName} ({ticket.userEmail})</p>
+                </div>
+                {isAdminView ? (
+                    <select value={ticket.status} onChange={e => handleChangeStatus(e.target.value as any)} className={`text-xs font-semibold rounded-full border-0 focus:ring-0 ${TICKET_STATUS_STYLES[ticket.status]}`}>
+                        <option value="open">Open</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                ) : (
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${TICKET_STATUS_STYLES[ticket.status]}`}>
+                        {ticket.status.replace('-', ' ')}
+                    </span>
                 )}
             </div>
-            <h3 className="text-xl font-bold text-white mb-4">{ticket.subject}</h3>
-            <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
-                {conversation.map((item, index) => (
-                    <div key={index} className="p-4 bg-black/20 rounded-lg">
-                        <div className="flex justify-between items-center text-xs text-gray-500 mb-1">
-                            <span className="font-semibold text-gray-300">{item.userName}</span>
-                            <span>{timeAgo(item.createdAt)}</span>
+
+            <div className="space-y-4 max-h-[50vh] overflow-y-auto bg-black/20 p-4 rounded-lg">
+                {ticket.replies.map(r => (
+                    <div key={r.id} className={`flex flex-col ${r.userId === currentUser?.id ? 'items-end' : 'items-start'}`}>
+                        <div className={`max-w-xl p-3 rounded-lg ${r.userId === currentUser?.id ? 'bg-brand-primary/20' : 'bg-white/10'}`}>
+                            <div className="flex items-center gap-2 text-xs font-semibold">
+                                <span className={r.userIsAdmin ? 'text-brand-secondary' : 'text-gray-300'}>{r.userName}</span>
+                                <span className="text-gray-500">{timeAgo(r.createdAt)}</span>
+                            </div>
+                            <p className="text-sm text-gray-200 mt-1">{r.message}</p>
                         </div>
-                        <p className="text-gray-300 whitespace-pre-wrap">{item.text}</p>
                     </div>
                 ))}
             </div>
-            <div className="mt-4 pt-4 border-t border-white/20">
-                <textarea
-                    value={reply}
-                    onChange={e => setReply(e.target.value)}
-                    placeholder="Type your reply..."
-                    rows={4}
-                    className="block w-full rounded-md border-0 bg-black/30 py-2 px-3 text-brand-light shadow-sm ring-1 ring-inset ring-white/20 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-brand-primary text-sm resize-y"
-                />
-                <button onClick={handleReply} disabled={isLoading || !reply.trim()} className="mt-2 flex items-center gap-2 px-4 py-2 text-sm font-semibold text-brand-dark bg-brand-light rounded-md hover:bg-gray-300 disabled:opacity-50">
-                    {isLoading && <LoadingIcon className="h-4 w-4 animate-spin" />}
-                    Send Reply
-                </button>
-            </div>
+            
+            {ticket.status !== 'closed' && (
+                 <form onSubmit={handleSubmitReply} className="mt-4">
+                    <textarea value={reply} onChange={e => setReply(e.target.value)} placeholder="Type your reply..." rows={3} className="w-full bg-black/30 rounded-md border-white/20 text-white focus:ring-brand-primary"></textarea>
+                    <button type="submit" disabled={isLoading || !reply.trim()} className="mt-2 px-4 py-2 text-sm font-semibold text-brand-dark bg-brand-light rounded-md hover:bg-gray-300 disabled:opacity-50">
+                        {isLoading ? <LoadingIcon className="h-5 w-5 animate-spin"/> : 'Send Reply'}
+                    </button>
+                 </form>
+            )}
         </div>
     );
 };

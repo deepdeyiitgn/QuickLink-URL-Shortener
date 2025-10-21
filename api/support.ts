@@ -1,137 +1,146 @@
 // Vercel Serverless Function: /api/support
-// Handles tickets and notifications.
+// Handles all logic for support tickets and sending notifications.
 
 import { connectToDatabase } from './lib/mongodb.js';
-import type { Ticket, Notification, TicketReply, User } from '../types';
+import type { Ticket, TicketReply, User, Notification } from '../types';
 
+async function handleGetTickets(req: any, res: any, db: any) {
+    const { userId, forAdmin } = req.query;
+    const usersCollection = db.collection('users');
+    const user = userId ? await usersCollection.findOne({ id: userId }) : null;
+
+    if (forAdmin === 'true') {
+        if (!user || !user.isAdmin) return res.status(403).json({ error: "Unauthorized" });
+        const allTickets = await db.collection('tickets').find({}).sort({ createdAt: -1 }).toArray();
+        return res.status(200).json(allTickets);
+    }
+    
+    if (userId) {
+        const userTickets = await db.collection('tickets').find({ userId }).sort({ createdAt: -1 }).toArray();
+        return res.status(200).json(userTickets);
+    }
+    
+    return res.status(400).json({ error: "User ID or admin flag is required." });
+}
+
+async function handleCreateTicket(req: any, res: any, db: any) {
+    const { userId, userName, userEmail, subject, message } = req.body;
+    const newTicket: Ticket = {
+        id: `ticket_${Date.now()}`,
+        userId,
+        userName,
+        userEmail,
+        subject,
+        status: 'open',
+        createdAt: Date.now(),
+        replies: [{
+            id: `reply_${Date.now()}`,
+            userId,
+            userName,
+            userIsAdmin: false,
+            message,
+            createdAt: Date.now(),
+        }]
+    };
+    await db.collection('tickets').insertOne(newTicket);
+    return res.status(201).json(newTicket);
+}
+
+async function handleUpdateTicket(req: any, res: any, db: any) {
+    const { ticketId, action, userId, message, newStatus } = req.body;
+    const user = await db.collection('users').findOne({ id: userId });
+    if (!user) return res.status(403).json({ error: "User not found." });
+
+    const ticket = await db.collection('tickets').findOne({ id: ticketId });
+    if (!ticket) return res.status(404).json({ error: 'Ticket not found.' });
+
+    if (action === 'add_reply') {
+        const newReply: TicketReply = {
+            id: `reply_${Date.now()}`,
+            userId,
+            userName: user.name,
+            userIsAdmin: user.isAdmin,
+            message,
+            createdAt: Date.now(),
+        };
+        await db.collection('tickets').updateOne({ id: ticketId }, { $push: { replies: newReply as any } });
+        
+        // If an admin replies, notify the user.
+        if (user.isAdmin && ticket.userId !== userId) {
+             const notification: Omit<Notification, 'id'> = {
+                userId: ticket.userId,
+                title: `Reply to your ticket: "${ticket.subject}"`,
+                message: `A support agent has replied to your ticket.`,
+                link: `/dashboard`, // Links to dashboard where they can see tickets
+                isRead: false,
+                createdAt: Date.now(),
+            };
+            await db.collection('notifications').insertOne({ ...notification, id: `notif_${Date.now()}` });
+        }
+    } else if (action === 'change_status') {
+        if (!user.isAdmin) return res.status(403).json({ error: "Unauthorized" });
+        // FIX: Explicitly type `updateStatus` to satisfy the MongoDB driver's type requirements.
+        const updateStatus: Ticket['status'] = newStatus;
+        await db.collection('tickets').updateOne({ id: ticketId }, { $set: { status: updateStatus } });
+    } else {
+        return res.status(400).json({ error: 'Invalid action.' });
+    }
+
+    const updatedTicket = await db.collection('tickets').findOne({ id: ticketId });
+    return res.status(200).json(updatedTicket);
+}
+
+async function handleGetNotifications(req: any, res: any, db: any) {
+    const { userId } = req.query;
+    if (!userId) return res.status(400).json({ error: 'User ID is required.' });
+    const notifications = await db.collection('notifications').find({ userId }).sort({ createdAt: -1 }).toArray();
+    return res.status(200).json(notifications);
+}
+
+async function handleSendNotification(req: any, res: any, db: any) {
+    const { userId, title, message, link, imageUrl } = req.body;
+    const newNotification: Notification = {
+        id: `notif_${Date.now()}`,
+        userId,
+        title,
+        message,
+        link,
+        imageUrl,
+        isRead: false,
+        createdAt: Date.now(),
+    };
+    await db.collection('notifications').insertOne(newNotification);
+    return res.status(201).json(newNotification);
+}
+
+async function handleMarkRead(req: any, res: any, db: any) {
+    const { userId } = req.body;
+    if (!userId) return res.status(400).json({ error: 'User ID is required.' });
+    await db.collection('notifications').updateMany({ userId, isRead: false }, { $set: { isRead: true } });
+    return res.status(200).json({ success: true });
+}
+
+// Main Handler
 export default async function handler(req: any, res: any) {
     res.setHeader('Content-Type', 'application/json');
-    const { type, userId, scope } = req.query; // 'ticket' or 'notification'
-
     try {
         const { db } = await connectToDatabase();
+        const { type } = req.query; // Differentiate between tickets and notifications
 
         if (type === 'ticket') {
-            const ticketsCollection = db.collection<Ticket>('tickets');
-            
-            if (req.method === 'GET') {
-                let tickets;
-                if (scope === 'all') {
-                    // In a real app, verify admin status here
-                    tickets = await ticketsCollection.find({}).sort({ createdAt: -1 }).toArray();
-                } else if (userId) {
-                    tickets = await ticketsCollection.find({ userId }).sort({ createdAt: -1 }).toArray();
-                } else {
-                    return res.status(400).json({ error: 'Either userId or scope=all is required.' });
-                }
-                return res.status(200).json(tickets);
-            }
-            
-            if (req.method === 'POST') {
-                const ticketData: Omit<Ticket, 'id' | 'createdAt' | 'status' | 'replies'> = req.body;
-                if (!ticketData.userEmail || !ticketData.subject || !ticketData.message) {
-                    return res.status(400).json({ error: 'Missing required fields for ticket.' });
-                }
-                const newTicket: Ticket = { ...ticketData, id: `ticket_${Date.now()}`, createdAt: Date.now(), status: 'open', replies: [] };
-                await ticketsCollection.insertOne(newTicket);
-                return res.status(201).json(newTicket);
-            }
-
-            if (req.method === 'PUT') {
-                const { action, ticketId, reply, status } = req.body;
-                let updateResult;
-
-                if (action === 'reply') {
-                    const newReply: TicketReply = { ...reply, id: `reply_${Date.now()}`, createdAt: Date.now() };
-                    updateResult = await ticketsCollection.findOneAndUpdate(
-                        { id: ticketId },
-                        { $push: { replies: newReply }, $set: { status: 'in-progress' } },
-                        { returnDocument: 'after' }
-                    );
-
-                    // If an admin/moderator replied, notify the user.
-                    const replyingUser = await db.collection<User>('users').findOne({ id: newReply.userId });
-                    
-                    if (updateResult && replyingUser && (replyingUser.isAdmin || replyingUser.canModerate) && updateResult.userId) {
-                        const notificationsCollection = db.collection('notifications');
-                        const newNotif: Notification = {
-                            id: `notif_${Date.now()}`,
-                            userId: updateResult.userId,
-                            message: `You have a new reply on your ticket: "${updateResult.subject}"`,
-                            createdAt: Date.now(),
-                            isRead: false
-                        };
-                        await notificationsCollection.insertOne(newNotif);
-                    }
-
-                } else if (action === 'status') {
-                    updateResult = await ticketsCollection.findOneAndUpdate(
-                        { id: ticketId },
-                        { $set: { status: status } },
-                        { returnDocument: 'after' }
-                    );
-                } else {
-                    return res.status(400).json({ error: 'Invalid action for updating ticket.' });
-                }
-
-                if (!updateResult) return res.status(404).json({ error: 'Ticket not found.' });
-                return res.status(200).json(updateResult);
-            }
-            
-            res.setHeader('Allow', ['GET', 'POST', 'PUT']);
-            return res.status(405).end('Method Not Allowed');
-
+            if (req.method === 'GET') return handleGetTickets(req, res, db);
+            if (req.method === 'POST') return handleCreateTicket(req, res, db);
+            if (req.method === 'PUT') return handleUpdateTicket(req, res, db);
         } else if (type === 'notification') {
-            const notificationsCollection = db.collection('notifications');
-            if (req.method === 'GET') {
-                if (!userId) return res.status(400).json({ error: 'userId is required.' });
-                const notifications = await notificationsCollection.find({ userId }).sort({ createdAt: -1 }).toArray();
-                return res.status(200).json(notifications);
-            }
-            if (req.method === 'POST') { // Admin creating notifications
-                const { userId: targetUserId, message } = req.body;
-                if (!targetUserId || !message) return res.status(400).json({ error: 'Target user ID and message are required.' });
-                
-                let notificationsToInsert: Notification[] = [];
-                if (targetUserId === 'all') {
-                    const usersCollection = db.collection('users');
-                    const allUsers = await usersCollection.find({}, { projection: { id: 1 } }).toArray();
-                    notificationsToInsert = allUsers.map(user => ({
-                        id: `notif_${Date.now()}_${user.id}`,
-                        userId: user.id,
-                        message,
-                        createdAt: Date.now(),
-                        isRead: false
-                    }));
-                } else {
-                     notificationsToInsert.push({
-                        id: `notif_${Date.now()}`,
-                        userId: targetUserId,
-                        message,
-                        createdAt: Date.now(),
-                        isRead: false
-                    });
-                }
-
-                if (notificationsToInsert.length > 0) {
-                    await notificationsCollection.insertMany(notificationsToInsert);
-                }
-                return res.status(201).json({ success: true, count: notificationsToInsert.length });
-            }
-            if (req.method === 'PUT') {
-                const { notificationId } = req.body;
-                if (!notificationId) return res.status(400).json({ error: 'notificationId is required.' });
-                await notificationsCollection.updateOne({ id: notificationId }, { $set: { isRead: true } });
-                return res.status(200).json({ success: true });
-            }
-            res.setHeader('Allow', ['GET', 'POST', 'PUT']);
-            return res.status(405).end('Method Not Allowed');
-
-        } else {
-            return res.status(400).json({ error: 'A valid support type (`ticket` or `notification`) must be specified.' });
+            if (req.method === 'GET') return handleGetNotifications(req, res, db);
+            if (req.method === 'POST') return handleSendNotification(req, res, db);
+            if (req.method === 'PUT' && req.body.action === 'mark_read') return handleMarkRead(req, res, db);
         }
+
+        return res.status(400).json({ error: "Invalid request type or method." });
+
     } catch (error: any) {
-        console.error(`Error with /api/support (type: ${type}):`, error);
+        console.error('Error with /api/support:', error);
         return res.status(500).json({ error: error.message || 'An internal server error occurred.' });
     }
 }

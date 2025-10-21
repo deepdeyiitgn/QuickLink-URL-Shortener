@@ -4,11 +4,8 @@ import {
     LinkIcon, TextIcon, WifiIcon, VCardIcon, EmailIcon, SmsIcon, PhoneIcon, GeoIcon,
     CalendarIcon, BitcoinIcon, UpiIcon, ImageIcon, ColorPaletteIcon, ChevronDownIcon
 } from './icons/IconComponents';
-// FIX: Corrected import path for AuthContext
 import { AuthContext } from '../contexts/AuthContext';
-// FIX: Corrected import path for QrContext
 import { QrContext } from '../contexts/QrContext';
-// FIX: Corrected import path for types
 import { QrCodeType, AuthContextType } from '../types';
 
 const qrTypes: { id: QrCodeType, label: string, icon: React.FC<any> }[] = [
@@ -41,8 +38,7 @@ const Accordion: React.FC<{ title: string; children: React.ReactNode }> = ({ tit
 };
 
 const QrCodeGenerator: React.FC = () => {
-    // FIX: Cast context to the correct type to resolve property errors
-    const auth = useContext(AuthContext) as AuthContextType;
+    const auth = useContext(AuthContext);
     const qrContext = useContext(QrContext);
 
     const [activeType, setActiveType] = useState<QrCodeType>('url');

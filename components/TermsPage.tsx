@@ -80,7 +80,12 @@ const TermsPage: React.FC = () => {
                     We reserve the right, at Our sole discretion, to modify or replace these Terms at any time. We will let you know via a prominent notice on Our Service, prior to the change becoming effective and update the "Last updated" date at the top of these Terms. <strong>By continuing to access or use Our Service after those revisions become effective, You agree to be bound by the revised terms.</strong>
                 </p>
 
-                <h2>12. Contact Us</h2>
+                <h2>12. Advertisements and User Support</h2>
+                <p>
+                    This Service is supported by advertisements displayed on various pages. Revenue generated from these ads is crucial for covering server costs and allows Us to continue offering many of our core features for free. If you are unable or choose not to purchase a subscription, we kindly ask that you consider disabling your adblocker while using Our Service. This is a valuable way to support Us and helps ensure the long-term availability of the platform for everyone.
+                </p>
+
+                <h2>13. Contact Us</h2>
                 <p>If you have any questions about these Terms, You can contact us by visiting the social media and contact links provided on this website.</p>
             </div>
         </div>

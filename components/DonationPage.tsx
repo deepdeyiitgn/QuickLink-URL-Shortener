@@ -1,90 +1,34 @@
-// FIX: Removed reference to vite/client types to resolve "Cannot find type definition" error.
-import React, { useState, useContext, useEffect, useMemo } from 'react';
-// FIX: Corrected import path for AuthContext
+import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
-// FIX: Corrected import path for types
-import { Donation, RazorpayOrder, RazorpaySuccessResponse, CashfreeOrder, AuthContextType } from '../types';
-import { XIcon, LoadingIcon, HeartIcon, CheckIcon, WarningIcon } from './icons/IconComponents';
-// FIX: Corrected import path for api
+import { Donation, RazorpayOrder, RazorpaySuccessResponse, AuthContextType } from '../types';
+import { LoadingIcon, XIcon, CheckIcon, WarningIcon } from './icons/IconComponents';
 import { api } from '../api';
 
-const PRESET_AMOUNTS = [10, 50, 100, 500, 1000];
-
 const DonationPage: React.FC = () => {
-    // FIX: Cast context to the correct type to resolve property errors
     const auth = useContext(AuthContext) as AuthContextType;
-    const { currentUser, updateUserAsDonor, openAuthModal } = auth || {};
-    
+    const { currentUser, updateUserAsDonor } = auth || {};
+
     const [amount, setAmount] = useState(100);
-    const [customAmount, setCustomAmount] = useState('');
+    const [name, setName] = useState(currentUser?.name || '');
+    const [message, setMessage] = useState('');
+    const [isAnonymous, setIsAnonymous] = useState(false);
+    const [donations, setDonations] = useState<Donation[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
-    const [view, setView] = useState<'selection' | 'success' | 'failed' | 'cancelled'>('selection');
-    const [paymentMethod, setPaymentMethod] = useState<'razorpay' | 'cashfree' | null>(null);
-    const [donations, setDonations] = useState<Donation[]>([]);
+    const [view, setView] = useState<'form' | 'success' | 'failed' | 'cancelled'>('form');
 
     useEffect(() => {
         api.getDonations().then(setDonations);
     }, []);
 
-    const handleAmountClick = (value: number) => {
-        setAmount(value);
-        setCustomAmount('');
-    };
-
-    const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value.replace(/[^0-9]/g, '');
-        const numValue = parseInt(value, 10);
-        if (value === '' || (numValue >= 1 && numValue <= 2000)) {
-            setCustomAmount(value);
-            if (value !== '') {
-                setAmount(numValue);
-            }
-        }
-    };
-    
-    const handlePayment = (method: 'razorpay' | 'cashfree') => {
-        if (!currentUser) {
-            openAuthModal?.('login');
+    const handlePayment = async () => {
+        if (amount < 10) {
+            setError('Minimum donation amount is ₹10.');
             return;
         }
-        if (method === 'razorpay') handleRazorpayPayment();
-        if (method === 'cashfree') handleCashfreePayment();
-    };
-
-    const onPaymentSuccess = async () => {
-        if (!currentUser) return;
-        
-        // --- FIX for Donation Bug ---
-        // Immediately show success to the user for a better experience.
-        setView('success');
-        setIsLoading(false);
-        setPaymentMethod(null);
-        
-        // Perform database updates in the background. In a production app,
-        // you would add robust error logging/handling here.
-        try {
-            await api.addDonation({
-                userId: currentUser.id,
-                userName: currentUser.name,
-                amount: amount,
-            });
-            await updateUserAsDonor?.(currentUser.id);
-            // Refresh donation list silently after successful update
-            const latestDonations = await api.getDonations();
-            setDonations(latestDonations);
-        } catch (updateError: any) {
-            // Log the error for the site owner, but don't bother the user
-            // since their payment was successful.
-            console.error(`Post-donation update failed, but user was shown success. Error: ${updateError.message}`);
-        }
-    };
-
-    const handleRazorpayPayment = async () => {
         setIsLoading(true);
         setError('');
-        setPaymentMethod('razorpay');
-        
+
         try {
             const orderResponse = await fetch('/api/payments?action=create_order&provider=razorpay', {
                 method: 'POST',
@@ -92,110 +36,152 @@ const DonationPage: React.FC = () => {
                 body: JSON.stringify({ amount, currency: 'INR' })
             });
 
-            if (!orderResponse.ok) throw new Error('Could not create payment order.');
+            if (!orderResponse.ok) {
+                const errorData = await orderResponse.json();
+                throw new Error(errorData.error || 'Could not create payment order.');
+            }
+
             const order: RazorpayOrder = await orderResponse.json();
 
             const options = {
-                // FIX: Use type assertion to silence TypeScript error about import.meta.env in non-Vite environments.
                 key: (import.meta as any).env.VITE_RAZORPAY_KEY_ID,
                 amount: order.amount,
                 currency: order.currency,
-                name: 'QuickLink Donation',
-                description: `Thank you for your support!`,
+                name: 'Donation to QuickLink',
+                description: 'Thank you for your support!',
                 order_id: order.id,
                 handler: async (response: RazorpaySuccessResponse) => {
                     setIsLoading(true);
-                    await onPaymentSuccess();
+                    // Show success UI immediately
+                    setView('success');
+
+                    // Then handle DB updates in the background
+                    try {
+                        const donationRecord: Omit<Donation, 'id' | 'createdAt'> = {
+                            name: isAnonymous ? 'Anonymous' : name || 'Anonymous Supporter',
+                            amount,
+                            currency: 'INR',
+                            message: message || undefined,
+                            isAnonymous,
+                        };
+                        await api.addDonation(donationRecord);
+
+                        // If user is logged in, mark them as a donor
+                        if (currentUser) {
+                            await updateUserAsDonor?.(currentUser.id);
+                        }
+
+                        // Refresh donation list
+                        const freshDonations = await api.getDonations();
+                        setDonations(freshDonations);
+                    } catch (dbError: any) {
+                        // Even if DB fails, user sees success. We log the error.
+                        console.error("CRITICAL: Payment successful but failed to record donation in DB.", dbError);
+                        setError(`Payment was successful, but failed to record donation. Please contact support. Payment ID: ${response.razorpay_payment_id}`);
+                        // Optionally set view to a special 'failed-but-paid' state
+                    } finally {
+                        setIsLoading(false);
+                    }
                 },
-                prefill: { name: currentUser?.name, email: currentUser?.email },
-                theme: { color: '#ff2e63' },
-                modal: { ondismiss: () => { if (view === 'selection') { setView('cancelled'); setIsLoading(false); setPaymentMethod(null); } } }
+                prefill: { name: name, email: currentUser?.email },
+                theme: { color: '#00e5ff' },
+                modal: { ondismiss: () => { if (view === 'form') { setView('cancelled'); setIsLoading(false); } } }
             };
 
-            // FIX: Rely on global type declaration from types.ts
             const rzp = new window.Razorpay(options);
             rzp.open();
             setIsLoading(false);
+
         } catch (err: any) {
             setError(`Payment failed: ${err.message}`);
             setView('failed');
             setIsLoading(false);
-            setPaymentMethod(null);
         }
     };
-    
-    const handleCashfreePayment = async () => {
-        setIsLoading(true);
-        setError('');
-        setPaymentMethod('cashfree');
 
-        try {
-            const orderResponse = await fetch('/api/payments?action=create_order&provider=cashfree', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ amount, currency: 'INR', user: currentUser })
-            });
-            if (!orderResponse.ok) throw new Error('Could not create payment order.');
-            const order: CashfreeOrder = await orderResponse.json();
-            
-            // FIX: Rely on global type declaration from types.ts
-            const cashfree = new window.Cashfree({ mode: "production" });
-            cashfree.checkout({
-                paymentSessionId: order.payment_session_id,
-                components: ["upi"],
-            }).then(async (result: any) => {
-                if (result.error) {
-                    setError(`Payment failed: ${result.error.message}`);
-                    setView('failed');
-                } else if (result.paymentDetails && result.paymentDetails.paymentStatus === 'SUCCESS') {
-                    setIsLoading(true);
-                    await onPaymentSuccess();
-                } else {
-                    setView('cancelled');
-                }
-                setIsLoading(false);
-                setPaymentMethod(null);
-            });
-        } catch (err: any) {
-             setError(`Payment failed: ${err.message}`);
-            setView('failed');
-            setIsLoading(false);
-            setPaymentMethod(null);
-        }
-    };
-    
-    const donationStats = useMemo(() => {
-        const total = donations.reduce((sum, d) => sum + d.amount, 0);
-        const donorIds = new Set(donations.map(d => d.userId));
-        // FIX: Add explicit type to reduce accumulator to fix type inference issue.
-        const leaderboard = Object.values(donations.reduce((acc: Record<string, { userId: string; userName: string; total: number }>, d) => {
-            if (!d.userId || !d.userName) return acc;
-            if (!acc[d.userId]) {
-                acc[d.userId] = { userId: d.userId, userName: d.userName, total: 0 };
-            }
-            acc[d.userId].total += d.amount;
-            return acc;
-        }, {}))
-        .sort((a, b) => b.total - a.total)
-        .slice(0, 10);
-        
-        return { total, count: donorIds.size, leaderboard };
-    }, [donations]);
-
-    const renderContent = () => {
+    const renderView = () => {
         switch (view) {
             case 'success':
-                return (<div className="text-center p-8"><CheckIcon className="mx-auto h-16 w-16 text-green-500 animate-check-pop" /><h2 className="text-3xl font-bold text-white mt-4">Thank You!</h2><p className="text-gray-400 my-4">Your generous donation is greatly appreciated. It helps us keep QuickLink running.</p><button onClick={() => setView('selection')} className="w-full max-w-xs mx-auto rounded-md bg-brand-secondary px-3 py-3 text-sm font-semibold text-white">Make another donation</button></div>);
+                return (
+                    <div className="text-center p-8">
+                        <CheckIcon className="mx-auto h-16 w-16 text-green-500 animate-check-pop" />
+                        <h2 className="text-3xl font-bold text-white mt-4">Thank You for Your Support!</h2>
+                        <p className="text-gray-400 my-4">Your generosity helps keep this platform running.</p>
+                        <button onClick={() => setView('form')} className="w-full max-w-xs mx-auto rounded-md bg-brand-primary px-3 py-3 text-sm font-semibold text-brand-dark">Make another donation</button>
+                    </div>
+                );
             case 'failed':
-                return (<div className="text-center p-8"><XIcon className="mx-auto h-16 w-16 text-red-500" /><h2 className="text-3xl font-bold text-white mt-4">Payment Failed</h2><p className="text-gray-400 my-4 break-words">{error}</p><button onClick={() => setView('selection')} className="w-full max-w-xs mx-auto rounded-md bg-brand-secondary px-3 py-3 text-sm font-semibold text-white">Try Again</button></div>);
+                return (
+                     <div className="text-center p-8">
+                        <XIcon className="mx-auto h-16 w-16 text-red-500" />
+                        <h2 className="text-3xl font-bold text-white mt-4">Payment Failed</h2>
+                        <p className="text-gray-400 my-4 break-words">{error}</p>
+                        <button onClick={() => setView('form')} className="w-full max-w-xs mx-auto rounded-md bg-brand-primary px-3 py-3 text-sm font-semibold text-brand-dark">Try Again</button>
+                    </div>
+                );
             case 'cancelled':
-                return (<div className="text-center p-8"><WarningIcon className="mx-auto h-16 w-16 text-yellow-500" /><h2 className="text-3xl font-bold text-white mt-4">Payment Cancelled</h2><p className="text-gray-400 my-4">Your transaction was cancelled.</p><button onClick={() => setView('selection')} className="w-full max-w-xs mx-auto rounded-md bg-brand-secondary px-3 py-3 text-sm font-semibold text-white">Try Again</button></div>);
+                return (
+                    <div className="text-center p-8">
+                        <WarningIcon className="mx-auto h-16 w-16 text-yellow-500" />
+                        <h2 className="text-3xl font-bold text-white mt-4">Payment Cancelled</h2>
+                        <p className="text-gray-400 my-4">Your transaction was cancelled.</p>
+                        <button onClick={() => setView('form')} className="w-full max-w-xs mx-auto rounded-md bg-brand-primary px-3 py-3 text-sm font-semibold text-brand-dark">Go Back</button>
+                    </div>
+                );
+            case 'form':
             default:
-                return (<><div className="text-center"><HeartIcon className="mx-auto h-12 w-12 text-brand-secondary" /><h2 className="text-3xl font-bold text-white mt-4">Support QuickLink</h2><p className="text-gray-400 mb-8">Your donations help us cover server costs and continue developing new features.</p></div><div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">{PRESET_AMOUNTS.map(val => (<button key={val} onClick={() => handleAmountClick(val)} className={`p-4 rounded-lg border-2 text-center transition-all ${amount === val && customAmount === '' ? 'border-brand-secondary bg-brand-secondary/10 scale-105' : 'border-white/20 bg-black/30 hover:border-white/30'}`}><span className="text-xl font-bold text-white">₹{val}</span></button>))}</div><input type="text" value={customAmount} onChange={handleCustomAmountChange} placeholder="Or enter a custom amount (₹1-2000)" className={`block w-full rounded-md border-2 bg-black/30 py-3 px-4 text-center text-xl font-bold text-brand-light shadow-sm placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-brand-secondary sm:text-lg transition-all ${customAmount !== '' ? 'border-brand-secondary' : 'border-white/20'}`} /><div className="mt-8 space-y-4"><p className="text-center text-sm text-gray-400">Choose a payment method:</p><button onClick={() => handlePayment('razorpay')} disabled={isLoading} className="w-full flex justify-center items-center gap-2 rounded-md bg-green-500 px-3 py-3 text-base font-semibold text-brand-dark hover:bg-green-400 disabled:opacity-50">{isLoading && paymentMethod === 'razorpay' ? <LoadingIcon className="animate-spin h-5 w-5" /> : `Donate ₹${amount} with Razorpay`}</button><button onClick={() => handlePayment('cashfree')} disabled={isLoading} className="w-full flex justify-center items-center gap-2 rounded-md bg-blue-600 px-3 py-3 text-base font-semibold text-white hover:bg-blue-500 disabled:opacity-50">{isLoading && paymentMethod === 'cashfree' ? <LoadingIcon className="animate-spin h-5 w-5" /> : `Donate ₹${amount} with UPI (Cashfree)`}</button></div></>);
+                return (
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-3 gap-2">
+                            {[20, 50, 100].map(val => (
+                                <button key={val} onClick={() => setAmount(val)} className={`py-3 rounded-md font-semibold ${amount === val ? 'bg-brand-primary text-brand-dark' : 'bg-black/30 hover:bg-black/50'}`}>₹{val}</button>
+                            ))}
+                        </div>
+                        <input type="number" value={amount} onChange={e => setAmount(Number(e.target.value))} className="w-full bg-black/30 rounded-md border-white/20 text-white focus:ring-brand-primary text-center text-lg" placeholder="Enter amount" />
+                        <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full bg-black/30 rounded-md border-white/20 text-white focus:ring-brand-primary" placeholder="Your Name (optional)" />
+                        <textarea value={message} onChange={e => setMessage(e.target.value)} rows={3} className="w-full bg-black/30 rounded-md border-white/20 text-white focus:ring-brand-primary" placeholder="Leave a message (optional)" />
+                        <label className="flex items-center gap-2 text-gray-400">
+                            <input type="checkbox" checked={isAnonymous} onChange={e => setIsAnonymous(e.target.checked)} className="rounded bg-black/30 border-white/20 text-brand-primary focus:ring-brand-primary" />
+                            Donate anonymously
+                        </label>
+                        {error && <p className="text-red-400 text-sm">{error}</p>}
+                        <button onClick={handlePayment} disabled={isLoading} className="w-full flex justify-center items-center gap-2 rounded-md bg-green-500 px-3 py-3 font-semibold text-brand-dark shadow-sm hover:bg-green-400 disabled:opacity-50">
+                            {isLoading ? <LoadingIcon className="animate-spin h-5 w-5" /> : `Donate ₹${amount}`}
+                        </button>
+                    </div>
+                );
         }
     };
-    
-    return (<div className="space-y-12 animate-fade-in"><div className="glass-card p-6 md:p-8 rounded-2xl max-w-xl mx-auto">{renderContent()}</div><div className="glass-card p-6 md:p-8 rounded-2xl max-w-xl mx-auto"><h3 className="text-2xl font-bold text-white text-center mb-6">Community Support</h3><div className="grid grid-cols-2 gap-4 text-center mb-6"><div className="bg-black/30 p-4 rounded-lg"><p className="text-gray-400 text-sm">Total Raised</p><p className="text-3xl font-bold text-brand-secondary">₹{donationStats.total.toLocaleString()}</p></div><div className="bg-black/30 p-4 rounded-lg"><p className="text-gray-400 text-sm">Total Donors</p><p className="text-3xl font-bold text-brand-secondary">{donationStats.count}</p></div></div><h4 className="font-semibold text-lg text-white mb-2">Top Donors</h4><div className="space-y-2">{donationStats.leaderboard.length > 0 ? donationStats.leaderboard.map((d, i) => (<div key={d.userId} className="flex justify-between items-center bg-black/20 p-3 rounded-md"><div className="flex items-center gap-3"><span className="font-bold text-gray-400 w-6">#{i+1}</span><p className="text-white font-semibold">{d.userName}</p></div><p className="font-bold text-brand-secondary">₹{d.total.toLocaleString()}</p></div>)) : <p className="text-gray-500 text-center">No donations yet. Be the first!</p>}</div></div></div>);
+
+    return (
+        <div className="space-y-12">
+            <div className="text-center">
+                <h1 className="text-5xl font-bold text-white mb-4 animate-aurora">Support Us</h1>
+                <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+                    Your contribution helps us cover server costs and continue to build and maintain this free service.
+                </p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-12 items-start max-w-5xl mx-auto">
+                <div className="glass-card p-6 md:p-8 rounded-2xl">
+                    {renderView()}
+                </div>
+                <div className="glass-card p-6 md:p-8 rounded-2xl">
+                    <h2 className="text-2xl font-bold text-white mb-4">Recent Supporters</h2>
+                    <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+                        {donations.length > 0 ? donations.map(d => (
+                            <div key={d.id} className="p-3 bg-black/30 rounded-lg">
+                                <div className="flex justify-between items-center">
+                                    <span className="font-semibold text-brand-light">{d.name}</span>
+                                    <span className="font-bold text-green-400">₹{d.amount}</span>
+                                </div>
+                                {d.message && <p className="text-sm text-gray-400 mt-1 italic">"{d.message}"</p>}
+                            </div>
+                        )) : <p className="text-gray-500">Be the first to donate!</p>}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 };
 
 export default DonationPage;
