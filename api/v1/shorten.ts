@@ -62,7 +62,7 @@ export default async function handler(req: any, res: any) {
             shortUrl: `${origin}/${finalAlias}`,
             createdAt: Date.now(),
             expiresAt: subscription.expiresAt, // Use the validated subscription's expiration
-            userId: user._id.toString(),
+            userId: user.id,
         };
 
         await urlsCollection.updateOne(
