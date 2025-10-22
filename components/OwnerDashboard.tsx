@@ -147,7 +147,7 @@ const TicketManagement: React.FC = () => {
 
 const OwnerDashboard: React.FC = () => {
     const auth = useContext(AuthContext);
-    const [activeTab, setActiveTab] = useState('live');
+    const [activeTab, setActiveTab] = useState('users');
     
     if (!auth || !auth.currentUser?.isAdmin) {
         return null;
