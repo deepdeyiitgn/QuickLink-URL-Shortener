@@ -42,6 +42,7 @@ const Footer: React.FC = () => {
         { name: 'Cookies Policy', href: '/cookies' },
         { name: 'System Status', href: '/status' },
         { name: 'FAQ', href: '/faq' },
+        { name: 'Github', href: 'https://github.com/deepdeyiitgn/QuickLink-URL-Shortener' },
     ];
 
     return (
