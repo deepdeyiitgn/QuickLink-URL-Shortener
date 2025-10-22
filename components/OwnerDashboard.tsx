@@ -204,7 +204,7 @@ const OwnerDashboard: React.FC = () => {
             <div className="mt-8 pt-6 border-t border-white/20">
                 <h3 className="text-xl font-bold text-white mb-4">Project Management</h3>
                 <a 
-                    href="https://github.com/deepdeyiitgn/QuickLink-URL-Shortener/archive/refs/heads/main.zip" 
+                    href="https://github.com/deepdeyiitgn/QuickLink-URL-Shortener" 
                     target="_blank" 
                     rel="noopener noreferrer" 
                     className="inline-block px-6 py-3 text-sm font-semibold text-brand-dark bg-gray-300 rounded-md hover:bg-white transition-colors"
