@@ -32,6 +32,8 @@
     *   **Deep Customization**: Change dot and background colors, and add a custom logo to the center.
 *   📷 **[QR Code Scanner](/qr-scanner)**: Instantly scan QR codes using a device camera or by uploading an image.
     *   **Multi-Engine Fallback**: Uses a primary in-browser scanner (`html5-qrcode`), a secondary in-browser scanner (`jsQR`), and an optional third-party API for maximum accuracy.
+*   ⚙️ **Optional External Fallback**: If both in-browser scanners fail, users are asked for consent to send the image to [api.qrserver.com](https://api.qrserver.com/) for decoding.
+
 
 ### ✍️ Community & Content
 
