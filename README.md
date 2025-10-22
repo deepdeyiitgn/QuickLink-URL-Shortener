@@ -29,7 +29,7 @@
 
 ---
 
-**[📞 Contact](https://www.chatbase.co/z1dBVS3yYaFm-L9FJnbAT/help)**
+**[📞 Contact](https://api.whatsapp.com/send/?phone=15558946957&text=Hello%2C+this+is+a+test+message&type=phone_number&app_absent=0)**
 
 ---
 <p align="center">
