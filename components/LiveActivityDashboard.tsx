@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { api } from '../api';
@@ -51,11 +49,17 @@ const LiveActivityDashboard: React.FC = () => {
         return <div className="text-center py-10"><LoadingIcon className="h-8 w-8 animate-spin mx-auto text-brand-secondary" /></div>;
     }
 
-    if (!data || !data.systemStatus) {
-        return <p className="text-center text-red-400">Failed to load live activity data or data is incomplete.</p>;
+    if (!data) {
+        return <p className="text-center text-red-400">Failed to load live activity data.</p>;
     }
 
-    const { systemStatus, allUsers = [], activityLogs = [] } = data;
+    const { systemStatus, allUsers, activityLogs } = data;
+
+    // More robust data validation to prevent render crashes
+    if (!systemStatus || !Array.isArray(allUsers) || !Array.isArray(activityLogs)) {
+        console.error("Malformed admin dashboard data received:", data);
+        return <p className="text-center text-red-400">Received incomplete or malformed activity data from the server.</p>;
+    }
     
     const onlineUsers = allUsers.filter((user: User) => (Date.now() - user.lastActive) < 5 * 60 * 1000);
 
