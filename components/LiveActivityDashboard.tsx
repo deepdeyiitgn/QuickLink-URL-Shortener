@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { api } from '../api';
@@ -43,7 +44,7 @@ const LiveActivityDashboard: React.FC = () => {
         const interval = setInterval(fetchData, 5000); // Poll every 5 seconds
 
         return () => clearInterval(interval); // Cleanup on unmount
-    }, [auth?.currentUser]);
+    }, [auth?.currentUser?.id, auth?.currentUser?.isAdmin]);
 
     if (loading) {
         return <div className="text-center py-10"><LoadingIcon className="h-8 w-8 animate-spin mx-auto text-brand-secondary" /></div>;
@@ -53,9 +54,13 @@ const LiveActivityDashboard: React.FC = () => {
         return <p className="text-center text-red-400">Failed to load live activity data.</p>;
     }
 
-    const onlineUsers = data.allUsers.filter((user: User) => (Date.now() - user.lastActive) < 5 * 60 * 1000);
+    const onlineUsers = (data.allUsers || []).filter((user: User) => (Date.now() - user.lastActive) < 5 * 60 * 1000);
     const { systemStatus } = data;
-    
+
+    if (!systemStatus) {
+        return <p className="text-center text-red-400">System status data is missing from the response.</p>;
+    }
+
     const dbServiceStatus = systemStatus.db.status === 'ok' ? 'Operational' : 'Offline';
     const authServiceStatus = systemStatus.auth.status === 'ok' ? 'Operational' : 'Offline';
     const urlServiceStatus = systemStatus.urls.status === 'ok' ? 'Operational' : 'Offline';
@@ -87,7 +92,7 @@ const LiveActivityDashboard: React.FC = () => {
                 <div>
                     <h3 className="text-xl font-bold text-white mb-4">Recent Activity</h3>
                      <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
-                        {data.activityLogs.length > 0 ? data.activityLogs.map((log: any) => (
+                        {(data.activityLogs || []).length > 0 ? data.activityLogs.map((log: any) => (
                             <div key={log._id} className="p-2 bg-black/40 rounded">
                                 <p className="text-sm text-gray-300">
                                     <span className="font-semibold text-white">{log.userName}</span> just logged in.
