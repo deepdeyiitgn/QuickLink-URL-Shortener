@@ -201,6 +201,7 @@ const OwnerDashboard: React.FC = () => {
             
             {renderContent()}
 
+            
             <div className="mt-8 pt-6 border-t border-white/20">
                 <h3 className="text-xl font-bold text-white mb-4">Project Management</h3>
                 <a 
