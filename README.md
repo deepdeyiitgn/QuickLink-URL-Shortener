@@ -66,10 +66,10 @@
 ## 📸 Screenshots
 
 *(Add screenshots of your application here to showcase the UI. For example:)*
-*   `![URL Shortener Page](link-to-screenshot.png)`
-*   `![QR Generator with Customization](link-to-screenshot.png)`
-*   `![Admin Dashboard](link-to-screenshot.png)`
-*   `![Community Blog](link-to-screenshot.png)`
+*   `<h2>URL Shortener Page</h2>[![URL Shortener Page](public/screenshot1.jpg)](https://quick-link-url-shortener.vercel.app/shortener)
+*   `<h2>QR Generator with Customization</h2> [![QR Generator with Customization](public/screenshot2.jpg)](https://quick-link-url-shortener.vercel.app/qr-generator)
+*   `<h2>Admin Dashboard</h2>[![Admin Dashboard](public/screenshot3.jpg)](https://quick-link-url-shortener.vercel.app/dashboard)
+*   `<h2>Community Blog</h2>[![Community Blog](public/screenshot4.jpg)](https://quick-link-url-shortener.vercel.app/blog)
 
 ---
 
