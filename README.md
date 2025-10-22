@@ -13,10 +13,20 @@
     <img src="https://img.shields.io/badge/database-MongoDB-47A248?style=for-the-badge&logo=mongodb" alt="MongoDB">
   </p>
 </div>
+<p align="center">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&duration=3000&pause=800&color=3A0CA3&center=true&vCenter=true&width=450&lines=QuickLink;URL+Shortener;QR+Suite;Community+Blog;Made+with+%F0%9F%A9%B7+Deep;Helped+by+Gemini+%F0%9F%92%99;We+Are+Here+%F0%9F%A7%BF;Saiyaara+%26+Aashiqui+2+%E2%9C%A8;Feminist+%E2%9C%A8;Jee+Aspirant+2027+%F0%9F%8E%AF" alt="Typing SVG">
+</p>
+
+
 
 **QuickLink** is a feature-complete, stable, and production-ready platform designed to make sharing information as seamless, secure, and efficient as possible. It provides a fast, reliable, and feature-rich suite to shorten URLs, generate dynamic QR codes, and engage with a community for everyone—from individuals sharing content with friends, to businesses engaging with customers on a global scale.
 
 **[➡️ Live Demo](https://quick-link-url-shortener.vercel.app/)**
+
+---
+<p align="center">
+  <img src="https://komarev.com/ghpvc/?username=deepdeyiitgn" alt="deepdeyiitgn's profile views" />
+</p>
 
 ---
 
@@ -216,3 +226,42 @@ This project is optimized for deployment on [Vercel](https://vercel.com/).
 ## 💖 Acknowledgment
 
 This project was built with the invaluable assistance of **Google's Gemini**. Its capabilities in code generation, debugging, and providing architectural insights were instrumental in bringing this complex application to life.
+
+---
+<div align="center"> 
+  
+ [![Deep's GitHub stats](https://github-readme-stats.vercel.app/api?username=deepdeyiitgn&show_icons=true)](https://github.com/deepdeyiitgn/deepdey-discord_bot/)
+</div>
+
+---
+<div align="center"> 
+  
+  [![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=deepdeyiitgn&layout=pie)](https://github.com/deepdeyiitgn)
+</div>
+
+---
+<div align="center"> 
+  
+  [![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=deepdeyiitgn&stats_format=bytes)](https://deepdeyiitk.com/)
+</div>
+
+---
+<div align="center"> 
+  
+<p align="center">
+ 
+  <img src="https://komarev.com/ghpvc/?username=deepdeyiitgn" alt="deepdeyiitgn's profile views" />
+</p>
+</div>
+
+
+<p align="center">
+  <em>Made with ❤️, AI power, and relentless focus by <b>Deep Dey</b></em>
+</p>
+
+
+
+<div align="center"> 
+  
+  [![](https://raw.githubusercontent.com/Anuj579/Anuj579/output/github-contribution-grid-snake-dark.svg)](https://deepdeyiitk.com/)
+</div>
