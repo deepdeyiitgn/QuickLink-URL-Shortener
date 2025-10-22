@@ -42,7 +42,7 @@ const Footer: React.FC = () => {
         { name: 'Cookies Policy', href: '/cookies' },
         { name: 'System Status', href: '/status' },
         { name: 'FAQ', href: '/faq' },
-        { name: 'Github', href: 'https://github.com/deepdeyiitgn/QuickLink-URL-Shortener' },
+        { name: 'GitHub', href: 'https://github.com/deepdeyiitgn/QuickLink-URL-Shortener' },
     ];
 
     return (
@@ -51,11 +51,21 @@ const Footer: React.FC = () => {
                 <div className="flex flex-col items-center gap-8">
                     <SocialLinks />
                     <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-gray-400">
-                        {footerLinks.map(link => (
-                            <Link key={link.name} to={link.href} className="hover:text-brand-light transition-colors">
-                                {link.name}
-                            </Link>
-                        ))}
+                        {footerLinks.map(link => {
+                            const isExternal = link.href.startsWith('http');
+                            if (isExternal) {
+                                return (
+                                    <a key={link.name} href={link.href} target="_blank" rel="noopener noreferrer" className="hover:text-brand-light transition-colors">
+                                        {link.name}
+                                    </a>
+                                );
+                            }
+                            return (
+                                <Link key={link.name} to={link.href} className="hover:text-brand-light transition-colors">
+                                    {link.name}
+                                </Link>
+                            );
+                        })}
                     </div>
                      <p className="text-center text-xs text-gray-600 mt-4 select-none footer-glow">
                         "Made with 🩷 Deep | Helped by Gemini 💙 | We Are Here 🧿 | Saiyaara & Aashiqui 2 ✨ || Feminist ✨ | Jee Aspirant 2027 🎯"
