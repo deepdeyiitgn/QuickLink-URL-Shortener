@@ -1,10 +1,12 @@
 
+
 import React, { useEffect, useState, useContext, useRef } from 'react';
 import { LinkIcon, CameraIcon, UploadIcon, LoadingIcon } from './icons/IconComponents';
 import { QrContext } from '../contexts/QrContext';
 import { AuthContext } from '../contexts/AuthContext';
 
 declare const Html5Qrcode: any;
+declare const jsQR: (data: Uint8ClampedArray, width: number, height: number) => { data: string } | null;
 
 const QrCodeScanner: React.FC = () => {
     const qrContext = useContext(QrContext);
@@ -21,6 +23,7 @@ const QrCodeScanner: React.FC = () => {
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const html5QrCode = useRef<any>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const stopScanner = async () => {
         if (html5QrCode.current?.isScanning) {
@@ -41,6 +44,7 @@ const QrCodeScanner: React.FC = () => {
             content: decodedText
         });
         stopScanner();
+        setIsFileProcessing(false);
     };
 
     const startScanner = () => {
@@ -71,24 +75,65 @@ const QrCodeScanner: React.FC = () => {
         };
     }, []);
 
+    const tryJsqrScan = (file: File) => {
+        const reader = new FileReader();
+        const triggerExternalFallback = () => {
+            setFailedFile(file);
+            setShowFallbackModal(true);
+            setIsFileProcessing(false);
+        };
+
+        reader.onload = (e) => {
+            if (!e.target?.result) {
+                triggerExternalFallback();
+                return;
+            }
+            const img = new Image();
+            img.onload = () => {
+                const canvas = canvasRef.current;
+                if (!canvas) { triggerExternalFallback(); return; }
+                const ctx = canvas.getContext('2d');
+                if (!ctx) { triggerExternalFallback(); return; }
+
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0, img.width, img.height);
+                const imageData = ctx.getImageData(0, 0, img.width, img.height);
+                
+                try {
+                    const code = jsQR(imageData.data, imageData.width, imageData.height);
+                    if (code && code.data) {
+                        onScanSuccess(code.data);
+                    } else {
+                        triggerExternalFallback();
+                    }
+                } catch (jsqrError) {
+                    console.error("jsQR library error:", jsqrError);
+                    triggerExternalFallback();
+                }
+            };
+            img.onerror = triggerExternalFallback;
+            img.src = e.target.result as string;
+        };
+        reader.onerror = triggerExternalFallback;
+        reader.readAsDataURL(file);
+    };
+
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!event.target.files || event.target.files.length === 0) return;
         const file = event.target.files[0];
         setIsFileProcessing(true);
         setScanError(null);
         setScanResult(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
 
         try {
             const fileScanner = new Html5Qrcode("reader-file", { verbose: false });
             const decodedText = await fileScanner.scanFile(file, false);
             onScanSuccess(decodedText);
         } catch (err) {
-            // Instead of setting error directly, trigger the fallback modal
-            setFailedFile(file);
-            setShowFallbackModal(true);
-        } finally {
-            setIsFileProcessing(false);
-            if (fileInputRef.current) fileInputRef.current.value = "";
+            console.warn("Primary scanner (html5-qrcode) failed, trying secondary client-side scanner (jsQR)...");
+            tryJsqrScan(file);
         }
     };
 
@@ -148,7 +193,7 @@ const QrCodeScanner: React.FC = () => {
             <div className="relative w-full max-w-lg glass-card rounded-2xl p-8 text-center">
                 <h3 className="text-xl font-bold text-white mb-4">Scan Failed</h3>
                 <p className="text-gray-300 mb-6">
-                    Our scanner couldn't read this QR code. Would you like to try again using our powerful third-party scanning partner, <code className="bg-black/30 p-1 rounded text-brand-secondary">api.qrserver.com</code>?
+                    Our built-in scanners couldn't read this QR code. Would you like to try again using our powerful third-party scanning partner, <code className="bg-black/30 p-1 rounded text-brand-secondary">api.qrserver.com</code>?
                     <br />
                     <span className="text-xs text-gray-500">Your image will be sent to their server for processing.</span>
                 </p>
@@ -228,7 +273,7 @@ const QrCodeScanner: React.FC = () => {
                 </div>
             )}
             
-            <div id="reader" style={{ display: 'none' }}></div>
+            <canvas ref={canvasRef} style={{ display: 'none' }} />
             <div id="reader-file" className="hidden"></div>
         </div>
     );
