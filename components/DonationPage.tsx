@@ -11,7 +11,7 @@ const Leaderboard: React.FC<{ donations: Donation[], users: any[] }> = ({ donati
         donations.forEach(d => {
             if (d.userId && !d.isAnonymous) {
                 const user = users.find(u => u.id === d.userId);
-                const name = user ? user.userName : d.userName; // Use userName // Fallback to donation name
+                const name = user ? user.name : d.name;// Fallback to donation name
                 const existing = userTotals.get(d.userId) || { name, total: 0, isUser: true };
                 existing.total += d.amount;
                 userTotals.set(d.userId, existing);
