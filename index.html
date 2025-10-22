@@ -33,6 +33,23 @@
       }
     }
     </script>
+    <style>
+        .animate-aurora {
+    background: linear-gradient(70deg, theme('colors.brand-primary'), theme('colors.brand-secondary'), theme('colors.brand-primary'));
+    background-size: 200% auto;
+    color: #000;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: aurora-glow 4s linear infinite;
+}
+
+@keyframes aurora-glow { 
+    to { 
+        background-position: 200% center; 
+    } 
+}
+        </style>
     
     <!-- Tailwind CSS Play CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
