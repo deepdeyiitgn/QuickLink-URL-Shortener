@@ -22,6 +22,8 @@
 **QuickLink** is a feature-complete, stable, and production-ready platform designed to make sharing information as seamless, secure, and efficient as possible. It provides a fast, reliable, and feature-rich suite to shorten URLs, generate dynamic QR codes, and engage with a community for everyone—from individuals sharing content with friends, to businesses engaging with customers on a global scale.
 
 **[➡️ Live Demo](https://quick-link-url-shortener.vercel.app/)**
+**[🩷 Support](https://www.chatbase.co/z1dBVS3yYaFm-L9FJnbAT/help)**
+**[📞 Contact](https://www.chatbase.co/z1dBVS3yYaFm-L9FJnbAT/help)**
 
 ---
 <p align="center">
