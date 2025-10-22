@@ -3,6 +3,7 @@
 
 import { connectToDatabase } from './lib/mongodb.js';
 import type { User } from '../types';
+import crypto from 'crypto';
 
 export default async function handler(req: any, res: any) {
     res.setHeader('Content-Type', 'application/json');
@@ -26,7 +27,7 @@ export default async function handler(req: any, res: any) {
 
         if (req.method === 'PUT') {
             const { id } = req.query;
-            const { action, ...updateData } = req.body;
+            const { action, newApiKey, ...updateData } = req.body;
 
             if (!id) {
                 return res.status(400).json({ error: 'User ID is required in the query.' });
@@ -35,6 +36,27 @@ export default async function handler(req: any, res: any) {
             if (action === 'update_details') {
                 const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
                 updateData.ipAddress = ip;
+            }
+            
+            // Handle API key generation if requested
+            if (newApiKey) {
+                const apiKey = `qk_${crypto.randomBytes(16).toString('hex')}`;
+                
+                const apiSubscription = updateData.subscription;
+                if (!apiSubscription || !apiSubscription.planId || !apiSubscription.expiresAt) {
+                    return res.status(400).json({ error: 'API subscription details are missing for key generation.' });
+                }
+
+                updateData.apiAccess = {
+                    apiKey: apiKey,
+                    subscription: {
+                        planId: apiSubscription.planId,
+                        expiresAt: apiSubscription.expiresAt
+                    }
+                };
+
+                // Prevent overwriting main user subscription
+                delete updateData.subscription;
             }
 
             // Always update lastActive on any PUT request
@@ -46,8 +68,6 @@ export default async function handler(req: any, res: any) {
                 { returnDocument: 'after' }
             );
 
-            // FIX: The modern MongoDB driver returns the document directly in the `value` property.
-            // Changed `result.value` to just `result` to correctly access the updated document.
             if (!result) {
                 return res.status(404).json({ error: 'User not found to update.' });
             }
