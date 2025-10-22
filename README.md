@@ -16,7 +16,7 @@
 
 **QuickLink** is a feature-complete, stable, and production-ready platform designed to make sharing information as seamless, secure, and efficient as possible. It provides a fast, reliable, and feature-rich suite to shorten URLs, generate dynamic QR codes, and engage with a community for everyone—from individuals sharing content with friends, to businesses engaging with customers on a global scale.
 
-**[➡️ Live Demo](https://shorturl.deepdeyiitk.com/)**
+**[➡️ Live Demo](https://quick-link-url-shortener.vercel.app/)**
 
 ---
 
@@ -134,7 +134,7 @@ RAZORPAY_KEY_SECRET="your_razorpay_key_secret"
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/Deep-Dey/quick-link-url-shortener.git
+    git clone https://github.com/deepdeyiitgn/QuickLink-URL-Shortener.git
     cd quick-link-url-shortener
     ```
 
