@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useState, useContext, useRef } from 'react';
 import { LinkIcon, CameraIcon, UploadIcon, LoadingIcon } from './icons/IconComponents';
 import { QrContext } from '../contexts/QrContext';
@@ -16,6 +14,7 @@ const QrCodeScanner: React.FC = () => {
     const [isScanning, setIsScanning] = useState(false);
     const [isFileProcessing, setIsFileProcessing] = useState(false);
     const [scanError, setScanError] = useState<string | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
     
     // New states for fallback mechanism
     const [showFallbackModal, setShowFallbackModal] = useState(false);
@@ -46,6 +45,27 @@ const QrCodeScanner: React.FC = () => {
         stopScanner();
         setIsFileProcessing(false);
     };
+
+    const processFile = async (file: File) => {
+        if (!file.type.startsWith('image/')) {
+            setScanError('Please drop an image file.');
+            return;
+        }
+        setIsFileProcessing(true);
+        setScanError(null);
+        setScanResult(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+
+        try {
+            const fileScanner = new Html5Qrcode("reader-file", { verbose: false });
+            const decodedText = await fileScanner.scanFile(file, false);
+            onScanSuccess(decodedText);
+        } catch (err) {
+            console.warn("Primary scanner (html5-qrcode) failed, trying secondary client-side scanner (jsQR)...");
+            tryJsqrScan(file);
+        }
+    };
+
 
     const startScanner = () => {
         if (isScanning || html5QrCode.current) return;
@@ -119,21 +139,9 @@ const QrCodeScanner: React.FC = () => {
         reader.readAsDataURL(file);
     };
 
-    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (!event.target.files || event.target.files.length === 0) return;
-        const file = event.target.files[0];
-        setIsFileProcessing(true);
-        setScanError(null);
-        setScanResult(null);
-        if (fileInputRef.current) fileInputRef.current.value = "";
-
-        try {
-            const fileScanner = new Html5Qrcode("reader-file", { verbose: false });
-            const decodedText = await fileScanner.scanFile(file, false);
-            onScanSuccess(decodedText);
-        } catch (err) {
-            console.warn("Primary scanner (html5-qrcode) failed, trying secondary client-side scanner (jsQR)...");
-            tryJsqrScan(file);
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files.length > 0) {
+            processFile(event.target.files[0]);
         }
     };
 
@@ -187,6 +195,30 @@ const QrCodeScanner: React.FC = () => {
             return false;
         }
     };
+    
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        if (!isScanning && !scanResult && !isFileProcessing) {
+            setIsDragging(true);
+        }
+    };
+
+    const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        setIsDragging(false);
+        if (isScanning || scanResult || isFileProcessing) return;
+
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            processFile(e.dataTransfer.files[0]);
+            e.dataTransfer.clearData();
+        }
+    };
+
 
     const FallbackModal = () => (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
@@ -234,28 +266,16 @@ const QrCodeScanner: React.FC = () => {
     }
     
     return (
-        <div className="mt-6">
+        <div 
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`mt-6 transition-all duration-300 p-2 rounded-lg ${isDragging ? 'bg-brand-primary/20 border-2 border-dashed border-brand-primary' : 'border-2 border-transparent'}`}
+        >
             {showFallbackModal && <FallbackModal />}
-            {!isScanning && !isFileProcessing && (
-                <div className="text-center animate-fade-in">
-                    <p className="text-gray-400 mb-6 max-w-lg mx-auto">Our powerful scanner can read even damaged or low-quality QR codes. For best results, ensure the code is well-lit.</p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <button onClick={startScanner} className="flex-1 inline-flex items-center justify-center gap-3 rounded-md bg-brand-primary px-6 py-3 text-sm font-semibold text-brand-dark shadow-[0_0_10px_#00e5ff] hover:bg-brand-primary/80 transition-all">
-                            <CameraIcon className="h-6 w-6" />
-                            Use Camera
-                        </button>
-                        <button onClick={() => fileInputRef.current?.click()} className="flex-1 inline-flex items-center justify-center gap-3 rounded-md bg-white/10 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-white/20 transition-all">
-                            <UploadIcon className="h-6 w-6" />
-                            Upload Image
-                        </button>
-                        <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
-                    </div>
-                    {scanError && <p className="mt-4 text-sm text-red-400">{scanError}</p>}
-                </div>
-            )}
 
-            {isScanning && (
-                <div className="animate-fade-in">
+            {isScanning ? (
+                 <div className="animate-fade-in">
                     <div className="w-full max-w-sm mx-auto">
                         <div id="reader" className="aspect-square bg-brand-dark rounded-lg overflow-hidden border-2 border-dashed border-white/20"></div>
                         <p className="text-xs text-gray-500 text-center mt-2">Point your camera at a QR code</p>
@@ -264,12 +284,35 @@ const QrCodeScanner: React.FC = () => {
                         <button onClick={stopScanner} className="text-gray-400 hover:text-white">Cancel</button>
                     </div>
                 </div>
-            )}
-            
-            {isFileProcessing && (
-                <div className="text-center animate-fade-in flex flex-col items-center justify-center h-48">
+            ) : isFileProcessing ? (
+                 <div className="text-center animate-fade-in flex flex-col items-center justify-center h-48">
                     <LoadingIcon className="h-8 w-8 animate-spin text-brand-primary" />
                     <p className="mt-4 text-gray-400">Processing image...</p>
+                </div>
+            ) : (
+                 <div className="text-center animate-fade-in min-h-[200px] flex flex-col justify-center">
+                    {isDragging ? (
+                        <div className="flex flex-col items-center justify-center h-48 pointer-events-none">
+                            <UploadIcon className="h-12 w-12 text-brand-primary animate-bounce" />
+                            <p className="mt-4 text-white font-semibold text-lg">Drop your image here to scan</p>
+                        </div>
+                    ) : (
+                        <>
+                            <p className="text-gray-400 mb-6 max-w-lg mx-auto">Our powerful scanner can read even damaged or low-quality QR codes. <span className="font-semibold text-gray-300">Drag & drop</span> an image file here or use the buttons below.</p>
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                <button onClick={startScanner} className="flex-1 inline-flex items-center justify-center gap-3 rounded-md bg-brand-primary px-6 py-3 text-sm font-semibold text-brand-dark shadow-[0_0_10px_#00e5ff] hover:bg-brand-primary/80 transition-all">
+                                    <CameraIcon className="h-6 w-6" />
+                                    Use Camera
+                                </button>
+                                <button onClick={() => fileInputRef.current?.click()} className="flex-1 inline-flex items-center justify-center gap-3 rounded-md bg-white/10 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-white/20 transition-all">
+                                    <UploadIcon className="h-6 w-6" />
+                                    Upload Image
+                                </button>
+                                <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+                            </div>
+                            {scanError && <p className="mt-4 text-sm text-red-400">{scanError}</p>}
+                        </>
+                    )}
                 </div>
             )}
             
