@@ -44,6 +44,7 @@ const Footer: React.FC = () => {
         { name: 'FAQ', href: '/faq' },
         { name: 'GitHub', href: 'https://github.com/deepdeyiitgn/QuickLink-URL-Shortener' },
         { name: 'Support', href: 'https://www.chatbase.co/z1dBVS3yYaFm-L9FJnbAT/help' },
+        { name: '☕ Buy Me a Coffee', href: 'https://buymeacoffee.com/quicklink' },
     ];
 
     return (
