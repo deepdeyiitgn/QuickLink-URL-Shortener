@@ -74,6 +74,7 @@
 
 *   **[Comprehensive Dashboard](/dashboard)**: Clean, tabbed interfaces for both users and admins.
 *   **Secure Authentication & Password Recovery**:
+    *   **Google Sign-In**: One-click sign-in/sign-up using your Google account, bypassing email verification.
     *   **Email Verification**: New user signups are protected by a mandatory email verification step to prevent spam and ensure account authenticity.
     *   **Robust Password Hashing**: Utilizes pbkdf2 with a strong salt for secure password storage.
     *   **"Forgot Password" Flow**: A complete password recovery process that sends a secure, one-time reset link to the user's email.
@@ -127,6 +128,7 @@
 
 *   **Payments**: [Razorpay](https://razorpay.com/), [Cashfree](https://www.cashfree.com/)
 *   **Advertisements**: [Google AdSense](https://www.google.com/adsense/)
+*   **Authentication**: [Google Identity Services](https://developers.google.com/identity)
 *   **Bot Protection**: [Google reCAPTCHA v2](https://www.google.com/recaptcha/about/)
 *   **Live Chat**: [JivoChat](https://www.jivochat.com/)
 *   **Email SMTP**: [Brevo (formerly Sendinblue)](https://www.brevo.com/)
@@ -144,7 +146,7 @@
 - [MongoDB Atlas Account](https://www.mongodb.com/cloud/atlas/register) for the database
 - [Razorpay Account](https://razorpay.com/) for payment processing
 - [Brevo Account](https://www.brevo.com/) for SMTP email service
-- [Google reCAPTCHA Account](https://www.google.com/recaptcha/admin) for bot protection
+- [Google Cloud Account](https://cloud.google.com/) for reCAPTCHA and Google Sign-In credentials
 
 ### Environment Variables
 
@@ -166,10 +168,12 @@ BREVO_USER="your_brevo_login_email"
 BREVO_PASS="your_brevo_master_password"
 BREVO_SENDER="Your App Name<no-reply@yourdomain.com>"
 
-# Google reCAPTCHA v2 ("I'm not a robot" Checkbox)
-# Get these from the Google reCAPTCHA admin console after registering your site.
-VITE_RECAPTCHA_SITE_KEY="your_recaptcha_site_key" # For the frontend
-RECAPTCHA_SECRET_KEY="your_recaptcha_secret_key" # For backend validation
+# Google Services
+# Get these from the Google Cloud Console (APIs & Services -> Credentials)
+VITE_GOOGLE_CLIENT_ID="your_google_oauth_client_id" # For Google Sign-In on frontend
+GOOGLE_CLIENT_ID="your_google_oauth_client_id" # Same value as above, for backend validation
+VITE_RECAPTCHA_SITE_KEY="your_recaptcha_v2_site_key" # For reCAPTCHA on frontend
+RECAPTCHA_SECRET_KEY="your_recaptcha_v2_secret_key" # For backend validation
 ```
 
 ### Local Development
