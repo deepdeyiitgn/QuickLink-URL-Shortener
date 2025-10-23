@@ -114,6 +114,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return response.message;
     };
 
+    const loginWithGoogle = async (credential: string) => {
+        const user = await api.loginWithGoogle(credential);
+        handleUserUpdate(user);
+    };
+
     const logout = () => {
         setCurrentUser(null);
         localStorage.removeItem('currentUser');
@@ -215,6 +220,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         updateUserAsDonor,
         getAllUsers,
         updateUserData,
+        loginWithGoogle,
         sendPasswordResetLink,
         resetPassword,
     }), [currentUser, users, isAuthModalOpen, authModalMode, isSubscriptionModalOpen, isApiSubscriptionModalOpen, loading, isFetchingDetails, getAllUsers]);
