@@ -1,4 +1,5 @@
 
+
 <div align="center">
   <img src="/public/quicklink-logo.svg" alt="QuickLink Logo" width="128" height="128">
   <h1>QuickLink - URL Shortener, QR Suite, & Community Blog</h1>
@@ -39,7 +40,6 @@
 
 ---
 
-
 ## ✨ Core Features
 
 ### 🛠️ Main Tools
@@ -73,7 +73,11 @@
 ### 👑 User & Admin Features
 
 *   **[Comprehensive Dashboard](/dashboard)**: Clean, tabbed interfaces for both users and admins.
-*   **Secure Authentication & Password Recovery**: Includes robust password hashing (pbkdf2) and a complete "Forgot Password" flow that sends a secure, one-time reset link to the user's email. Password fields now include a toggle for visibility to improve user experience.
+*   **Secure Authentication & Password Recovery**:
+    *   **Email Verification**: New user signups are protected by a mandatory email verification step to prevent spam and ensure account authenticity.
+    *   **Robust Password Hashing**: Utilizes pbkdf2 with a strong salt for secure password storage.
+    *   **"Forgot Password" Flow**: A complete password recovery process that sends a secure, one-time reset link to the user's email.
+*   **Multi-Layered Bot Protection**: A sophisticated, multi-step CAPTCHA system on the verification page to filter out bots, featuring Google reCAPTCHA with a custom math and text puzzle as a fallback.
 *   **User Management**: Admins can view all users, manage their roles (Admin, Moderator), grant premium access, and view session analytics (IP, browser, device).
 *   **Content Moderation**: Admins can approve/disapprove blog posts and delete any user-created content (short links, posts, comments).
 *   **[Developer API](/api-access)**: A secure API for integrating URL shortening into external applications.
@@ -123,6 +127,7 @@
 
 *   **Payments**: [Razorpay](https://razorpay.com/), [Cashfree](https://www.cashfree.com/)
 *   **Advertisements**: [Google AdSense](https://www.google.com/adsense/)
+*   **Bot Protection**: [Google reCAPTCHA v2](https://www.google.com/recaptcha/about/)
 *   **Live Chat**: [JivoChat](https://www.jivochat.com/)
 *   **Email SMTP**: [Brevo (formerly Sendinblue)](https://www.brevo.com/)
 
@@ -139,6 +144,7 @@
 - [MongoDB Atlas Account](https://www.mongodb.com/cloud/atlas/register) for the database
 - [Razorpay Account](https://razorpay.com/) for payment processing
 - [Brevo Account](https://www.brevo.com/) for SMTP email service
+- [Google reCAPTCHA Account](https://www.google.com/recaptcha/admin) for bot protection
 
 ### Environment Variables
 
@@ -159,6 +165,11 @@ BREVO_PORT="587"
 BREVO_USER="your_brevo_login_email"
 BREVO_PASS="your_brevo_master_password"
 BREVO_SENDER="Your App Name<no-reply@yourdomain.com>"
+
+# Google reCAPTCHA v2 ("I'm not a robot" Checkbox)
+# Get these from the Google reCAPTCHA admin console after registering your site.
+VITE_RECAPTCHA_SITE_KEY="your_recaptcha_site_key" # For the frontend
+RECAPTCHA_SECRET_KEY="your_recaptcha_secret_key" # For backend validation
 ```
 
 ### Local Development
@@ -284,4 +295,3 @@ This project was built with the invaluable assistance of **Google's Gemini**. It
   
   [![](https://raw.githubusercontent.com/Anuj579/Anuj579/output/github-contribution-grid-snake-dark.svg)](https://deepdeyiitk.com/)
 </div>
-
