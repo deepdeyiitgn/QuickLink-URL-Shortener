@@ -12,6 +12,7 @@
     <img src="https://img.shields.io/badge/backend-Serverless-yellow?style=for-the-badge&logo=vercel" alt="Serverless">
     <img src="https://img.shields.io/badge/database-MongoDB-47A248?style=for-the-badge&logo=mongodb" alt="MongoDB">
     <img src="https://api.netlify.com/api/v1/badges/200f5c40-1521-4812-a0b1-e0549f7e8871/deploy-status" alt="Netlify Status" href="https://app.netlify.com/projects/quicklinkurl/deploys">
+    <img src="https://deploy-badge.vercel.app/vercel/qlynk" alt="Vercel Deploy"></img>
   </p>
 </div>
 <p align="center">
@@ -37,6 +38,7 @@
 </p>
 
 ---
+
 
 ## ✨ Core Features
 
