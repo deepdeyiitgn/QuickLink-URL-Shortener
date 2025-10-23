@@ -19,7 +19,6 @@
 </p>
 
 
-
 **QuickLink** is a feature-complete, stable, and production-ready platform designed to make sharing information as seamless, secure, and efficient as possible. It provides a fast, reliable, and feature-rich suite to shorten URLs, generate dynamic QR codes, and engage with a community for everyone—from individuals sharing content with friends, to businesses engaging with customers on a global scale.
 
 **[➡️ Live Demo](https://quick-link-url-shortener.vercel.app/)**
@@ -51,8 +50,6 @@
     *   **Deep Customization**: Change dot and background colors, and add a custom logo to the center.
 *   📷 **[QR Code Scanner](/qr-scanner)**: Instantly scan QR codes using a device camera or by uploading an image.
     *   **Multi-Engine Fallback**: Uses a primary in-browser scanner (`html5-qrcode`), a secondary in-browser scanner (`jsQR`), and an optional third-party API for maximum accuracy.
-*   ⚙️ **Optional External Fallback**: If both in-browser scanners fail, users are asked for consent to send the image to [api.qrserver.com](https://api.qrserver.com/) for decoding.
-
 
 ### ✍️ Community & Content
 
@@ -67,13 +64,14 @@
 *   💎 **[Subscription Tiers](/dashboard)**: One-time payments for premium plans via Razorpay and Cashfree.
 *   🛍️ **[E-commerce Shop](/shop)**: A complete shop system for digital products (e.g., subscription extensions).
 *   🎟️ **Advanced Coupon System**: Admins can create and manage discount coupons (percentage or flat-rate) with various limits (expiration, quantity, one-per-user).
-*   💸 **[Donation System](/donate)**: A dedicated page for users to support the platform, featuring a live donation leaderboard.
+*   💸 **[Donation System](/donate)**: A dedicated page for users to support the platform, featuring a live donation leaderboard and a "Buy Me a Coffee" link.
 *   **Strategic Ad Placement**: Dismissible Google AdSense units are placed in non-intrusive locations, with core tool areas and dashboards remaining ad-free.
 *   **Anti-Adblocker System**: A polite, timed modal encourages users to disable adblockers and provides helpful guides.
 
 ### 👑 User & Admin Features
 
 *   **[Comprehensive Dashboard](/dashboard)**: Clean, tabbed interfaces for both users and admins.
+*   **Secure Authentication & Password Recovery**: Includes robust password hashing (pbkdf2) and a complete "Forgot Password" flow that sends a secure, one-time reset link to the user's email. Password fields now include a toggle for visibility to improve user experience.
 *   **User Management**: Admins can view all users, manage their roles (Admin, Moderator), grant premium access, and view session analytics (IP, browser, device).
 *   **Content Moderation**: Admins can approve/disapprove blog posts and delete any user-created content (short links, posts, comments).
 *   **[Developer API](/api-access)**: A secure API for integrating URL shortening into external applications.
@@ -114,6 +112,7 @@
 *   **Runtime**: [Node.js](https://nodejs.org/)
 *   **Database**: [MongoDB Atlas](https://www.mongodb.com/atlas)
 *   **ODM**: Native [MongoDB Driver](https://www.mongodb.com/docs/drivers/node/current/)
+*   **Email**: [Nodemailer](https://nodemailer.com/) for sending transactional emails.
 
 </details>
 
@@ -123,6 +122,7 @@
 *   **Payments**: [Razorpay](https://razorpay.com/), [Cashfree](https://www.cashfree.com/)
 *   **Advertisements**: [Google AdSense](https://www.google.com/adsense/)
 *   **Live Chat**: [JivoChat](https://www.jivochat.com/)
+*   **Email SMTP**: [Brevo (formerly Sendinblue)](https://www.brevo.com/)
 
 </details>
 
@@ -136,6 +136,7 @@
 - [Vercel Account](https://vercel.com/signup) for deployment
 - [MongoDB Atlas Account](https://www.mongodb.com/cloud/atlas/register) for the database
 - [Razorpay Account](https://razorpay.com/) for payment processing
+- [Brevo Account](https://www.brevo.com/) for SMTP email service
 
 ### Environment Variables
 
@@ -149,13 +150,20 @@ MONGODB_DB_NAME="your_database_name"
 # Razorpay API Keys (for payment processing)
 VITE_RAZORPAY_KEY_ID="your_razorpay_key_id"
 RAZORPAY_KEY_SECRET="your_razorpay_key_secret"
+
+# Brevo SMTP Configuration (for password reset emails)
+BREVO_HOST="smtp-relay.brevo.com"
+BREVO_PORT="587"
+BREVO_USER="your_brevo_login_email"
+BREVO_PASS="your_brevo_master_password"
+BREVO_SENDER="Your App Name<no-reply@yourdomain.com>"
 ```
 
 ### Local Development
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/deepdeyiitgn/QuickLink-URL-Shortener.git
+    git clone https://github.com/Deep-Dey/quick-link-url-shortener.git
     cd quick-link-url-shortener
     ```
 
@@ -274,3 +282,4 @@ This project was built with the invaluable assistance of **Google's Gemini**. It
   
   [![](https://raw.githubusercontent.com/Anuj579/Anuj579/output/github-contribution-grid-snake-dark.svg)](https://deepdeyiitk.com/)
 </div>
+
