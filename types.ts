@@ -2,6 +2,7 @@
 declare global {
   interface Window {
     Razorpay: any;
+    grecaptcha: any;
   }
 }
 
@@ -16,7 +17,7 @@ export interface ShortenedUrl {
 }
 
 export type UserBadge = 'normal' | 'premium' | 'moderator' | 'owner' | 'blacklist';
-export type UserStatus = 'active' | 'banned';
+export type UserStatus = 'pending' | 'active' | 'banned';
 
 export interface Subscription {
   planId: 'monthly' | 'semi-annually' | 'yearly';
@@ -50,9 +51,11 @@ export interface User {
   ipAddress?: string;
   browser?: string;
   deviceType?: string;
-  // Fields for password reset
+  // Fields for password reset & email verification
   passwordResetToken?: string;
   passwordResetExpires?: number;
+  verificationToken?: string;
+  verificationExpires?: number;
 }
 
 export type AuthModalMode = 'login' | 'signup';
@@ -67,7 +70,7 @@ export interface AuthContextType {
   loading: boolean;
   isFetchingDetails: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (name: string, email: string, password: string) => Promise<void>;
+  signup: (name: string, email: string, password: string) => Promise<string>;
   logout: () => void;
   openAuthModal: (mode: AuthModalMode) => void;
   closeAuthModal: () => void;
