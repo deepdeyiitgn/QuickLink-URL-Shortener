@@ -18,7 +18,9 @@ export const api = {
     // Auth
     login: (email: string, password: string): Promise<User> => apiFetch('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'login', email, password }) }),
     signup: (name: string, email: string, password: string): Promise<User> => apiFetch('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'signup', name, email, password }) }),
-    
+    sendPasswordResetLink: (email: string): Promise<{ message: string }> => apiFetch('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'forgot-password', email }) }),
+    resetPassword: (token: string, newPassword: string): Promise<{ message: string }> => apiFetch('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'reset-password', token, newPassword }) }),
+
     // Users
     getUsers: (): Promise<User[]> => apiFetch('/api/users'),
     getUserById: (id: string): Promise<User> => apiFetch(`/api/users?id=${id}`),
