@@ -158,7 +158,7 @@ export default async function handler(req: any, res: any) {
 
                 const htmlEmail = `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin:auto; border:1px solid #ddd; padding:20px; text-align:center; background:#f9f9f9;">
-                        <img src="https://quick-link-url-shortener.vercel.app/quicklink-logo.svg" alt="QuickLink Logo" style="width:150px; margin-bottom:20px;" />
+                        <img src="${origin}/quicklink-logo.svg" alt="QuickLink Logo" style="width:150px; margin-bottom:20px;" />
                         <h2 style="color:#333;">Welcome to QuickLink!</h2>
                         <p style="color:#555; font-size:16px;">Thanks for signing up! Please click the button below to verify your email address and activate your account.</p>
                         <a href="${verificationUrl}" style="display:inline-block; padding:12px 25px; margin:20px 0; background:#00e5ff; color:#0a0a1a; text-decoration:none; border-radius:5px; font-weight:bold;">Verify Your Email</a>
@@ -197,7 +197,8 @@ export default async function handler(req: any, res: any) {
                 
                 const { email, name, picture } = tokenInfo;
                 
-                let user = await usersCollection.findOne({ email });
+                const userFromDb = await usersCollection.findOne({ email });
+                let user: User | null = userFromDb as User | null;
                 let isNewUser = false;
             
                 if (!user) {
@@ -218,7 +219,7 @@ export default async function handler(req: any, res: any) {
                         subscription: null,
                         apiAccess: null,
                     };
-                    await usersCollection.insertOne(newUser);
+                    await usersCollection.insertOne(newUser as any);
                     user = newUser;
                 } else {
                     // If user exists, update their name and picture and activate if pending
@@ -231,7 +232,7 @@ export default async function handler(req: any, res: any) {
                     user = { ...user, ...updates };
                 }
             
-                if (isNewUser) {
+                if (isNewUser && user) {
                     // Send welcome email without blocking the response
                     sendWelcomeEmail(user, transporter).catch(console.error);
                 }
@@ -255,7 +256,7 @@ export default async function handler(req: any, res: any) {
 
                 const resetUrl = `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers.host}/reset-password/${resetToken}`;
 
-                const htmlEmail = `<div style="font-family: Arial, sans-serif; max-width: 600px; margin:auto; border:1px solid #ddd; padding:20px; text-align:center; background:#f9f9f9;"><img src="https://quick-link-url-shortener.vercel.app/quicklink-logo.svg" alt="QuickLink Logo" style="width:150px; margin-bottom:20px;" /><h2 style="color:#333;">Reset Your Password</h2><p style="color:#555; font-size:16px;">We received a request to reset your QuickLink account password. Click the button below to reset it:</p><a href="${resetUrl}" style="display:inline-block; padding:12px 25px; margin:20px 0; background:#00e5ff; color:#0a0a1a; text-decoration:none; border-radius:5px; font-weight:bold;">Reset Password</a><p style="color:#777; font-size:14px;">If the button doesn’t work, copy and paste this link into your browser: <br /><a href="${resetUrl}" style="color:#00e5ff; word-break:break-all;">${resetUrl}</a></p><p style="color:#aaa; font-size:12px; margin-top:30px;">&copy; ${new Date().getFullYear()} QuickLink. All rights reserved.</p></div>`;
+                const htmlEmail = `<div style="font-family: Arial, sans-serif; max-width: 600px; margin:auto; border:1px solid #ddd; padding:20px; text-align:center; background:#f9f9f9;"><img src="${origin}/quicklink-logo.svg" alt="QuickLink Logo" style="width:150px; margin-bottom:20px;" /><h2 style="color:#333;">Reset Your Password</h2><p style="color:#555; font-size:16px;">We received a request to reset your QuickLink account password. Click the button below to reset it:</p><a href="${resetUrl}" style="display:inline-block; padding:12px 25px; margin:20px 0; background:#00e5ff; color:#0a0a1a; text-decoration:none; border-radius:5px; font-weight:bold;">Reset Password</a><p style="color:#777; font-size:14px;">If the button doesn’t work, copy and paste this link into your browser: <br /><a href="${resetUrl}" style="color:#00e5ff; word-break:break-all;">${resetUrl}</a></p><p style="color:#aaa; font-size:12px; margin-top:30px;">&copy; ${new Date().getFullYear()} QuickLink. All rights reserved.</p></div>`;
                 
                 await transporter.sendMail({
                     from: process.env.BREVO_SENDER,
