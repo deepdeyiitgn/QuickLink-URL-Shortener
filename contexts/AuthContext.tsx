@@ -109,9 +109,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         handleUserUpdate(user);
     };
 
-    const signup = async (name: string, email: string, password: string) => {
-        const user = await api.signup(name, email, password);
-        handleUserUpdate(user);
+    const signup = async (name: string, email: string, password: string): Promise<string> => {
+        const response = await api.signup(name, email, password);
+        return response.message;
     };
 
     const logout = () => {
