@@ -44,6 +44,7 @@ const DonationPage = lazy(() => import('./components/DonationPage'));
 const NotificationsPage = lazy(() => import('./components/NotificationsPage'));
 const ShopPage = lazy(() => import('./components/ShopPage'));
 const AdComponent = lazy(() => import('./components/AdComponent'));
+const ResetPasswordPage = lazy(() => import('./components/ResetPasswordPage'));
 
 const AppContent: React.FC = () => {
     const auth = useContext(AuthContext);
@@ -110,6 +111,7 @@ const AppContent: React.FC = () => {
                                 <Route path="/donate" element={<DonationPage />} />
                                 <Route path="/notifications" element={<NotificationsPage />} />
                                 <Route path="/shop" element={<ShopPage />} />
+                                <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
                                 <Route path="/:alias" element={<RedirectPage />} />
                                 <Route path="*" element={<NotFoundPage />} />
                             </Routes>
