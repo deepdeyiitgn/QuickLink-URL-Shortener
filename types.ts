@@ -50,6 +50,9 @@ export interface User {
   ipAddress?: string;
   browser?: string;
   deviceType?: string;
+  // Fields for password reset
+  passwordResetToken?: string;
+  passwordResetExpires?: number;
 }
 
 export type AuthModalMode = 'login' | 'signup';
@@ -79,6 +82,8 @@ export interface AuthContextType {
   updateUserAsDonor: (userId: string) => Promise<void>;
   getAllUsers: () => Promise<User[]>;
   updateUserData: (userId: string, updates: Partial<User>) => Promise<void>;
+  sendPasswordResetLink: (email: string) => Promise<void>;
+  resetPassword: (token: string, newPassword: string) => Promise<void>;
 }
 
 export interface UrlContextType {
