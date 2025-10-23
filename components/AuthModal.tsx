@@ -23,6 +23,20 @@ const AuthModal: React.FC = () => {
       setEmail('');
       setPassword('');
       setShowPassword(false);
+      
+      if (window.google) {
+        window.google.accounts.id.initialize({
+            client_id: process.env.VITE_GOOGLE_CLIENT_ID,
+            callback: handleGoogleSignIn,
+        });
+        const googleButton = document.getElementById('google-signin-button');
+        if (googleButton) {
+            window.google.accounts.id.renderButton(
+                googleButton,
+                { theme: 'outline', size: 'large', width: '350' }
+            );
+        }
+      }
     }
   }, [auth?.isAuthModalOpen, auth?.authModalMode]);
 
@@ -30,7 +44,21 @@ const AuthModal: React.FC = () => {
     return null;
   }
 
-  const { login, signup, closeAuthModal, sendPasswordResetLink } = auth;
+  const { login, signup, closeAuthModal, sendPasswordResetLink, loginWithGoogle } = auth;
+  
+  const handleGoogleSignIn = async (response: any) => {
+        if (!loginWithGoogle) return;
+        setIsLoading(true);
+        setError('');
+        try {
+            await loginWithGoogle(response.credential);
+            closeAuthModal();
+        } catch (err: any) {
+            setError(err.message || 'Google sign-in failed.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,6 +124,12 @@ const AuthModal: React.FC = () => {
         <div className="flex border-b border-white/20 mb-6">
             <button onClick={() => setMode('login')} className={`w-1/2 py-3 text-lg font-semibold transition-colors ${mode === 'login' ? 'text-brand-primary border-b-2 border-brand-primary' : 'text-gray-500'}`}>Sign In</button>
             <button onClick={() => setMode('signup')} className={`w-1/2 py-3 text-lg font-semibold transition-colors ${mode === 'signup' ? 'text-brand-primary border-b-2 border-brand-primary' : 'text-gray-500'}`}>Sign Up</button>
+        </div>
+        <div id="google-signin-button" className="mb-4 flex justify-center"></div>
+        <div className="relative flex py-2 items-center">
+            <div className="flex-grow border-t border-white/20"></div>
+            <span className="flex-shrink mx-4 text-gray-400 text-xs uppercase">Or</span>
+            <div className="flex-grow border-t border-white/20"></div>
         </div>
         <h2 className="text-2xl font-bold text-center text-white mb-2">{mode === 'signup' ? 'Create an Account' : 'Welcome Back'}</h2>
         <p className="text-center text-gray-400 mb-6">{mode === 'signup' ? 'Get 7-day links by creating an account.' : 'Sign in to access your benefits.'}</p>
