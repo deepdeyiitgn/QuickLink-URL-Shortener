@@ -36,6 +36,66 @@ const transporter = nodemailer.createTransport({
     },
 });
 
+// --- Welcome Email for Google Sign-In Users ---
+async function sendWelcomeEmail(user: User, transporter: any) {
+    const host = 'shorturl.deepdeyiitk.com'; // Using the primary domain for links in email
+    const protocol = 'https';
+    const origin = `${protocol}://${host}`;
+
+    const htmlEmail = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin:auto; border:1px solid #ddd; padding:20px; text-align:center; background:#0a0a1a; color: #e0f7fa;">
+        <img src="${origin}/quicklink-logo.svg" alt="QuickLink Logo" style="width:120px; margin-bottom:20px;" />
+        <h1 style="color:#00e5ff; font-size: 28px; background: linear-gradient(70deg, #00e5ff, #846cff, #00e5ff); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: aurora-glow 4s linear infinite;">Welcome to QuickLink, ${user.name}!</h1>
+        <p style="color:#b0bec5; font-size:16px;">We're thrilled to have you. Your account is active and you're ready to explore all the powerful features QuickLink has to offer. Here's a quick guide to get you started:</p>
+        
+        <div style="text-align: left; border-top: 1px solid #37474f; margin-top: 25px; padding-top: 20px;">
+            <h2 style="color: #846cff; border-bottom: 2px solid #846cff; padding-bottom: 5px;">🔗 Powerful URL Shortener</h2>
+            <p style="color:#b0bec5; line-height: 1.6;">Turn long, messy URLs into short, shareable links. Perfect for social media, marketing campaigns, and more.</p>
+            <ul style="color:#b0bec5; list-style-position: inside; padding-left: 0;">
+                <li><strong>Create Custom Aliases:</strong> Make your links memorable (e.g., ${host}/my-event).</li>
+                <li><strong>Link Management:</strong> All your links are saved in your <a href="${origin}/dashboard" style="color: #00e5ff;">Dashboard</a>.</li>
+                <li><strong>Link Lifespan:</strong> As a registered user, your links last for 7 days. Upgrade to Premium for links that last up to a year!</li>
+            </ul>
+        </div>
+        
+        <div style="text-align: left; border-top: 1px solid #37474f; margin-top: 25px; padding-top: 20px;">
+            <h2 style="color: #00e5ff; border-bottom: 2px solid #00e5ff; padding-bottom: 5px;">🎨 QR Code Suite</h2>
+            <p style="color:#b0bec5; line-height: 1.6;">Bridge the physical and digital worlds with our versatile QR code tools.</p>
+            <ul style="color:#b0bec5; list-style-position: inside; padding-left: 0;">
+                <li><strong>Generate Anything:</strong> Create codes for websites, Wi-Fi, vCards, events, and even payments.</li>
+                <li><strong>Customize:</strong> Change colors and add your logo to match your brand.</li>
+                <li><strong>Scan Instantly:</strong> Use our browser-based <a href="${origin}/qr-scanner" style="color: #00e5ff;">QR Scanner</a> with your camera or an image file.</li>
+            </ul>
+        </div>
+
+        <div style="text-align: left; border-top: 1px solid #37474f; margin-top: 25px; padding-top: 20px;">
+            <h2 style="color: #846cff; border-bottom: 2px solid #846cff; padding-bottom: 5px;">✍️ Community Blog</h2>
+            <p style="color:#b0bec5; line-height: 1.6;">Share your stories, tutorials, and ideas with the QuickLink community. You can create posts, add images or audio, and interact with others by liking and commenting.</p>
+            <a href="${origin}/blog/create" style="display:inline-block; padding:10px 20px; margin:10px 0; background:#846cff; color:#fff; text-decoration:none; border-radius:5px;">Write Your First Post</a>
+        </div>
+
+        <div style="text-align: left; border-top: 1px solid #37474f; margin-top: 25px; padding-top: 20px;">
+            <h2 style="color: #00e5ff; border-bottom: 2px solid #00e5ff; padding-bottom: 5px;">🚀 Developer API</h2>
+            <p style="color:#b0bec5; line-height: 1.6;">Integrate QuickLink's power into your own applications. Get your free trial API key from the <a href="${origin}/api-access" style="color: #00e5ff;">API Access page</a>.</p>
+        </div>
+
+        <div style="border-top: 1px solid #37474f; margin-top: 30px; padding-top: 20px; color: #78909c; font-size: 12px;">
+            <p style="margin: 0;">"Made with 🩷 Deep | Helped by Gemini 💙 | We Are Here 🧿 | Saiyaara & Aashiqui 2 ✨ || Feminist ✨ | Jee Aspirant 2027 🎯"</p>
+            <p style="margin-top: 20px;">&copy; ${new Date().getFullYear()} QuickLink. All rights reserved.</p>
+        </div>
+    </div>
+    <style>@keyframes aurora-glow { to { background-position: 200% center; } }</style>
+    `;
+
+    await transporter.sendMail({
+        from: process.env.BREVO_SENDER,
+        to: user.email,
+        subject: `🎉 Welcome to QuickLink, ${user.name}!`,
+        html: htmlEmail,
+    });
+}
+
+
 // --- Main Handler ---
 export default async function handler(req: any, res: any) {
     res.setHeader('Content-Type', 'application/json');
@@ -48,7 +108,7 @@ export default async function handler(req: any, res: any) {
     try {
         const { db } = await connectToDatabase();
         const usersCollection = db.collection('users');
-        const { action, email, password, name, token, newPassword, recaptchaToken } = req.body;
+        const { action, email, password, name, token, newPassword, recaptchaToken, credential } = req.body;
 
         switch (action) {
             case 'login': {
@@ -114,6 +174,71 @@ export default async function handler(req: any, res: any) {
                 });
 
                 return res.status(200).json({ message: 'Verification email sent. Please check your inbox to complete your registration.' });
+            }
+
+            case 'google-signin': {
+                if (!credential) {
+                    return res.status(400).json({ error: 'Google credential not provided.' });
+                }
+            
+                // Verify token with Google
+                const googleRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+                const tokenInfo = await googleRes.json();
+            
+                if (!googleRes.ok || !tokenInfo.email_verified) {
+                    return res.status(401).json({ error: 'Invalid Google token or email not verified.' });
+                }
+            
+                // Verify that the token was meant for your app
+                const clientId = process.env.GOOGLE_CLIENT_ID;
+                if (tokenInfo.aud !== clientId) {
+                    return res.status(401).json({ error: 'Token audience does not match client ID.' });
+                }
+                
+                const { email, name, picture } = tokenInfo;
+                
+                let user = await usersCollection.findOne({ email });
+                let isNewUser = false;
+            
+                if (!user) {
+                    isNewUser = true;
+                    const newUser: User = {
+                        id: `user_${Date.now()}`,
+                        name,
+                        email,
+                        passwordHash: 'GOOGLE_SSO_LOGIN',
+                        profilePictureUrl: picture,
+                        createdAt: Date.now(),
+                        lastActive: Date.now(),
+                        isAdmin: false,
+                        canModerate: false,
+                        canSetCustomExpiry: false,
+                        isDonor: false,
+                        status: 'active',
+                        subscription: null,
+                        apiAccess: null,
+                    };
+                    await usersCollection.insertOne(newUser);
+                    user = newUser;
+                } else {
+                    // If user exists, update their name and picture and activate if pending
+                    const updates: Partial<User> = { lastActive: Date.now() };
+                    if (user.name !== name) updates.name = name;
+                    if (user.profilePictureUrl !== picture) updates.profilePictureUrl = picture;
+                    if (user.status === 'pending') updates.status = 'active';
+                    
+                    await usersCollection.updateOne({ email }, { $set: updates });
+                    user = { ...user, ...updates };
+                }
+            
+                if (isNewUser) {
+                    // Send welcome email without blocking the response
+                    sendWelcomeEmail(user, transporter).catch(console.error);
+                }
+                
+                // Don't send back the password hash
+                const { passwordHash, ...userToReturn } = user;
+                return res.status(200).json(userToReturn);
             }
 
             case 'forgot-password': {
