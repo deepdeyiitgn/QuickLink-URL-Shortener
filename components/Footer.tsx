@@ -43,15 +43,19 @@ const Footer: React.FC = () => {
         { name: 'System Status', href: '/status' },
         { name: 'FAQ', href: '/faq' },
         { name: 'GitHub', href: 'https://github.com/deepdeyiitgn/QuickLink-URL-Shortener' },
-        { name: 'Support', href: 'https://www.chatbase.co/z1dBVS3yYaFm-L9FJnbAT/help' },
-        { name: '☕ Buy Me a Coffee', href: 'https://buymeacoffee.com/quicklink' },
+        { name: 'Support', href: 'https://www.chatbase.co/z1dBVS3yYaFm-L9FJnbAT/help' }, 
     ];
 
     return (
         <footer className="bg-brand-dark/50 border-t border-white/10 mt-auto">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="flex flex-col items-center gap-8">
-                    <SocialLinks />
+                    <div className="flex items-center gap-6">
+                        <SocialLinks />
+                        <a href="https://www.buymeacoffee.com/quicklink" target="_blank" rel="noopener noreferrer">
+                            <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=☕&slug=quicklink&button_colour=5F7FFF&font_colour=ffffff&font_family=Comic&outline_colour=000000&coffee_colour=FFDD00" alt="Buy Me A Coffee" />
+                        </a>
+                    </div>
                     <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-gray-400">
                         {footerLinks.map(link => {
                             const isExternal = link.href.startsWith('http');
