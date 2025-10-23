@@ -234,10 +234,8 @@ export default async function handler(req: any, res: any) {
             
                 if (isNewUser && user) {
                     // Send welcome email without blocking the response
-                    sendWelcomeEmail(user, transporter)
-                      .then(() => console.log('Welcome email sent successfully'))
-                      .catch(err => console.error('Error sending welcome email:', err));
-
+                    sendWelcomeEmail(user, transporter).catch(console.error);
+                    
                 }
                 
                 // Don't send back the password hash
