@@ -1,4 +1,5 @@
 
+
 import React, { Suspense, lazy, useContext, useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 
@@ -45,6 +46,7 @@ const NotificationsPage = lazy(() => import('./components/NotificationsPage'));
 const ShopPage = lazy(() => import('./components/ShopPage'));
 const AdComponent = lazy(() => import('./components/AdComponent'));
 const ResetPasswordPage = lazy(() => import('./components/ResetPasswordPage'));
+const EmailVerificationPage = lazy(() => import('./components/EmailVerificationPage'));
 
 const AppContent: React.FC = () => {
     const auth = useContext(AuthContext);
@@ -112,6 +114,7 @@ const AppContent: React.FC = () => {
                                 <Route path="/notifications" element={<NotificationsPage />} />
                                 <Route path="/shop" element={<ShopPage />} />
                                 <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+                                <Route path="/verify-email/:token" element={<EmailVerificationPage />} />
                                 <Route path="/:alias" element={<RedirectPage />} />
                                 <Route path="*" element={<NotFoundPage />} />
                             </Routes>
