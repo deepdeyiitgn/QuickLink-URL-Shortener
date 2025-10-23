@@ -34,6 +34,7 @@ export interface ApiAccess {
 }
 
 export interface User {
+  _id?: any; // To accommodate MongoDB documents
   id: string;
   name: string;
   email: string;
