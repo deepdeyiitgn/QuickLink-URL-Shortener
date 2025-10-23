@@ -182,6 +182,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUsers(prev => prev.map(u => u.id === userId ? updatedUser : u));
     };
 
+    const sendPasswordResetLink = async (email: string) => {
+        await api.sendPasswordResetLink(email);
+    };
+
+    const resetPassword = async (token: string, newPassword: string) => {
+        await api.resetPassword(token, newPassword);
+    };
+
     const value = useMemo(() => ({
         currentUser,
         users,
@@ -207,6 +215,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         updateUserAsDonor,
         getAllUsers,
         updateUserData,
+        sendPasswordResetLink,
+        resetPassword,
     }), [currentUser, users, isAuthModalOpen, authModalMode, isSubscriptionModalOpen, isApiSubscriptionModalOpen, loading, isFetchingDetails, getAllUsers]);
 
     return (
