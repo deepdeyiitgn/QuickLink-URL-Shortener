@@ -3,6 +3,7 @@ declare global {
   interface Window {
     Razorpay: any;
     grecaptcha: any;
+    google: any; // For Google Identity Services
   }
 }
 
@@ -85,6 +86,7 @@ export interface AuthContextType {
   updateUserAsDonor: (userId: string) => Promise<void>;
   getAllUsers: () => Promise<User[]>;
   updateUserData: (userId: string, updates: Partial<User>) => Promise<void>;
+  loginWithGoogle: (credential: string) => Promise<void>;
   sendPasswordResetLink: (email: string) => Promise<void>;
   resetPassword: (token: string, newPassword: string) => Promise<void>;
 }
