@@ -17,9 +17,12 @@ async function apiFetch(url: string, options: RequestInit = {}) {
 export const api = {
     // Auth
     login: (email: string, password: string): Promise<User> => apiFetch('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'login', email, password }) }),
-    signup: (name: string, email: string, password: string): Promise<User> => apiFetch('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'signup', name, email, password }) }),
+    signup: (name: string, email: string, password: string): Promise<{ message: string }> => apiFetch('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'signup', name, email, password }) }),
     sendPasswordResetLink: (email: string): Promise<{ message: string }> => apiFetch('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'forgot-password', email }) }),
     resetPassword: (token: string, newPassword: string): Promise<{ message: string }> => apiFetch('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'reset-password', token, newPassword }) }),
+    checkVerificationToken: (token: string): Promise<{ isValid: boolean, message: string }> => apiFetch('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'check-verification-token', token }) }),
+    verifyAndActivateAccount: (payload: { token: string, recaptchaToken?: string, mathAnswer?: number, textAnswer?: string }): Promise<{ message: string }> => apiFetch('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'verify-and-activate', ...payload }) }),
+
 
     // Users
     getUsers: (): Promise<User[]> => apiFetch('/api/users'),
