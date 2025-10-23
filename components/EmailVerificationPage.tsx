@@ -40,14 +40,9 @@ const EmailVerificationPage: React.FC = () => {
     const [timer, setTimer] = useState(30);
 
     useEffect(() => {
-        if (!token) {
-            setStatus('error');
-            setMessage('No verification token provided. The link is incomplete.');
-            return;
-        }
-
-        api.checkVerificationToken(token)
-            .then(response => {
+        const verifyToken = async (verificationToken: string) => {
+             try {
+                const response = await api.checkVerificationToken(verificationToken);
                 if (response.isValid) {
                     setStatus('verifying');
                     setMessage('');
@@ -55,11 +50,18 @@ const EmailVerificationPage: React.FC = () => {
                     setStatus('error');
                     setMessage(response.message);
                 }
-            })
-            .catch(err => {
+            } catch (err: any) {
                 setStatus('error');
                 setMessage(err.message || 'An error occurred while validating the link.');
-            });
+            }
+        };
+
+        if (token) {
+            verifyToken(token);
+        } else {
+            setStatus('error');
+            setMessage('No verification token provided. The link is incomplete.');
+        }
     }, [token]);
     
     useEffect(() => {
