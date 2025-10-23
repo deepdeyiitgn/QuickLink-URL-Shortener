@@ -107,12 +107,63 @@ export default async function handler(req: any, res: any) {
 
                 const resetUrl = `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers.host}/reset-password/${resetToken}`;
 
+                // --- HTML Email Template with Logo + Button + Fallback Link ---
+                const htmlEmail = `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin:auto; border:1px solid #ddd; padding:20px; text-align:center; background:#f9f9f9;">
+                        
+                        <!-- Logo -->
+                        <img src="https://quick-link-url-shortener.vercel.app/quicklink-logo.svg" 
+                             alt="QuickLink Logo" 
+                             style="width:150px; margin-bottom:20px;" />
+
+                        <!-- Heading -->
+                        <h2 style="color:#333;">Reset Your Password</h2>
+
+                        <!-- Message -->
+                        <p style="color:#555; font-size:16px;">
+                            We received a request to reset your QuickLink account password. Click the button below to reset it:
+                        </p>
+
+                        <!-- Button -->
+                        <a href="${resetUrl}" 
+                           style="display:inline-block; padding:12px 25px; margin:20px 0; background:#4CAF50; color:white; text-decoration:none; border-radius:5px; font-weight:bold;">
+                            Reset Password
+                        </a>
+
+                        <!-- Fallback link -->
+                        <p style="color:#777; font-size:14px;">
+                            If the button doesn’t work, copy and paste this link into your browser: <br />
+                            <a href="${resetUrl}" style="color:#4CAF50; word-break:break-all;">${resetUrl}</a>
+                        </p>
+
+                        <!-- Footer -->
+                        <p style="color:#aaa; font-size:12px; margin-top:30px;">
+                            &copy; 2025 QuickLink. All rights reserved.
+                        </p>
+                    </div>
+                `;
+                
+                const textEmail = `
+                    Reset Your Password
+
+                    We received a request to reset your QuickLink account password.
+                    
+                    Please use the following link to complete the process:
+                    ${resetUrl}
+
+                    This link will expire in one hour.
+                    
+                    If you did not request this, please ignore this email and your password will remain unchanged.
+
+                    © 2025 QuickLink. All rights reserved.
+                `;
+
                 const mailOptions = {
                     from: process.env.BREVO_SENDER,
                     to: user.email,
                     subject: 'QuickLink - Password Reset Request',
-                    text: `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\nPlease click on the following link, or paste it into your browser to complete the process:\n\n${resetUrl}\n\nThis link will expire in one hour.\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`,
-                    html: `<p>You are receiving this email because you (or someone else) have requested the reset of the password for your account.</p><p>Please click on the following link to complete the process:</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>This link will expire in one hour.</p><p>If you did not request this, please ignore this email and your password will remain unchanged.</p>`,
+                    text: textEmail,
+                    html: htmlEmail,
                 };
 
                 await transporter.sendMail(mailOptions);
