@@ -1,11 +1,11 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
-import { XIcon, LoadingIcon, EyeIcon, EyeSlashIcon } from './icons/IconComponents';
+import { XIcon, LoadingIcon, EyeIcon, EyeSlashIcon, CheckIcon } from './icons/IconComponents';
 import { AuthContextType } from '../types';
 
 const AuthModal: React.FC = () => {
   const auth = useContext(AuthContext);
-  const [mode, setMode] = useState<'login' | 'signup' | 'forgot'>('login');
+  const [mode, setMode] = useState<'login' | 'signup' | 'forgot' | 'signup_success'>('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -39,8 +39,9 @@ const AuthModal: React.FC = () => {
     setSuccessMessage('');
     try {
       if (mode === 'signup') {
-        await signup(name, email, password);
-        closeAuthModal();
+        const message = await signup(name, email, password);
+        setSuccessMessage(message);
+        setMode('signup_success');
       } else if (mode === 'login') {
         await login(email, password);
         closeAuthModal();
@@ -56,6 +57,19 @@ const AuthModal: React.FC = () => {
   };
 
   const renderContent = () => {
+    if (mode === 'signup_success') {
+      return (
+        <div className="text-center">
+            <CheckIcon className="h-12 w-12 text-green-400 mx-auto mb-4 animate-check-pop" />
+            <h2 className="text-2xl font-bold text-center text-white mb-2">Almost there!</h2>
+            <p className="text-center text-gray-300 mb-6">{successMessage}</p>
+            <button type="button" onClick={closeAuthModal} className="w-full rounded-md bg-brand-primary px-3 py-3 text-sm font-semibold text-brand-dark shadow-[0_0_10px_#00e5ff] hover:bg-brand-primary/80">
+                Close
+            </button>
+        </div>
+      );
+    }
+    
     if (mode === 'forgot') {
       return (
         <>
