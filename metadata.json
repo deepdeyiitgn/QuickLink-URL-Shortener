@@ -1,0 +1,7 @@
+{
+  "name": "QuickLink URL Shortener & JEE Blog [2]",
+  "description": "A top-ranking URL shortener, QR generator, and QR scanner with a developer API. Also features a blog with content for JEE 2027 aspirants by Deep Dey.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
