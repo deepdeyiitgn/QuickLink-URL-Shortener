@@ -1,5 +1,3 @@
-
-
 <div align="center">
   <img src="/public/quicklink-logo.svg" alt="QuickLink Logo" width="128" height="128">
   <h1>QuickLink - URL Shortener, QR Suite, & Community Blog</h1>
@@ -299,3 +297,29 @@ This project was built with the invaluable assistance of **Google's Gemini**. It
   
   [![](https://raw.githubusercontent.com/Anuj579/Anuj579/output/github-contribution-grid-snake-dark.svg)](https://deepdeyiitk.com/)
 </div>
+
+
+---
+
+---
+
+---
+
+<p>22/10/2025 || 13:05:65pm</p>
+<h1>24/10/2025 || 13:35:65pm</h1>
+
+---
+
+![An_HtWVS-iXRkVhAQwnzxTTlDxJf6fSRgyT7UNkYJZOxnoK5QND_ZeS9-gMG7kbR0aNbqBroVU_F-6XgQ05pDql_LVCPtWZyEejC6F_xUzPlncVI](https://github.com/user-attachments/assets/f60cb949-c051-4a36-83c1-b8bc70e6e156)
+![Top URL Shortener, QR Generator   Scanner API _ Free Blog for JEE 2027 Prep by Deep Dey - QuickLink_page-0001 (3)](https://github.com/user-attachments/assets/8643992f-deb6-40a3-ab92-2f7a2d302332)
+![Top URL Shortener, QR Generator   Scanner API _ Free Blog for JEE 2027 Prep by Deep Dey - QuickLink_page-0001 (2)](https://github.com/user-attachments/assets/c9a98a1c-8a5a-4ecb-9304-1be20cdede26)
+![Top URL Shortener, QR Generator   Scanner API _ Free Blog for JEE 2027 Prep by Deep Dey - QuickLink_page-0001 (1)](https://github.com/user-attachments/assets/5dfdb3ed-cc10-412a-844f-6c32c86b9eca)
+![Top URL Shortener, QR Generator   Scanner API _ Free Blog for JEE 2027 Prep by Deep Dey - QuickLink_page-0001](https://github.com/user-attachments/assets/cad4f259-2742-4fd5-9cfa-54261185038c)
+<img width="258" height="262" alt="Pi7_cropper (1)" src="https://github.com/user-attachments/assets/797549ae-ed49-404a-b6fa-6bed8e69f12c" />
+![AAAABSk1SolJAORWwO-Vb1FBZnY1ySrpEXzo1Aio6lWXwtolsQ8GklIWSCdxziGZYV1Z0OrcRvgUrwv5BIKQ9kiS8pzDtzgBbS12HIU- (1)](https://github.com/user-attachments/assets/3f3ca3b7-3646-40fa-b3d5-23c977d0cb03)
+![AAAABRMOUiK7Xick1Xt4599-WzV4z6XRv2pk6ikoyKq90VA5npKCVaZfa2zeyHLQ9ZH7_7p-h1fMYve8Lj2nauBfnxu0cENzFIAxcv3o](https://github.com/user-attachments/assets/7d26939b-d0ba-44d7-8593-ad1639a6cf70)
+![AAAABSUzKnX_BeqckNqKhudc0Pq8CjBUu04s1PZEgE28jdafAD-71k5T2V1YDjZFoOqs1vZtK0aeoccdPDu6DIWtGFUDF6D8ZITJplJf](https://github.com/user-attachments/assets/12343866-95b2-4317-a2a4-e307eb341f4f)
+![AAAABT14_uucHpazOdJBoZNEYOctGmwMJtnXvVHWlNvrwkbih_MKYFd28TliPHEVoh4tKJvKpMPw6yRmax1TGrKF7oQP_Yqe9ynzo6ca](https://github.com/user-attachments/assets/d190b389-1a5e-42cf-9097-26898415b2e1)
+![blue-maximalist-winter-wonderland-background-design-template-56b30f8eef163e2075a3407fca8bf413_screen](https://github.com/user-attachments/assets/3c7788e7-c733-448c-a348-d50dba999b54)
+![winter_wonderland_illustration-wallpaper-3840x2160](https://github.com/user-attachments/assets/3245ef79-63f1-484c-98db-b98137c50873)
+![240_F_232218361_z40uofkN5zfL0SJ0GlnRaxRrp1GqCBR2](https://github.com/user-attachments/assets/875ea33c-8018-4994-b141-6c406478c197)
