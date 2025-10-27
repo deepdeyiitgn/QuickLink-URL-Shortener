@@ -1,4 +1,4 @@
-// This is a Vercel serverless function for the Developer API endpoint. 
+// This is a Vercel serverless function for the Developer API endpoint. shorten.ts 
 // It validates the API key and creates a short URL, storing it in MongoDB Atlas.
 
 import { connectToDatabase } from '../lib/mongodb.js';
