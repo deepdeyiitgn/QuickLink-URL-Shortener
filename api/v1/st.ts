@@ -1,27 +1,25 @@
-// This is a Vercel serverless function for the Developer API endpoint. shorten.ts 
-// It validates the API key and creates a short URL, storing it in MongoDB Atlas.
+// This is a Vercel serverless function for the Developer API endpoint: st.ts
+// It validates the API key and creates or redirects short URLs via MongoDB Atlas.
 
 import { connectToDatabase } from '../lib/mongodb.js';
 import type { User, ShortenedUrl } from '../../types';
 
 export default async function handler(req: any, res: any) {
     try {
-        // ✅ extra part: agar request /api/v1/shorten/st se aayi ho
-        if (req.url.startsWith('/api/v1/shorten/st')) {
+        // ✅ Allow both /api/v1/shorten and /api/v1/st
+        if (req.url.startsWith('/api/v1/st')) {
             req.method = 'GET';
             const queryStr = req.url.split('?')[1] || '';
             req.query = Object.fromEntries(new URLSearchParams(queryStr));
         }
 
         const method = req.method;
-
-        // 🔹 Accept both POST (secure) and GET (bot-style)
         if (method !== 'POST' && method !== 'GET') {
             res.setHeader('Allow', ['POST', 'GET']);
             return res.status(405).end('Method Not Allowed');
         }
 
-        // 🔹 Extract API key
+        // 🔹 Extract API key & URL
         let apiKey: string | undefined;
         let longUrl: string | undefined;
         let alias: string | undefined;
@@ -49,7 +47,6 @@ export default async function handler(req: any, res: any) {
         const urlsCollection = db.collection('urls');
 
         const user = await usersCollection.findOne({ "apiAccess.apiKey": apiKey });
-
         if (!user || !user.apiAccess) {
             return res.status(403).json({ status: 'error', message: "Invalid API Key." });
         }
@@ -90,17 +87,25 @@ export default async function handler(req: any, res: any) {
             { upsert: true }
         );
 
-        // ✅ Standard response format
-        return res.status(200).json({
-            status: "success",
-            shortenedUrl: newUrl.shortUrl,
-            longUrl: newUrl.longUrl,
-            alias: newUrl.alias,
-            expiresAt: newUrl.expiresAt
-        });
+        const userAgent = req.headers['user-agent'] || '';
+        const isBot = /(curl|wget|axios|python|node|postman)/i.test(userAgent);
+
+        // ✅ Different responses based on client type
+        if (isBot) {
+            return res.status(200).json({
+                status: "success",
+                shortenedUrl: newUrl.shortUrl,
+                longUrl: newUrl.longUrl,
+                alias: newUrl.alias,
+                expiresAt: newUrl.expiresAt
+            });
+        } else {
+            // normal browser → redirect directly
+            return res.redirect(302, newUrl.shortUrl);
+        }
 
     } catch (error: any) {
-        console.error('API /v1/shorten Error:', error);
+        console.error('API /v1/st Error:', error);
         return res.status(500).json({
             status: "error",
             message: error.message || 'Internal server error'
