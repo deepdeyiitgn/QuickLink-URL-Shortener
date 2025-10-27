@@ -34,7 +34,7 @@ const ApiAccessPage: React.FC = () => {
         )
     }
 
-    const endpoint = `${window.location.origin}/api/v1/shorten`;
+    const endpoint = `${window.location.origin}/api/v1/st`;
     const curlExample = `curl -X POST ${endpoint} \\\n     -H "Authorization: Bearer ${currentUser.apiAccess?.apiKey || 'YOUR_API_KEY'}" \\\n     -H "Content-Type: application/json" \\\n     -d '{\n          "longUrl": "https://example.com/very/long/url",\n          "alias": "custom-alias-optional"\n        }'`;
 
     return (
