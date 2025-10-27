@@ -8,7 +8,7 @@ export default async function handler(req: any, res: any) {
     try {
         // ✅ Allow both /api/v1/shorten and /api/v1/st
         if (req.url.startsWith('/api/v1/st')) {
-            req.method = 'GET';
+            req.method = req.method || 'GET';
             const queryStr = req.url.split('?')[1] || '';
             req.query = Object.fromEntries(new URLSearchParams(queryStr));
         }
@@ -25,10 +25,11 @@ export default async function handler(req: any, res: any) {
         let alias: string | undefined;
 
         if (method === 'POST') {
-            apiKey = req.headers.authorization?.split(' ')[1];
+            // accept key either from header or query for flexibility
+            apiKey = req.headers.authorization?.split(' ')[1] || req.query.api;
             ({ longUrl, alias } = req.body);
         } else {
-            apiKey = req.query.api;
+            apiKey = req.query.api || req.headers.authorization?.split(' ')[1];
             longUrl = req.query.url;
             alias = req.query.alias;
         }
