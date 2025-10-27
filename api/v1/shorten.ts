@@ -8,7 +8,6 @@ export default async function handler(req: any, res: any) {
     try {
         const method = req.method;
 
-        // 🔹 Accept both POST (secure) and GET (bot/browser)
         if (method !== 'POST' && method !== 'GET') {
             res.setHeader('Allow', ['POST', 'GET']);
             return res.status(405).end('Method Not Allowed');
@@ -22,13 +21,6 @@ export default async function handler(req: any, res: any) {
                 return res.status(400).json({ status: 'error', message: 'Missing parameters.' });
             }
 
-            // 👇 Browser open case — redirect (hide API key)
-            if (req.headers.accept?.includes('text/html')) {
-                const generatedAlias = alias || Math.random().toString(36).substring(2, 8);
-                return res.redirect(302, `/${generatedAlias}`);
-            }
-
-            // 👇 Bot-style call — convert to POST-like
             req.headers.authorization = `Bearer ${api}`;
             req.body = { longUrl: decodeURIComponent(url), alias: alias || undefined };
             req.method = 'POST';
@@ -52,7 +44,6 @@ export default async function handler(req: any, res: any) {
         const urlsCollection = db.collection('urls');
 
         const user = await usersCollection.findOne({ "apiAccess.apiKey": apiKey });
-
         if (!user || !user.apiAccess) {
             return res.status(403).json({ status: 'error', message: 'Invalid API Key.' });
         }
@@ -95,7 +86,12 @@ export default async function handler(req: any, res: any) {
             { upsert: true }
         );
 
-        // ✅ Send success response
+        // --- Check if it's from browser, redirect instead of JSON ---
+        if (req.query?.api && req.query?.url && req.headers.accept?.includes('text/html')) {
+            return res.redirect(302, `/${finalAlias}`);
+        }
+
+        // ✅ JSON success (for bot or API)
         return res.status(200).json({
             status: 'success',
             shortenedUrl: newUrl.shortUrl,
