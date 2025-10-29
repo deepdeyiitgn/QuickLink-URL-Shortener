@@ -1,184 +1,232 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { LoadingIcon } from "./icons/IconComponents";
+import React, { useEffect, useState } from "react";
+import { RefreshCw } from "lucide-react";
 
-interface UrlData {
-  id: string;
-  originalUrl: string;
+interface LinkData {
+  _id: string;
   shortUrl: string;
-  createdAt: string;
-  expiresAt: string;
+  alias?: string;
+  createdAt?: string;
+  expiresAt?: string;
 }
 
-interface HistoryTableProps {
-  urls: UrlData[];
-  loading: boolean;
-}
-
-export default function HistoryTable({ urls, loading }: HistoryTableProps) {
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const [timeLeft, setTimeLeft] = useState<Record<string, string>>({});
+const HistoryTable: React.FC = () => {
+  const [links, setLinks] = useState<LinkData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [reloading, setReloading] = useState(false);
+  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const perPage = 10;
 
-  const urlsPerPage = 10;
-  const totalPages = Math.ceil(urls.length / urlsPerPage);
-  const indexOfLast = currentPage * urlsPerPage;
-  const indexOfFirst = indexOfLast - urlsPerPage;
-  const currentUrls = urls.slice(indexOfFirst, indexOfLast);
+  const fetchLinks = async () => {
+    try {
+      if (!reloading) setLoading(true);
+      const res = await fetch("/api/urls");
+      if (!res.ok) throw new Error("Failed to fetch links");
+      const data = await res.json();
+      // Sort new → old
+      const sorted = data.sort(
+        (a: LinkData, b: LinkData) =>
+          new Date(b.createdAt || "").getTime() -
+          new Date(a.createdAt || "").getTime()
+      );
+      setLinks(sorted);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+      setReloading(false);
+    }
+  };
 
   useEffect(() => {
-    if (!hoveredId) return;
+    fetchLinks();
+  }, []);
 
-    const interval = setInterval(() => {
-      const hoveredUrl = urls.find((url) => url.id === hoveredId);
-      if (!hoveredUrl) return;
+  const handleReload = () => {
+    setReloading(true);
+    fetchLinks();
+  };
 
-      const expiry = new Date(hoveredUrl.expiresAt).getTime();
-      const now = new Date().getTime();
-      const diff = expiry - now;
+  const totalPages = Math.ceil(links.length / perPage);
+  const startIdx = (currentPage - 1) * perPage;
+  const currentLinks = links.slice(startIdx, startIdx + perPage);
 
-      if (diff <= 0) {
-        setTimeLeft((prev) => ({ ...prev, [hoveredId]: "Expired" }));
-        clearInterval(interval);
-      } else {
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff / (1000 * 60)) % 60);
-        const seconds = Math.floor((diff / 1000) % 60);
-        setTimeLeft((prev) => ({
-          ...prev,
-          [hoveredId]: `${hours}h ${minutes}m ${seconds}s`,
-        }));
-      }
+  const renderTimeLeft = (expiresAt?: string) => {
+    if (!expiresAt) return "-";
+    const expiry = new Date(expiresAt).getTime();
+    const now = Date.now();
+    const diff = expiry - now;
+    if (diff <= 0) return "Expired";
+
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    return `${hours}h ${minutes}m ${seconds}s`;
+  };
+
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (hoveredRow) setNow(Date.now());
     }, 1000);
-
-    return () => clearInterval(interval);
-  }, [hoveredId, urls]);
-
-  if (loading) {
-    return (
-      <div className="text-center py-10">
-        <LoadingIcon className="h-8 w-8 animate-spin mx-auto" />
-      </div>
-    );
-  }
-
-  if (!urls || urls.length === 0) {
-    return (
-      <div className="text-center text-gray-500 py-6">
-        No URLs shortened yet.
-      </div>
-    );
-  }
-
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
-
-  const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-  };
+    return () => clearInterval(timer);
+  }, [hoveredRow]);
 
   return (
-    <div className="overflow-x-auto mt-4">
-      <table className="min-w-full border border-gray-300 rounded-lg">
-        <thead>
-          <tr className="bg-gray-100 text-gray-700 text-sm sm:text-base">
-            <th className="p-2 border">#</th>
-            <th className="p-2 border">Short URL</th>
-            {!isMobile && <th className="p-2 border">Original URL</th>}
-            {!isMobile && <th className="p-2 border">Created</th>}
-            <th className="p-2 border">Expires</th>
-            {!isMobile && <th className="p-2 border">Time Left</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {currentUrls.map((url, index) => {
-            const expired = new Date(url.expiresAt) < new Date();
-            const timeText = expired
-              ? "Expired"
-              : hoveredId === url.id
-              ? timeLeft[url.id] || "Calculating..."
-              : "";
-
-            return (
-              <tr
-                key={url.id}
-                onMouseEnter={() => setHoveredId(url.id)}
-                onMouseLeave={() => setHoveredId(null)}
-                className={`text-center text-sm sm:text-base transition-colors ${
-                  expired
-                    ? "text-gray-400 line-through bg-gray-50 cursor-not-allowed"
-                    : "hover:bg-gray-100"
-                }`}
-              >
-                <td className="border p-2">{indexOfFirst + index + 1}</td>
-                <td className="border p-2">
-                  {expired ? (
-                    <span>{url.shortUrl}</span>
-                  ) : (
-                    <Link
-                      to={url.shortUrl}
-                      target="_self"
-                      className="text-blue-600 hover:underline"
-                    >
-                      {url.shortUrl}
-                    </Link>
-                  )}
-                </td>
-                {!isMobile && (
-                  <td className="border p-2 truncate max-w-[200px]">
-                    {url.originalUrl}
-                  </td>
-                )}
-                {!isMobile && (
-                  <td className="border p-2">
-                    {new Date(url.createdAt).toLocaleString()}
-                  </td>
-                )}
-                <td className="border p-2">
-                  {new Date(url.expiresAt).toLocaleString()}
-                </td>
-                {!isMobile && (
-                  <td className="border p-2 text-gray-600">{timeText}</td>
-                )}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-
-      {/* Pagination Controls */}
-      <div className="flex justify-center items-center gap-4 mt-4 text-sm sm:text-base">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-950 text-white px-6 py-10">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-semibold tracking-wide">
+          QuickLink History
+        </h1>
         <button
-          onClick={handlePrev}
-          disabled={currentPage === 1}
-          className={`px-4 py-2 rounded-md border ${
-            currentPage === 1
-              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-              : "bg-white hover:bg-gray-100"
-          }`}
+          onClick={handleReload}
+          disabled={reloading}
+          className="flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/80 transition disabled:opacity-60"
         >
-          ⬅ Prev
-        </button>
-
-        <span className="text-gray-700">
-          Page {currentPage} of {totalPages}
-        </span>
-
-        <button
-          onClick={handleNext}
-          disabled={currentPage === totalPages}
-          className={`px-4 py-2 rounded-md border ${
-            currentPage === totalPages
-              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-              : "bg-white hover:bg-gray-100"
-          }`}
-        >
-          Next ➡
+          <RefreshCw className={`w-4 h-4 ${reloading ? "animate-spin" : ""}`} />
+          {reloading ? "Refreshing..." : "Reload"}
         </button>
       </div>
+
+      {/* Loading / Error / Empty */}
+      {loading ? (
+        <div className="text-center py-10 text-gray-400 text-2xl animate-pulse">
+          <span className="inline-block animate-bounce">.</span>
+          <span className="inline-block animate-bounce delay-150">.</span>
+          <span className="inline-block animate-bounce delay-300">.</span>
+        </div>
+      ) : error ? (
+        <p className="text-center text-red-400 mt-10">
+          Error: {error}. Please reload.
+        </p>
+      ) : links.length === 0 ? (
+        <p className="text-center text-gray-500 mt-10">
+          No links found. Try shortening one first.
+        </p>
+      ) : (
+        <>
+          <p className="text-gray-300 mb-3 text-sm">
+            Total Active Links:{" "}
+            <span className="text-brand-primary font-semibold">
+              {links.length}
+            </span>
+          </p>
+
+          <div className="overflow-x-auto rounded-xl shadow-lg border border-gray-700">
+            <table className="min-w-full border-collapse text-sm">
+              <thead className="bg-gray-800/80">
+                <tr>
+                  <th className="border border-gray-700 px-3 py-2 text-left">#</th>
+                  <th className="border border-gray-700 px-3 py-2 text-left">
+                    Short Link
+                  </th>
+                  <th className="border border-gray-700 px-3 py-2 text-left">
+                    Alias
+                  </th>
+                  <th className="border border-gray-700 px-3 py-2 text-left">
+                    Created
+                  </th>
+                  <th className="border border-gray-700 px-3 py-2 text-left">
+                    Expires
+                  </th>
+                  <th className="border border-gray-700 px-3 py-2 text-left">
+                    Time Left
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentLinks.map((link, i) => {
+                  const expired =
+                    link.expiresAt && new Date(link.expiresAt).getTime() < now;
+                  return (
+                    <tr
+                      key={link._id}
+                      className={`transition ${
+                        expired
+                          ? "bg-gray-800/40 line-through text-gray-500 cursor-not-allowed"
+                          : "hover:bg-gray-800/60"
+                      }`}
+                      onMouseEnter={() => setHoveredRow(link._id)}
+                      onMouseLeave={() => setHoveredRow(null)}
+                    >
+                      <td className="border border-gray-700 px-3 py-2">
+                        {startIdx + i + 1}
+                      </td>
+                      <td className="border border-gray-700 px-3 py-2 text-blue-400">
+                        {expired ? (
+                          <span>{link.shortUrl}</span>
+                        ) : (
+                          <a
+                            href={link.shortUrl}
+                            className="hover:underline"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              window.location.href = link.shortUrl;
+                            }}
+                          >
+                            {link.shortUrl}
+                          </a>
+                        )}
+                      </td>
+                      <td className="border border-gray-700 px-3 py-2">
+                        {link.alias || "-"}
+                      </td>
+                      <td className="border border-gray-700 px-3 py-2">
+                        {link.createdAt
+                          ? new Date(link.createdAt).toLocaleString()
+                          : "-"}
+                      </td>
+                      <td className="border border-gray-700 px-3 py-2">
+                        {link.expiresAt
+                          ? new Date(link.expiresAt).toLocaleString()
+                          : "-"}
+                      </td>
+                      <td className="border border-gray-700 px-3 py-2">
+                        {hoveredRow === link._id
+                          ? renderTimeLeft(link.expiresAt)
+                          : link.expiresAt
+                          ? "-"
+                          : ""}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-4 mt-6 text-sm text-gray-300">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 bg-gray-800 rounded-md disabled:opacity-40"
+              >
+                Prev
+              </button>
+              <span>
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(p + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 bg-gray-800 rounded-md disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
-}
+};
+
+export default HistoryTable;
+
