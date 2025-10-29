@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { RefreshCw, ExternalLink, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { LoadingIcon } from "@/components/ui/loading-icon"; // adjust import path if needed
+import { LoadingIcon } from "./icons/IconComponents"; // adjust import path if needed
 
 interface LinkData {
   _id: string;
