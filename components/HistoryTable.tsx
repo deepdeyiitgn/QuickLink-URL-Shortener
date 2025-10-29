@@ -1,136 +1,95 @@
-import React, { useEffect, useState } from "react";
-import { RefreshCw } from "lucide-react"; // icon for reload button
+import React, { useState } from 'react';
+import { ExternalLink, Eye } from 'lucide-react';
 
-interface LinkData {
-  _id: string;
-  originalUrl: string;
+interface Url {
+  id: string;
+  alias: string;
   shortUrl: string;
-  alias?: string;
-  createdAt?: string;
-  expiresAt?: string;
+  longUrl: string;
+  createdAt: string;
+  expiresAt?: string | null;
 }
 
-const HistoryTable: React.FC = () => {
-  const [links, setLinks] = useState<LinkData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [reloading, setReloading] = useState(false);
+interface HistoryTableProps {
+  urls: Url[];
+}
 
-  const fetchLinks = async () => {
-    try {
-      if (!reloading) setLoading(true);
-      const res = await fetch("/api/urls");
-      if (!res.ok) throw new Error("Failed to fetch links");
-      const data = await res.json();
-      setLinks(data);
-      setError(null);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-      setReloading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchLinks();
-  }, []);
-
-  const handleReload = () => {
-    setReloading(true);
-    fetchLinks();
-  };
+const HistoryTable: React.FC<HistoryTableProps> = ({ urls }) => {
+  const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-950 text-white px-6 py-10">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-semibold tracking-wide">
-          QuickLink History
-        </h1>
-        <button
-          onClick={handleReload}
-          disabled={reloading}
-          className="flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/80 transition disabled:opacity-60"
-        >
-          <RefreshCw className={`w-4 h-4 ${reloading ? "animate-spin" : ""}`} />
-          {reloading ? "Refreshing..." : "Reload"}
-        </button>
+    <div className="p-4">
+      <h2 className="text-2xl font-semibold mb-4 text-center text-white">History</h2>
+      <p className="text-center mb-4 text-gray-300">Total links: {urls.length}</p>
+
+      <div className="overflow-x-auto rounded-2xl shadow-lg">
+        <table className="min-w-full bg-[#0f172a] text-white border border-gray-700">
+          <thead>
+            <tr className="bg-[#1e293b] text-gray-300">
+              <th className="py-3 px-4 text-left">#</th>
+              <th className="py-3 px-4 text-left">Alias</th>
+              <th className="py-3 px-4 text-left">Short URL</th>
+              <th className="py-3 px-4 text-left">Original URL</th>
+              <th className="py-3 px-4 text-left">Created</th>
+              <th className="py-3 px-4 text-left">Expires</th>
+            </tr>
+          </thead>
+          <tbody>
+            {urls.map((url, index) => (
+              <tr key={url.id} className="hover:bg-[#1e293b] transition">
+                <td className="py-3 px-4">{index + 1}</td>
+                <td className="py-3 px-4">{url.alias}</td>
+
+                {/* Short URL clickable */}
+                <td className="py-3 px-4 text-blue-400 underline cursor-pointer">
+                  <a href={url.shortUrl} target="_self" rel="noopener noreferrer">
+                    {url.shortUrl}
+                  </a>
+                </td>
+
+                {/* Long URL truncate + popup on click */}
+                <td
+                  className="py-3 px-4 max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap cursor-pointer text-gray-300"
+                  title="Click to view full URL"
+                  onClick={() => setSelectedUrl(url.longUrl)}
+                >
+                  {url.longUrl}
+                </td>
+
+                <td className="py-3 px-4">
+                  {new Date(url.createdAt).toLocaleDateString()}
+                </td>
+                <td className="py-3 px-4">
+                  {url.expiresAt
+                    ? new Date(url.expiresAt).toLocaleDateString()
+                    : 'Never'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      {/* Status or error */}
-      {loading ? (
-        <p className="text-center text-gray-400 animate-pulse mt-10">
-          Fetching your link history...
-        </p>
-      ) : error ? (
-        <p className="text-center text-red-400 mt-10">
-          Error: {error}. Please reload.
-        </p>
-      ) : links.length === 0 ? (
-        <p className="text-center text-gray-500 mt-10">
-          No links found. Try shortening one first.
-        </p>
-      ) : (
-        <>
-          {/* Total Count */}
-          <p className="text-gray-300 mb-3 text-sm">
-            Total Active Links:{" "}
-            <span className="text-brand-primary font-semibold">
-              {links.length}
-            </span>
-          </p>
-
-          {/* Table */}
-          <div className="overflow-x-auto rounded-xl shadow-lg border border-gray-700">
-            <table className="min-w-full border-collapse text-sm">
-              <thead className="bg-gray-800/80">
-                <tr>
-                  <th className="border border-gray-700 px-3 py-2 text-left">#</th>
-                  <th className="border border-gray-700 px-3 py-2 text-left">Original Link</th>
-                  <th className="border border-gray-700 px-3 py-2 text-left">Short Link</th>
-                  <th className="border border-gray-700 px-3 py-2 text-left">Alias</th>
-                  <th className="border border-gray-700 px-3 py-2 text-left">Created</th>
-                  <th className="border border-gray-700 px-3 py-2 text-left">Expires</th>
-                </tr>
-              </thead>
-              <tbody>
-                {links.map((link, i) => (
-                  <tr
-                    key={link._id}
-                    className="hover:bg-gray-800/60 transition"
-                  >
-                    <td className="border border-gray-700 px-3 py-2">{i + 1}</td>
-                    <td className="border border-gray-700 px-3 py-2 break-all">
-                      {link.originalUrl}
-                    </td>
-                    <td className="border border-gray-700 px-3 py-2 text-blue-400">
-                      <a
-                        href={link.shortUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:underline"
-                      >
-                        {link.shortUrl}
-                      </a>
-                    </td>
-                    <td className="border border-gray-700 px-3 py-2">{link.alias || "-"}</td>
-                    <td className="border border-gray-700 px-3 py-2">
-                      {link.createdAt
-                        ? new Date(link.createdAt).toLocaleString()
-                        : "-"}
-                    </td>
-                    <td className="border border-gray-700 px-3 py-2">
-                      {link.expiresAt
-                        ? new Date(link.expiresAt).toLocaleString()
-                        : "-"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* Popup Modal */}
+      {selectedUrl && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50"
+          onClick={() => setSelectedUrl(null)}
+        >
+          <div
+            className="bg-[#0f172a] text-white p-6 rounded-xl shadow-lg max-w-[90%] md:max-w-[600px] break-words"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-xl mb-2">Full URL</h3>
+            <p className="text-gray-300 break-all">{selectedUrl}</p>
+            <button
+              className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg"
+              onClick={() => setSelectedUrl(null)}
+            >
+              Close
+            </button>
           </div>
-        </>
+        </div>
       )}
     </div>
   );
