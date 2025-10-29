@@ -1,50 +1,58 @@
-import React, { useEffect, useState } from "react";
-import { RefreshCw, ExternalLink, X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { LoadingIcon } from "./icons/IconComponents"; // adjust import path if needed
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { LoadingIcon } from "./icons/IconComponents";
 
-interface LinkData {
-  _id: string;
+interface UrlData {
+  id: string;
   originalUrl: string;
   shortUrl: string;
-  alias?: string;
-  createdAt?: string;
-  expiresAt?: string;
+  createdAt: string;
+  expiresAt: string;
 }
 
-const HistoryTable: React.FC = () => {
-  const [links, setLinks] = useState<LinkData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [reloading, setReloading] = useState(false);
-  const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
+interface HistoryTableProps {
+  urls: UrlData[];
+  loading: boolean;
+}
 
-  const navigate = useNavigate();
+export default function HistoryTable({ urls, loading }: HistoryTableProps) {
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [timeLeft, setTimeLeft] = useState<Record<string, string>>({});
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const fetchLinks = async () => {
-    try {
-      if (!reloading) setLoading(true);
-      const res = await fetch("/api/urls");
-      if (!res.ok) throw new Error("Failed to fetch links");
-      const data = await res.json();
-      setLinks(data);
-      setError(null);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-      setReloading(false);
-    }
-  };
+  const urlsPerPage = 10;
+  const totalPages = Math.ceil(urls.length / urlsPerPage);
+  const indexOfLast = currentPage * urlsPerPage;
+  const indexOfFirst = indexOfLast - urlsPerPage;
+  const currentUrls = urls.slice(indexOfFirst, indexOfLast);
 
   useEffect(() => {
-    fetchLinks();
-  }, []);
+    if (!hoveredId) return;
 
-  const handleReload = () => {
-    setReloading(true);
-    fetchLinks();
-  };
+    const interval = setInterval(() => {
+      const hoveredUrl = urls.find((url) => url.id === hoveredId);
+      if (!hoveredUrl) return;
+
+      const expiry = new Date(hoveredUrl.expiresAt).getTime();
+      const now = new Date().getTime();
+      const diff = expiry - now;
+
+      if (diff <= 0) {
+        setTimeLeft((prev) => ({ ...prev, [hoveredId]: "Expired" }));
+        clearInterval(interval);
+      } else {
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        const seconds = Math.floor((diff / 1000) % 60);
+        setTimeLeft((prev) => ({
+          ...prev,
+          [hoveredId]: `${hours}h ${minutes}m ${seconds}s`,
+        }));
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [hoveredId, urls]);
 
   if (loading) {
     return (
@@ -54,110 +62,123 @@ const HistoryTable: React.FC = () => {
     );
   }
 
+  if (!urls || urls.length === 0) {
+    return (
+      <div className="text-center text-gray-500 py-6">
+        No URLs shortened yet.
+      </div>
+    );
+  }
+
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
+  const handlePrev = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-950 text-white px-6 py-10">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-semibold tracking-wide">QuickLink History</h1>
+    <div className="overflow-x-auto mt-4">
+      <table className="min-w-full border border-gray-300 rounded-lg">
+        <thead>
+          <tr className="bg-gray-100 text-gray-700 text-sm sm:text-base">
+            <th className="p-2 border">#</th>
+            <th className="p-2 border">Short URL</th>
+            {!isMobile && <th className="p-2 border">Original URL</th>}
+            {!isMobile && <th className="p-2 border">Created</th>}
+            <th className="p-2 border">Expires</th>
+            {!isMobile && <th className="p-2 border">Time Left</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {currentUrls.map((url, index) => {
+            const expired = new Date(url.expiresAt) < new Date();
+            const timeText = expired
+              ? "Expired"
+              : hoveredId === url.id
+              ? timeLeft[url.id] || "Calculating..."
+              : "";
+
+            return (
+              <tr
+                key={url.id}
+                onMouseEnter={() => setHoveredId(url.id)}
+                onMouseLeave={() => setHoveredId(null)}
+                className={`text-center text-sm sm:text-base transition-colors ${
+                  expired
+                    ? "text-gray-400 line-through bg-gray-50 cursor-not-allowed"
+                    : "hover:bg-gray-100"
+                }`}
+              >
+                <td className="border p-2">{indexOfFirst + index + 1}</td>
+                <td className="border p-2">
+                  {expired ? (
+                    <span>{url.shortUrl}</span>
+                  ) : (
+                    <Link
+                      to={url.shortUrl}
+                      target="_self"
+                      className="text-blue-600 hover:underline"
+                    >
+                      {url.shortUrl}
+                    </Link>
+                  )}
+                </td>
+                {!isMobile && (
+                  <td className="border p-2 truncate max-w-[200px]">
+                    {url.originalUrl}
+                  </td>
+                )}
+                {!isMobile && (
+                  <td className="border p-2">
+                    {new Date(url.createdAt).toLocaleString()}
+                  </td>
+                )}
+                <td className="border p-2">
+                  {new Date(url.expiresAt).toLocaleString()}
+                </td>
+                {!isMobile && (
+                  <td className="border p-2 text-gray-600">{timeText}</td>
+                )}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+
+      {/* Pagination Controls */}
+      <div className="flex justify-center items-center gap-4 mt-4 text-sm sm:text-base">
         <button
-          onClick={handleReload}
-          disabled={reloading}
-          className="flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-xl hover:bg-brand-primary/80 transition disabled:opacity-60"
+          onClick={handlePrev}
+          disabled={currentPage === 1}
+          className={`px-4 py-2 rounded-md border ${
+            currentPage === 1
+              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+              : "bg-white hover:bg-gray-100"
+          }`}
         >
-          <RefreshCw className={`w-4 h-4 ${reloading ? "animate-spin" : ""}`} />
-          {reloading ? "Refreshing..." : "Reload"}
+          ⬅ Prev
+        </button>
+
+        <span className="text-gray-700">
+          Page {currentPage} of {totalPages}
+        </span>
+
+        <button
+          onClick={handleNext}
+          disabled={currentPage === totalPages}
+          className={`px-4 py-2 rounded-md border ${
+            currentPage === totalPages
+              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+              : "bg-white hover:bg-gray-100"
+          }`}
+        >
+          Next ➡
         </button>
       </div>
-
-      {/* Error / Empty */}
-      {error ? (
-        <p className="text-center text-red-400 mt-10">Error: {error}</p>
-      ) : links.length === 0 ? (
-        <p className="text-center text-gray-500 mt-10">
-          No links found. Try shortening one first.
-        </p>
-      ) : (
-        <>
-          {/* Count */}
-          <p className="text-gray-300 mb-3 text-sm">
-            Total Active Links:{" "}
-            <span className="text-brand-primary font-semibold">
-              {links.length}
-            </span>
-          </p>
-
-          {/* Table */}
-          <div className="overflow-x-auto rounded-xl shadow-lg border border-gray-700">
-            <table className="min-w-full border-collapse text-sm">
-              <thead className="bg-gray-800/80">
-                <tr>
-                  <th className="border border-gray-700 px-3 py-2 text-left">#</th>
-                  <th className="border border-gray-700 px-3 py-2 text-left">Original Link</th>
-                  <th className="border border-gray-700 px-3 py-2 text-left">Short Link</th>
-                  <th className="border border-gray-700 px-3 py-2 text-left">Alias</th>
-                  <th className="border border-gray-700 px-3 py-2 text-left">Created</th>
-                  <th className="border border-gray-700 px-3 py-2 text-left">Expires</th>
-                </tr>
-              </thead>
-              <tbody>
-                {links.map((link, i) => (
-                  <tr key={link._id} className="hover:bg-gray-800/60 transition">
-                    <td className="border border-gray-700 px-3 py-2">{i + 1}</td>
-
-                    {/* Original URL (truncated + popup) */}
-                    <td
-                      className="border border-gray-700 px-3 py-2 max-w-[250px] truncate cursor-pointer"
-                      onClick={() => setSelectedUrl(link.originalUrl)}
-                      title={link.originalUrl}
-                    >
-                      {link.originalUrl}
-                    </td>
-
-                    {/* Short URL (SPA navigation) */}
-                    <td
-                      className="border border-gray-700 px-3 py-2 text-blue-400 cursor-pointer hover:underline"
-                      onClick={() => navigate(`/${link.alias || link._id}`)}
-                    >
-                      {link.shortUrl}
-                    </td>
-
-                    <td className="border border-gray-700 px-3 py-2">
-                      {link.alias || "-"}
-                    </td>
-                    <td className="border border-gray-700 px-3 py-2">
-                      {link.createdAt
-                        ? new Date(link.createdAt).toLocaleString()
-                        : "-"}
-                    </td>
-                    <td className="border border-gray-700 px-3 py-2">
-                      {link.expiresAt
-                        ? new Date(link.expiresAt).toLocaleString()
-                        : "-"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </>
-      )}
-
-      {/* Popup for full original URL */}
-      {selectedUrl && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
-          <div className="bg-gray-800 p-6 rounded-xl shadow-xl max-w-lg w-[90%]">
-            <div className="flex justify-between items-center mb-3">
-              <h2 className="text-lg font-semibold">Full Original URL</h2>
-              <button onClick={() => setSelectedUrl(null)}>
-                <X className="h-5 w-5 text-gray-400 hover:text-white" />
-              </button>
-            </div>
-            <p className="text-gray-200 break-all">{selectedUrl}</p>
-          </div>
-        </div>
-      )}
     </div>
   );
-};
-
-export default HistoryTable;
+}
