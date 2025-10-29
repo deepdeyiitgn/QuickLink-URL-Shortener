@@ -38,6 +38,11 @@
 
 ---
 
+  <img src="public/macbook.jpg" alt="QuickLink Screenshot">
+
+
+---
+
 ## ✨ Core Features
 
 ### 🛠️ Main Tools
