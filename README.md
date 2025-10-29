@@ -38,7 +38,7 @@
 
 ---
 
-  <img src="public/macbook.jpg" alt="QuickLink Screenshot">
+  <img src="https://raw.githubusercontent.com/deepdeyiitgn/QuickLink-URL-Shortener/refs/heads/main/public/macbook.jpg" alt="QuickLink Screenshot">
 
 
 ---
