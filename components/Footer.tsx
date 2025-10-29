@@ -43,6 +43,7 @@ const Footer: React.FC = () => {
         { name: 'Cookies Policy', href: '/cookies' },
         { name: 'System Status', href: '/status' },
         { name: 'FAQ', href: '/faq' },
+        { name: 'History', href: '/history' },
         { name: 'GitHub', href: 'https://github.com/deepdeyiitgn/QuickLink-URL-Shortener' },
         { name: 'Support', href: 'https://www.chatbase.co/z1dBVS3yYaFm-L9FJnbAT/help' }, 
     ];
