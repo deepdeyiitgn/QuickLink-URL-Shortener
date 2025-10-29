@@ -42,18 +42,18 @@
 
 ### 🛠️ Main Tools
 
-*   🔗 **[URL Shortener](/shortener)**: Convert long URLs into short, shareable links.
+*   🔗 **[URL Shortener](https://qlynk.vercel.app/shortener)**: Convert long URLs into short, shareable links.
     *   **Custom Aliases**: Create branded, memorable links that stand out.
     *   **Dynamic Expiration**: Link lifespan is based on user status (24 hours for anonymous, 7 days for registered, up to 1 year for subscribers).
-*   🎨 **[QR Code Generator](/qr-generator)**: A versatile suite for creating custom QR codes.
+*   🎨 **[QR Code Generator](https://qlynk.vercel.app/qr-generator)**: A versatile suite for creating custom QR codes.
     *   **Multiple Data Types**: Supports URLs, Wi-Fi, vCard, Text, Email, SMS, Phone, Geo-location, Calendar Events, Bitcoin, and UPI.
     *   **Deep Customization**: Change dot and background colors, and add a custom logo to the center.
-*   📷 **[QR Code Scanner](/qr-scanner)**: Instantly scan QR codes using a device camera or by uploading an image.
+*   📷 **[QR Code Scanner](https://qlynk.vercel.app/qr-scanner)**: Instantly scan QR codes using a device camera or by uploading an image.
     *   **Multi-Engine Fallback**: Uses a primary in-browser scanner (`html5-qrcode`), a secondary in-browser scanner (`jsQR`), and an optional third-party API for maximum accuracy.
 
 ### ✍️ Community & Content
 
-*   📰 **[Community Blog](/blog)**: A user-driven blog for sharing stories, updates, and tutorials.
+*   📰 **[Community Blog](https://qlynk.vercel.app/blog)**: A user-driven blog for sharing stories, updates, and tutorials.
     *   **Rich Content Creation**: Users can create posts with titles, content, images (up to 2), or a single audio file.
     *   **Post Formatting**: Supports both plain text and full HTML for advanced post layouts.
     *   **Social Interaction**: Users can like and comment on posts.
@@ -61,16 +61,16 @@
 
 ### 💰 Monetization & E-commerce
 
-*   💎 **[Subscription Tiers](/dashboard)**: One-time payments for premium plans via Razorpay and Cashfree.
-*   🛍️ **[E-commerce Shop](/shop)**: A complete shop system for digital products (e.g., subscription extensions).
+*   💎 **[Subscription Tiers](https://qlynk.vercel.app/dashboard)**: One-time payments for premium plans via Razorpay and Cashfree.
+*   🛍️ **[E-commerce Shop](https://qlynk.vercel.app/shop)**: A complete shop system for digital products (e.g., subscription extensions).
 *   🎟️ **Advanced Coupon System**: Admins can create and manage discount coupons (percentage or flat-rate) with various limits (expiration, quantity, one-per-user).
-*   💸 **[Donation System](/donate)**: A dedicated page for users to support the platform, featuring a live donation leaderboard and a "Buy Me a Coffee" link.
+*   💸 **[Donation System](https://qlynk.vercel.app/donate)**: A dedicated page for users to support the platform, featuring a live donation leaderboard and a "Buy Me a Coffee" link.
 *   **Strategic Ad Placement**: Dismissible Google AdSense units are placed in non-intrusive locations, with core tool areas and dashboards remaining ad-free.
 *   **Anti-Adblocker System**: A polite, timed modal encourages users to disable adblockers and provides helpful guides.
 
 ### 👑 User & Admin Features
 
-*   **[Comprehensive Dashboard](/dashboard)**: Clean, tabbed interfaces for both users and admins.
+*   **[Comprehensive Dashboard](https://qlynk.vercel.app/dashboard)**: Clean, tabbed interfaces for both users and admins.
 *   **Secure Authentication & Password Recovery**:
     *   **Google Sign-In**: One-click sign-in/sign-up using your Google account, bypassing email verification.
     *   **Email Verification**: New user signups are protected by a mandatory email verification step to prevent spam and ensure account authenticity.
@@ -79,7 +79,7 @@
 *   **Multi-Layered Bot Protection**: A sophisticated, multi-step CAPTCHA system on the verification page to filter out bots, featuring Google reCAPTCHA with a custom math and text puzzle as a fallback.
 *   **User Management**: Admins can view all users, manage their roles (Admin, Moderator), grant premium access, and view session analytics (IP, browser, device).
 *   **Content Moderation**: Admins can approve/disapprove blog posts and delete any user-created content (short links, posts, comments).
-*   **[Developer API](/api-access)**: A secure API for integrating URL shortening into external applications.
+*   **[Developer API](https://qlynk.vercel.app/api-access)**: A secure API for integrating URL shortening into external applications.
 *   **Support Ticket System**: Users can create support tickets, and admins can manage and reply to them from the dashboard.
 *   **Notification System**: Admins can send custom push notifications (with optional links) to individual users or all users.
 
@@ -295,7 +295,7 @@ This project was built with the invaluable assistance of **Google's Gemini**. It
 
 <div align="center"> 
   
-  [![](https://raw.githubusercontent.com/Anuj579/Anuj579/output/github-contribution-grid-snake-dark.svg)](https://deepdeyiitk.com/)
+  [![](https://raw.githubusercontent.com/deepdeyiitgn/deepdeyiitgn/9168ffe0ea26017a66cb396f5329afcc4a77c586/snake.svg)](https://www.youtube.com/channel/UCrh1Mx5CTTbbkgW5O6iS2Tw/)
 </div>
 
 
