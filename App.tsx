@@ -48,6 +48,7 @@ const AdComponent = lazy(() => import('./components/AdComponent'));
 const ResetPasswordPage = lazy(() => import('./components/ResetPasswordPage'));
 const EmailVerificationPage = lazy(() => import('./components/EmailVerificationPage'));
 const CopyrightPage = lazy(() => import('./components/CopyrightPage'));
+const HistoryPage = lazy(() => import('./components/HistoryTable'));
 
 const AppContent: React.FC = () => {
     const auth = useContext(AuthContext);
@@ -108,6 +109,7 @@ const AppContent: React.FC = () => {
                                 <Route path="/status" element={<StatusPage />} />
                                 <Route path="/faq" element={<FaqPage />} />
                                 <Route path="/dashboard" element={<Dashboard />} />
+                                <Route path="/history" element={<HistoryPage />} />
                                 <Route path="/blog" element={<BlogPage />} />
                                 <Route path="/blog/create" element={<BlogCreatePage />} />
                                 <Route path="/blog/post/:postId" element={<BlogPostPageWrapper />} />
