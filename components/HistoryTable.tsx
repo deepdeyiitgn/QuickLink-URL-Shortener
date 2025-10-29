@@ -86,12 +86,24 @@ const HistoryTable: React.FC = () => {
             <table className="min-w-full border-collapse text-sm">
               <thead className="bg-gray-800/80">
                 <tr>
-                  <th className="border border-gray-700 px-3 py-2 text-left">#</th>
-                  <th className="border border-gray-700 px-3 py-2 text-left">Original Link</th>
-                  <th className="border border-gray-700 px-3 py-2 text-left">Short Link</th>
-                  <th className="border border-gray-700 px-3 py-2 text-left">Alias</th>
-                  <th className="border border-gray-700 px-3 py-2 text-left">Created</th>
-                  <th className="border border-gray-700 px-3 py-2 text-left">Expires</th>
+                  <th className="border border-gray-700 px-3 py-2 text-left">
+                    #
+                  </th>
+                  <th className="border border-gray-700 px-3 py-2 text-left">
+                    Original Link
+                  </th>
+                  <th className="border border-gray-700 px-3 py-2 text-left">
+                    Short Link
+                  </th>
+                  <th className="border border-gray-700 px-3 py-2 text-left">
+                    Alias
+                  </th>
+                  <th className="border border-gray-700 px-3 py-2 text-left">
+                    Created
+                  </th>
+                  <th className="border border-gray-700 px-3 py-2 text-left">
+                    Expires
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -101,9 +113,14 @@ const HistoryTable: React.FC = () => {
                     className="hover:bg-gray-800/60 transition"
                   >
                     <td className="border border-gray-700 px-3 py-2">{i + 1}</td>
-                    <td className="border border-gray-700 px-3 py-2 break-all">
+                    {/* Original URL truncated + tooltip */}
+                    <td
+                      className="border border-gray-700 px-3 py-2 max-w-[250px] truncate"
+                      title={link.originalUrl}
+                    >
                       {link.originalUrl}
                     </td>
+                    {/* Short URL */}
                     <td className="border border-gray-700 px-3 py-2 text-blue-400">
                       <a
                         href={link.shortUrl}
@@ -114,12 +131,17 @@ const HistoryTable: React.FC = () => {
                         {link.shortUrl}
                       </a>
                     </td>
-                    <td className="border border-gray-700 px-3 py-2">{link.alias || "-"}</td>
+                    {/* Alias */}
+                    <td className="border border-gray-700 px-3 py-2">
+                      {link.alias || "-"}
+                    </td>
+                    {/* Created Date */}
                     <td className="border border-gray-700 px-3 py-2">
                       {link.createdAt
                         ? new Date(link.createdAt).toLocaleString()
                         : "-"}
                     </td>
+                    {/* Expiry Date */}
                     <td className="border border-gray-700 px-3 py-2">
                       {link.expiresAt
                         ? new Date(link.expiresAt).toLocaleString()
