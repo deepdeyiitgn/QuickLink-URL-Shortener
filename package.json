@@ -15,7 +15,8 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.15.0",
     "qr-code-styling": "^1.5.1",
-    "nodemailer": "^6.9.14"
+    "nodemailer": "^6.9.14",
+    "lucide-react": "^0.453.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",
