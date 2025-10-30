@@ -1216,7 +1216,7 @@ const CopyrightPage: React.FC = () => {
         <footer className="mt-20 pt-8 border-t border-gray-700 text-center">
           <div className="mb-6">
             <a
-              href="https://qlynk.vercel.app/"
+              href="/"
               className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-md transition-colors"
             >
               {/* Simple Home Icon SVG */}
