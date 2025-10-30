@@ -10,6 +10,41 @@ import { LoadingIcon, UploadIcon, MicrophoneIcon, XIcon } from './icons/IconComp
 // FIX: Corrected import path for types
 import type { User, UserBadge, AuthContextType } from '../types';
 
+// Helper: create a square center-cropped blob from a File
+async function getSquareCroppedBlob(file: File, outputSize?: number): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+            try {
+                const min = Math.min(img.naturalWidth, img.naturalHeight);
+                const sx = Math.round((img.naturalWidth - min) / 2);
+                const sy = Math.round((img.naturalHeight - min) / 2);
+                const canvas = document.createElement('canvas');
+                const size = outputSize ?? min;
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) throw new Error('Canvas not supported');
+                ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+                canvas.toBlob((blob) => {
+                    URL.revokeObjectURL(url);
+                    if (!blob) reject(new Error('Could not create blob'));
+                    else resolve(blob);
+                }, 'image/jpeg', 0.92);
+            } catch (err) {
+                URL.revokeObjectURL(url);
+                reject(err);
+            }
+        };
+        img.onerror = (e) => {
+            URL.revokeObjectURL(url);
+            reject(new Error('Image load error'));
+        };
+        img.src = url;
+    });
+}
+
 type PostType = 'normal' | 'html';
 
 const getUserBadge = (user: User | null): UserBadge => {
@@ -37,7 +72,7 @@ const BlogCreatePost: React.FC = () => {
     const imageInputRef = useRef<HTMLInputElement>(null);
     const audioInputRef = useRef<HTMLInputElement>(null);
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (files && files.length > 0) {
             if (images.length + files.length > 2) {
@@ -47,13 +82,69 @@ const BlogCreatePost: React.FC = () => {
             setAudio(null);
             if (audioInputRef.current) audioInputRef.current.value = '';
 
-            Array.from(files).forEach(file => {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    setImages(prev => [...prev, reader.result as string]);
-                };
-                reader.readAsDataURL(file);
-            });
+            // Client-side enforced limits
+            const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+
+            // Prepare FormData and previews with square center-crop (1:1)
+            const form = new FormData();
+            const previewUrls: string[] = [];
+
+            for (const file of Array.from(files)) {
+                const f = file as File;
+                if (f.size > MAX_SIZE) {
+                    setError('Each file must be 5MB or smaller.');
+                    // revoke previews created so far
+                    previewUrls.forEach(u => URL.revokeObjectURL(u));
+                    return;
+                }
+                // create square-cropped blob (center)
+                try {
+                    // eslint-disable-next-line no-undef
+                    const blob = await getSquareCroppedBlob(f, 1000);
+                    // create preview URL (circle shown by CSS in preview)
+                    const pUrl = URL.createObjectURL(blob);
+                    previewUrls.push(pUrl);
+                    form.append('files', blob, f.name);
+                } catch (err) {
+                    console.error('Crop error:', err);
+                    setError('Failed to process image.');
+                    previewUrls.forEach(u => URL.revokeObjectURL(u));
+                    return;
+                }
+            }
+
+            // show previews immediately (temporary) while uploading
+            setImages(prev => [...prev, ...previewUrls]);
+
+            try {
+                setIsLoading(true);
+                setError('');
+                const res = await fetch('/api/upload/blog', {
+                    method: 'POST',
+                    body: form
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    setError(data?.error || 'Upload failed');
+                    // revoke temporary previews
+                    previewUrls.forEach(u => URL.revokeObjectURL(u));
+                    return;
+                }
+                // Expecting data.images array with objects containing url
+                const uploaded = (data.images || []).map((it: any) => it.url || it.filePath || it.fileUrl || it.name || it.file || it);
+                const uploadedUrls = uploaded.filter((u: string) => !!u);
+                // replace last previewUrls count images with actual uploaded urls
+                setImages(prev => {
+                    // remove the temporary previewUrls from end and append uploadedUrls
+                    const newPrev = prev.slice(0, Math.max(0, prev.length - previewUrls.length));
+                    return [...newPrev, ...uploadedUrls];
+                });
+            } catch (err: any) {
+                console.error('Image upload error:', err);
+                setError(err?.message || 'Upload failed');
+            } finally {
+                setIsLoading(false);
+            }
         }
     };
     
