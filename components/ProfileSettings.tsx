@@ -5,6 +5,41 @@ import { AuthContext } from '../contexts/AuthContext';
 import { LoadingIcon, UploadIcon, CheckIcon } from './icons/IconComponents';
 import { AuthContextType } from '../types';
 
+// Helper: create a square center-cropped blob from a File
+async function getSquareCroppedBlob(file: File, outputSize?: number): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+            try {
+                const min = Math.min(img.naturalWidth, img.naturalHeight);
+                const sx = Math.round((img.naturalWidth - min) / 2);
+                const sy = Math.round((img.naturalHeight - min) / 2);
+                const canvas = document.createElement('canvas');
+                const size = outputSize ?? min;
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) throw new Error('Canvas not supported');
+                ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+                canvas.toBlob((blob) => {
+                    URL.revokeObjectURL(url);
+                    if (!blob) reject(new Error('Could not create blob'));
+                    else resolve(blob);
+                }, 'image/jpeg', 0.92);
+            } catch (err) {
+                URL.revokeObjectURL(url);
+                reject(err);
+            }
+        };
+        img.onerror = (e) => {
+            URL.revokeObjectURL(url);
+            reject(new Error('Image load error'));
+        };
+        img.src = url;
+    });
+}
+
 const ProfileSettings: React.FC = () => {
     // FIX: Cast context to the correct type to resolve property errors
     const auth = useContext(AuthContext) as AuthContextType;
@@ -20,14 +55,37 @@ const ProfileSettings: React.FC = () => {
 
     if (!currentUser) return null;
     
-    const handlePictureUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handlePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setProfilePicture(reader.result as string);
-            };
-            reader.readAsDataURL(file);
+            const MAX_SIZE = 5 * 1024 * 1024;
+            if (file.size > MAX_SIZE) { setError('Profile picture must be 5MB or smaller.'); return; }
+
+            try {
+                setIsLoading(true);
+                setError('');
+                // Create square center-cropped blob before upload
+                // eslint-disable-next-line no-undef
+                const blob = await getSquareCroppedBlob(file, 800);
+                const form = new FormData();
+                form.append('file', blob, file.name);
+
+                // show temporary preview
+                const tempUrl = URL.createObjectURL(blob);
+                setProfilePicture(tempUrl);
+
+                const res = await fetch('/api/upload/profile', { method: 'POST', body: form });
+                const data = await res.json();
+                if (!res.ok) { setError(data?.error || 'Upload failed'); URL.revokeObjectURL(tempUrl); return; }
+
+                const imgObj = data.image || (data.images && data.images[0]) || null;
+                const url = imgObj ? (imgObj.url || imgObj.filePath || imgObj.fileUrl || imgObj.name || imgObj.file) : null;
+                if (url) { setProfilePicture(url); URL.revokeObjectURL(tempUrl); }
+                else { setError('Upload succeeded but no URL returned.'); URL.revokeObjectURL(tempUrl); }
+            } catch (err: any) {
+                console.error('Profile upload error:', err);
+                setError(err?.message || 'Upload failed');
+            } finally { setIsLoading(false); }
         }
     };
     
