@@ -148,3 +148,10 @@ body {
   cursor: none !important;
 }
 
+/* Hide default cursor globally (only for desktop) */
+@media (min-width: 768px) {
+  * {
+    cursor: none !important;
+  }
+}
+
