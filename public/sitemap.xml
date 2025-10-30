@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset 
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- 🌍 Home -->
+  <url>
+    <loc>https://qlynk.vercel.app/</loc>
+    <lastmod>2025-10-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- 🧭 Tool Pages -->
+  <url>
+    <loc>https://qlynk.vercel.app/tools</loc>
+    <lastmod>2025-10-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://qlynk.vercel.app/shortener</loc>
+    <lastmod>2025-10-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+  </url>
+
+  <url>
+    <loc>https://qlynk.vercel.app/qr-generator</loc>
+    <lastmod>2025-10-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://qlynk.vercel.app/qr-scanner</loc>
+    <lastmod>2025-10-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://qlynk.vercel.app/api-access</loc>
+    <lastmod>2025-10-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- 📖 Blog Section -->
+  <url>
+    <loc>https://qlynk.vercel.app/blog</loc>
+    <lastmod>2025-10-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Placeholder for blog posts -->
+  <url>
+    <loc>https://qlynk.vercel.app/blog/post/sample-post</loc>
+    <lastmod>2025-10-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- 📞 Info Pages -->
+  <url><loc>https://qlynk.vercel.app/about</loc><changefreq>yearly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://qlynk.vercel.app/contact</loc><changefreq>yearly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://qlynk.vercel.app/privacy</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://qlynk.vercel.app/terms</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://qlynk.vercel.app/cancellation</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://qlynk.vercel.app/cookies</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://qlynk.vercel.app/faq</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://qlynk.vercel.app/status</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://qlynk.vercel.app/donate</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://qlynk.vercel.app/shop</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://qlynk.vercel.app/copyright</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+
+  <!-- ⚠️ Error Page -->
+  <url>
+    <loc>https://qlynk.vercel.app/404</loc>
+    <priority>0.1</priority>
+  </url>
+
+</urlset>
