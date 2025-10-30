@@ -80,6 +80,33 @@ const AboutPage: React.FC = () => {
                 </div>
             </div>
         </div>
+                        <div className="border-t border-gray-700 pt-10">
+                    <h3 className="text-2xl font-semibold text-brand-primary mb-3">About the Author</h3>
+                    <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+                        <img
+                            src="https://i.postimg.cc/Ss0GyCZ5/Ufffffffffntitled-design.png"
+                            alt="Deep Dey - Founder of QuickLink"
+                            className="w-40 h-40 rounded-full object-cover border-2 border-brand-secondary shadow-md"
+                        />
+                        <div className="text-gray-300 text-lg leading-relaxed">
+                            <p className="mb-3">
+                                <strong>Deep Dey</strong> — the creator and visionary mind behind <strong>QuickLink</strong>.  
+                                A student and JEE aspirant driven by curiosity, precision, and the belief that small ideas can grow into impactful tools.  
+                                QuickLink wasn’t built from a business plan — it was born from frustration. Constantly juggling long URLs, broken links, and cluttered sharing methods, Deep set out to build something clean, fast, and human.
+                            </p>
+                            <p className="mb-3">
+                                Starting as a small experiment in web development, QuickLink evolved into a full-fledged platform for link shortening and QR generation.  
+                                Every feature — from secure redirects to QR customization — reflects a single question he asked himself:  
+                                <em>“How can sharing information feel effortless and smart at the same time?”</em>
+                            </p>
+                            <p>
+                                When he’s not writing code or improving QuickLink, Deep spends time learning about AI, building new projects, and inspiring others chasing their own IIT or tech dreams.  
+                                QuickLink is more than a product — it’s proof that vision and persistence can turn an idea into something real.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
     );
 };
 
