@@ -5,6 +5,13 @@ Allow: /
 Disallow: /api/
 Disallow: /admin/
 Disallow: /test/
+Disallow: /dashboard
+Disallow: /history
+Disallow: /notifications
+Disallow: /api-access
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /blog/create
 
 # Sitemap location
 Sitemap: https://qlynk.vercel.app/sitemap.xml
