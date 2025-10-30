@@ -1,5 +1,5 @@
 
-
+import CustomCursor from './components/CustomCursor';
 import React, { Suspense, lazy, useContext, useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 
@@ -142,6 +142,7 @@ const AppContent: React.FC = () => {
             <BackToTopButton />
             <NotificationPermissionPrompt />
             <div id="portal-root"></div>
+            <CustomCursor />
         </div>
     );
 };
