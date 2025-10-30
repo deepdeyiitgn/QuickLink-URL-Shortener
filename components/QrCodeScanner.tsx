@@ -15,8 +15,6 @@ const QrCodeScanner: React.FC = () => {
     const [isFileProcessing, setIsFileProcessing] = useState(false);
     const [scanError, setScanError] = useState<string | null>(null);
     const [isDragging, setIsDragging] = useState(false);
-    
-    // New states for fallback mechanism
     const [showFallbackModal, setShowFallbackModal] = useState(false);
     const [failedFile, setFailedFile] = useState<File | null>(null);
 
@@ -66,27 +64,41 @@ const QrCodeScanner: React.FC = () => {
         }
     };
 
-
-    const startScanner = () => {
+    const startScanner = async () => {
         if (isScanning || html5QrCode.current) return;
 
         setScanError(null);
         setScanResult(null);
         setIsScanning(true);
-        const qrScanner = new Html5Qrcode("reader");
-        html5QrCode.current = qrScanner;
-        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
 
-        qrScanner.start({ facingMode: "environment" }, config, onScanSuccess, () => {})
-            .catch((err: any) => {
-                let errorMessage = 'An unexpected camera error occurred.';
-                if (err.name === 'NotAllowedError') errorMessage = 'Camera access was denied. Please grant permissions in your browser settings.';
-                else if (err.name === 'NotFoundError') errorMessage = 'No camera was found on this device. Try uploading an image instead.';
-                else if (err.name === 'NotReadableError') errorMessage = 'The camera is in use by another application. Please close other apps and try again.';
-                else errorMessage = `Camera Error: ${err.message}. Please ensure permissions are granted.`;
-                setScanError(errorMessage);
-                stopScanner();
-            });
+        try {
+            // Force permission request manually
+            await navigator.mediaDevices.getUserMedia({ video: true });
+
+            // Delay to ensure <div id="reader"> is rendered
+            setTimeout(() => {
+                const qrScanner = new Html5Qrcode("reader");
+                html5QrCode.current = qrScanner;
+                const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+                qrScanner.start({ facingMode: "environment" }, config, onScanSuccess, () => {})
+                    .catch((err: any) => {
+                        let errorMessage = 'An unexpected camera error occurred.';
+                        if (err.name === 'NotAllowedError') errorMessage = 'Camera access was denied. Please grant permissions.';
+                        else if (err.name === 'NotFoundError') errorMessage = 'No camera found on this device.';
+                        else if (err.name === 'NotReadableError') errorMessage = 'Camera is in use by another app.';
+                        setScanError(errorMessage);
+                        stopScanner();
+                    });
+            }, 200); // 200ms delay ensures div exists
+        } catch (err: any) {
+            if (err.name === 'NotAllowedError') {
+                setScanError('Camera access denied. Please allow camera permission in browser settings.');
+            } else {
+                setScanError('Unable to access camera. Please check device permissions.');
+            }
+            setIsScanning(false);
+        }
     };
 
     useEffect(() => {
@@ -218,7 +230,6 @@ const QrCodeScanner: React.FC = () => {
             e.dataTransfer.clearData();
         }
     };
-
 
     const FallbackModal = () => (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
