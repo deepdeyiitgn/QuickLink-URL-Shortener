@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Block temporary build or test routes
+Disallow: /api/
+Disallow: /admin/
+Disallow: /test/
+
+# Sitemap location
+Sitemap: https://qlynk.vercel.app/sitemap.xml
