@@ -1,5 +1,6 @@
 // src/components/CopyrightPage.tsx
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from "react-router-dom";
 
 const CopyrightPage: React.FC = () => {
   // State to manage modal visibility and content
@@ -1215,8 +1216,8 @@ const CopyrightPage: React.FC = () => {
         {/* Footer */}
         <footer className="mt-20 pt-8 border-t border-gray-700 text-center">
           <div className="mb-6">
-            <a
-              href="/"
+            <Link
+              to="/"
               className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-md transition-colors"
             >
               {/* Simple Home Icon SVG */}
@@ -1235,7 +1236,7 @@ const CopyrightPage: React.FC = () => {
                 />
               </svg>
               Go to Home
-            </a>
+            </Link>
           </div>
           <p className="text-sm text-gray-500">
             © 2025 Quicklink. All music rights, licenses, and credits belong to
