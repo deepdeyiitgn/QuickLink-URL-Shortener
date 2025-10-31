@@ -155,3 +155,19 @@ body {
   }
 }
 
+
+
+/* Mobile nav animation */
+
+@keyframes bounce-slight {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-bounce-slight {
+  animation: bounce-slight 0.4s ease;
+}
