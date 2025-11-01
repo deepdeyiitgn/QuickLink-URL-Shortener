@@ -57,19 +57,13 @@ export const api = {
     getAdminDashboardData: (adminId: string): Promise<any> => apiFetch(`/api/admin?adminId=${adminId}`),
     
     // Tickets
-    getUserTickets: (userId: string): Promise<Ticket[]> => apiFetch(`/api/support?type=ticket&userId=${userId}`),
-    getAllTickets: async (): Promise<Ticket[]> => {
-    const authData = JSON.parse(localStorage.getItem("auth") || "{}");
-    const userId = authData?.currentUser?.id || "temp";
-    const token = authData?.token;
+    getAllTickets: async (config: RequestInit = {}): Promise<Ticket[]> => {
+       return apiFetch(`/api/support?type=ticket&forAdmin=true`, {
+        method: "GET",
+        ...config, // forwards headers, like Authorization
+     });
+    },
 
-    return apiFetch(`/api/support?type=ticket&forAdmin=true&userId=${userId}`, {
-        headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-    });
-},
 
     createTicket: (data: any): Promise<Ticket> => apiFetch('/api/support?type=ticket', { method: 'POST', body: JSON.stringify(data) }),
     updateTicket: (ticketId: string, update: any): Promise<Ticket> => apiFetch('/api/support?type=ticket', { method: 'PUT', body: JSON.stringify({ ticketId, ...update }) }),
