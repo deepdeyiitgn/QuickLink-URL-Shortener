@@ -30,7 +30,7 @@ export interface ApiAccess {
   subscription: {
     planId: 'trial' | 'basic' | 'pro';
     expiresAt: number;
-  };
+  }
 }
 
 export interface User {
@@ -49,7 +49,6 @@ export interface User {
   status: UserStatus;
   subscription: Subscription | null;
   apiAccess: ApiAccess | null;
-  token?: string; // 👈 add this line
   // New fields for security/analytics
   ipAddress?: string;
   browser?: string;
@@ -72,8 +71,7 @@ export interface AuthContextType {
   isApiSubscriptionModalOpen: boolean;
   loading: boolean;
   isFetchingDetails: boolean;
-  // 👇 change this one line
-  login: (email: string, password: string) => Promise<{ user: User; token: string } | User>;
+  login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<string>;
   logout: () => void;
   openAuthModal: (mode: AuthModalMode) => void;
@@ -94,13 +92,14 @@ export interface AuthContextType {
   resetPassword: (token: string, newPassword: string) => Promise<void>;
 }
 
-
 export interface UrlContextType {
   allUrls: ShortenedUrl[];
   activeUrls: ShortenedUrl[];
   expiredUrls: ShortenedUrl[];
   paymentHistory: PaymentRecord[];
   loading: boolean;
+  // FIX: Corrected the signature for `addUrl` to accept creation data and return the new URL object.
+  // This resolves type errors in both the context provider and the components that use it.
   addUrl: (newUrl: { longUrl: string; alias?: string; userId: string | null }) => Promise<ShortenedUrl>;
   deleteUrl: (urlId: string) => Promise<void>;
   deleteUrlsByUserId: (userId: string) => Promise<void>;
@@ -177,126 +176,129 @@ export interface RazorpaySuccessResponse {
 }
 
 export interface CashfreeOrder {
+  // Define required fields based on Cashfree API response
   payment_session_id: string;
   order_id: string;
 }
 
+
 export interface TicketReply {
-  id: string;
-  userId: string;
-  userName: string;
-  userIsAdmin: boolean;
-  message: string;
-  createdAt: number;
+    id: string;
+    userId: string;
+    userName: string;
+    userIsAdmin: boolean;
+    message: string;
+    createdAt: number;
 }
 
 export interface Ticket {
-  id: string;
-  userId: string;
-  userName: string;
-  userEmail: string;
-  subject: string;
-  status: 'open' | 'in-progress' | 'closed';
-  createdAt: number;
-  replies: TicketReply[];
+    id: string;
+    userId: string;
+    userName: string;
+    userEmail: string;
+    subject: string;
+    status: 'open' | 'in-progress' | 'closed';
+    createdAt: number;
+    replies: TicketReply[];
 }
 
 export interface NotificationMessage {
-  id: string;
-  userId: string;
-  title: string;
-  message: string;
-  link?: string;
-  isRead: boolean;
-  createdAt: number;
-  imageUrl?: string;
+    id: string;
+    userId: string;
+    title: string;
+    message: string;
+    link?: string;
+    isRead: boolean;
+    createdAt: number;
+    imageUrl?: string;
 }
 
 export interface DbStatus {
-  status: 'ok' | 'error';
-  message: string;
-  dbName: string;
+    status: 'ok' | 'error';
+    message: string;
+    dbName: string;
 }
 
 export interface Comment {
-  id: string;
-  userId: string;
-  userName: string;
-  userBadge: UserBadge;
-  text: string;
-  createdAt: number;
+    id: string;
+    userId: string;
+    userName: string;
+    userBadge: UserBadge;
+    text: string;
+    createdAt: number;
 }
 
 export interface BlogPost {
-  id: string;
-  userId: string;
-  userName: string;
-  userBadge: UserBadge;
-  userProfilePictureUrl?: string;
-  title: string;
-  content: string;
-  postType: 'normal' | 'html';
-  imageUrls?: string[];
-  audioUrl?: string | null;
-  keywords?: string[];
-  likes: string[];
-  comments: Comment[];
-  shares: number;
-  views: number;
-  isPinned: boolean;
-  status: 'pending' | 'approved';
-  createdAt: number;
+    id: string;
+    userId: string;
+    userName: string;
+    userBadge: UserBadge;
+    userProfilePictureUrl?: string;
+    title: string;
+    content: string;
+    postType: 'normal' | 'html';
+    imageUrls?: string[];
+    audioUrl?: string | null;
+    keywords?: string[];
+    likes: string[]; // array of user IDs
+    comments: Comment[];
+    shares: number;
+    views: number;
+    isPinned: boolean;
+    status: 'pending' | 'approved';
+    createdAt: number;
 }
 
 export interface BlogContextType {
-  posts: BlogPost[];
-  loading: boolean;
-  addPost: (postData: Omit<BlogPost, 'id' | 'createdAt' | 'likes' | 'comments' | 'shares' | 'isPinned' | 'status' | 'userProfilePictureUrl' | 'views'>) => Promise<void>;
-  toggleLike: (postId: string) => Promise<void>;
-  addComment: (postId: string, commentData: Omit<Comment, 'id' | 'createdAt'>) => Promise<void>;
-  incrementShares: (postId: string) => Promise<void>;
-  incrementView: (postId: string) => Promise<void>;
-  deletePost: (postId: string) => Promise<void>;
-  togglePinPost: (postId: string) => Promise<void>;
-  approvePost: (postId: string) => Promise<void>;
+    posts: BlogPost[];
+    loading: boolean;
+    addPost: (postData: Omit<BlogPost, 'id' | 'createdAt' | 'likes' | 'comments' | 'shares' | 'isPinned' | 'status' | 'userProfilePictureUrl' | 'views'>) => Promise<void>;
+    toggleLike: (postId: string) => Promise<void>;
+    addComment: (postId: string, commentData: Omit<Comment, 'id' | 'createdAt'>) => Promise<void>;
+    incrementShares: (postId: string) => Promise<void>;
+    incrementView: (postId: string) => Promise<void>;
+    deletePost: (postId: string) => Promise<void>;
+    togglePinPost: (postId: string) => Promise<void>;
+    approvePost: (postId: string) => Promise<void>;
 }
 
 export interface ProductBenefit {
-  type: 'SUBSCRIPTION_DAYS' | 'API_DAYS';
-  value: number;
+    type: 'SUBSCRIPTION_DAYS' | 'API_DAYS';
+    value: number; // e.g., 30 for 30 days
 }
 
 export interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  benefit: ProductBenefit;
-  isActive: boolean;
-  limitQuantity?: boolean;
-  stock?: number;
-  availableUntil?: number;
-  createdAt: number;
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    imageUrl: string;
+    benefit: ProductBenefit;
+    isActive: boolean;
+    limitQuantity?: boolean;
+    stock?: number;
+    availableUntil?: number;
+    createdAt: number;
 }
 
 export interface Coupon {
-  id: string;
-  code: string;
-  discount: {
-    type: 'PERCENT' | 'FLAT';
-    value: number;
-  };
-  expiresAt?: number;
-  quantityLimit?: number;
-  uses: number;
-  onePerUser: boolean;
-  createdAt: number;
+    id: string;
+    code: string; // e.g., "SAVE10"
+    discount: {
+        type: 'PERCENT' | 'FLAT';
+        value: number;
+    };
+    expiresAt?: number;
+    quantityLimit?: number;
+    uses: number;
+    onePerUser: boolean;
+    createdAt: number;
 }
 
 export interface CouponUsage {
-  id: string;
-  couponId: string;
-  userId: string;
-  timestamp: number;
+    id: string;
+    couponId: string;
+    userId: string;
+    timestamp: number;
 }
+
