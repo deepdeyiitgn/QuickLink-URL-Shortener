@@ -20,6 +20,7 @@ async function handleGetTickets(req: any, res: any, db: any) {
               return res.status(500).json({ error: "Server misconfiguration" });
             }
 
+            console.log("Raw token:", rawToken);
             const decoded: any = jwt.verify(rawToken, secret);
 
             const user = await db.collection('users').findOne({ id: decoded.id });
