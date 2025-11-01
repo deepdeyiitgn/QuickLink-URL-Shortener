@@ -100,7 +100,12 @@ const TicketManagement: React.FC = () => {
             const token = authData?.token;
 
             // call existing function without arguments
-            const allTickets: any = await api.getAllTickets();
+            const allTickets: any = await api.getAllTickets({
+              headers: {
+                "Authorization": `Bearer ${token}`,
+            },
+           });
+
 
             // handle different response shapes safely
             if (Array.isArray(allTickets)) {
