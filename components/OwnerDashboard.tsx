@@ -14,7 +14,6 @@ import NotificationCreator from './NotificationCreator';
 import ProductManager from './ProductManager';
 import CouponManager from './CouponManager';
 import LiveActivityDashboard from './LiveActivityDashboard';
-const token = localStorage.getItem("token");
 
 const TICKET_STATUS_STYLES: Record<Ticket['status'], string> = {
     open: 'bg-green-500/20 text-green-300',
@@ -92,48 +91,11 @@ const TicketManagement: React.FC = () => {
     const [filter, setFilter] = useState<'all' | Ticket['status']>('all');
 
     useEffect(() => {
-    const fetchTickets = async () => {
-        console.log("Sending token:", token);
-        try {
-            setLoading(true);
-
-            // read auth context instead of passing params to API
-            const authData = JSON.parse(localStorage.getItem("auth") || "{}");
-            const token = authData?.token;
-
-            // call existing function without arguments
-            const allTickets: any = await api.getAllTickets({
-              headers: {
-                "Authorization": `Bearer ${token}`,
-            },
-           });
-
-
-            // handle different response shapes safely
-            if (Array.isArray(allTickets)) {
-                setTickets(allTickets);
-            } else if (Array.isArray(allTickets?.tickets)) {
-                setTickets(allTickets.tickets);
-            } else if (Array.isArray(allTickets?.data)) {
-                setTickets(allTickets.data);
-            } else {
-                console.error("Unexpected data:", allTickets);
-                setTickets([]);
-            }
-        } catch (error) {
-            console.error("Failed to fetch tickets:", error);
-            alert("Unable to load tickets right now. Please try again later.");
-            setTickets([]);
-        } finally {
+        api.getAllTickets().then(allTickets => {
+            setTickets(allTickets);
             setLoading(false);
-        }
-    };
-
-    fetchTickets();
-}, []);
-
-
-
+        });
+    }, []);
     
     const handleTicketUpdate = (updatedTicket: Ticket) => {
         setTickets(prev => prev.map(t => t.id === updatedTicket.id ? updatedTicket : t));
