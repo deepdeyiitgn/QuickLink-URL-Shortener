@@ -14,6 +14,7 @@ import NotificationCreator from './NotificationCreator';
 import ProductManager from './ProductManager';
 import CouponManager from './CouponManager';
 import LiveActivityDashboard from './LiveActivityDashboard';
+const token = localStorage.getItem("token");
 
 const TICKET_STATUS_STYLES: Record<Ticket['status'], string> = {
     open: 'bg-green-500/20 text-green-300',
