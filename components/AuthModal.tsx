@@ -74,6 +74,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       setSuccessMessage(message);
       setMode('signup_success');
     } else if (mode === 'login') {
+      const user: User = await login(email, password);
       const user = await login(email, password);
       if (user?.token) {
         localStorage.setItem("token", user.token);
