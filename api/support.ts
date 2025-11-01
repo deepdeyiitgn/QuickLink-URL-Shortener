@@ -14,7 +14,14 @@ async function handleGetTickets(req: any, res: any, db: any) {
         if (!rawToken) return res.status(401).json({ error: "Missing token" });
 
         try {
-            const decoded: any = jwt.verify(rawToken, process.env.JWT_SECRET);
+            const secret = process.env.JWT_SECRET as string;
+            if (!secret) {
+              console.error("JWT_SECRET missing in environment!");
+              return res.status(500).json({ error: "Server misconfiguration" });
+            }
+
+            const decoded: any = jwt.verify(rawToken, secret);
+
             const user = await db.collection('users').findOne({ id: decoded.id });
 
             if (!user || !user.isAdmin)
