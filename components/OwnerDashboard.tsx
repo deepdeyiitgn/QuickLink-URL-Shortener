@@ -94,23 +94,23 @@ const TicketManagement: React.FC = () => {
     const fetchTickets = async () => {
         try {
             setLoading(true);
-            const auth = JSON.parse(localStorage.getItem("auth") || "{}");
-            const userId = auth?.currentUser?.id;
-            const token = auth?.token;
 
-            if (!userId || !token) {
-                console.warn("No valid user or token found. Admin not logged in?");
-                setLoading(false);
-                return;
-            }
+            // read auth context instead of passing params to API
+            const authData = JSON.parse(localStorage.getItem("auth") || "{}");
+            const token = authData?.token;
 
-            const allTickets = await api.getAllTickets(userId, token);
+            // call existing function without arguments
+            const allTickets: any = await api.getAllTickets();
+
+            // handle different response shapes safely
             if (Array.isArray(allTickets)) {
                 setTickets(allTickets);
             } else if (Array.isArray(allTickets?.tickets)) {
                 setTickets(allTickets.tickets);
+            } else if (Array.isArray(allTickets?.data)) {
+                setTickets(allTickets.data);
             } else {
-                console.error("Invalid ticket data:", allTickets);
+                console.error("Unexpected data:", allTickets);
                 setTickets([]);
             }
         } catch (error) {
@@ -124,6 +124,7 @@ const TicketManagement: React.FC = () => {
 
     fetchTickets();
 }, []);
+
 
 
     
