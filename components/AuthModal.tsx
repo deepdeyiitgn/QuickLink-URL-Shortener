@@ -60,37 +60,36 @@ const AuthModal: React.FC = () => {
         }
     };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-    setSuccessMessage('');
-    try {
-      if (mode === 'signup') {
-        const message = await signup(name, email, password);
-        setSuccessMessage(message);
-        setMode('signup_success');
-      } else if (mode === 'login') {
-        const user = await login(email, password);
-        if (user?.token) {
-          localStorage.setItem("token", user.token);
-          console.log("Token saved:", user.token);
-        } else {
-          console.warn("Login successful but token missing");
-      }
-        closeAuthModal();
-   }
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
+  setError('');
+  setSuccessMessage('');
 
-      } else if (mode === 'forgot') {
-        await sendPasswordResetLink(email);
-        setSuccessMessage('Password reset link sent! Please check your email.');
+  try {
+    if (mode === 'signup') {
+      const message = await signup(name, email, password);
+      setSuccessMessage(message);
+      setMode('signup_success');
+    } else if (mode === 'login') {
+      const user = await login(email, password);
+      if (user?.token) {
+        localStorage.setItem("token", user.token);
+        console.log("Token saved:", user.token);
+      } else {
+        console.warn("Login successful but token missing");
       }
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred.');
-    } finally {
-      setIsLoading(false);
+      closeAuthModal();
+    } else if (mode === 'forgot') {
+      await sendPasswordResetLink(email);
+      setSuccessMessage('Password reset link sent! Please check your email.');
     }
-  };
+  } catch (err: any) {
+    setError(err.message || 'An unexpected error occurred.');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const renderContent = () => {
     if (mode === 'signup_success') {
