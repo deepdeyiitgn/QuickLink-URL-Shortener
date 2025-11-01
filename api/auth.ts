@@ -5,7 +5,6 @@ import { connectToDatabase } from './lib/mongodb.js';
 import type { User } from '../types';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
-import jwt from 'jsonwebtoken';
 
 // --- Password Hashing Utilities ---
 // Use a strong algorithm and salt.
@@ -122,13 +121,7 @@ export default async function handler(req: any, res: any) {
                 }
                 // Don't send back the password hash
                 const { passwordHash, ...userToReturn } = user;
-                const jwtSecret = process.env.JWT_SECRET || 'default_secret_key';
-                const token = jwt.sign(
-                    { id: user.id, email: user.email, isAdmin: user.isAdmin },
-                    jwtSecret,
-                    { expiresIn: '7d' }
-              );
-               return res.status(200).json({ user: userToReturn, token });
+                return res.status(200).json(userToReturn);
             }
 
             case 'signup': {
