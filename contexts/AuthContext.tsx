@@ -104,24 +104,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, [currentUser?.isAdmin, getAllUsers]);
 
 
-const login = async (email: string, password: string): Promise<{ user: User; token: string }> => {
-  const res = await api.login(email, password);
-
-  if (res?.token) {
-    localStorage.setItem("token", res.token);
-  } else {
-    console.warn("Backend did not send token");
-  }
-
-  if (res?.user) {
-    handleUserUpdate(res.user);
-    return { user: res.user, token: res.token }; // ✅ fixed return
-  } else {
-    throw new Error("User data missing from response");
-  }
-};
-
-
+    const login = async (email: string, password: string) => {
+        const user = await api.login(email, password);
+        handleUserUpdate(user);
+    };
 
     const signup = async (name: string, email: string, password: string): Promise<string> => {
         const response = await api.signup(name, email, password);
@@ -136,7 +122,6 @@ const login = async (email: string, password: string): Promise<{ user: User; tok
     const logout = () => {
         setCurrentUser(null);
         localStorage.removeItem('currentUser');
-        localStorage.removeItem('token'); // ✅ clear token too
     };
 
     const openAuthModal = (mode: AuthModalMode) => {
