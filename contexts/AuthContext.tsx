@@ -136,6 +136,7 @@ const login = async (email: string, password: string): Promise<{ user: User; tok
     const logout = () => {
         setCurrentUser(null);
         localStorage.removeItem('currentUser');
+        localStorage.removeItem('token'); // ✅ clear token too
     };
 
     const openAuthModal = (mode: AuthModalMode) => {
