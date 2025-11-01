@@ -92,6 +92,7 @@ const TicketManagement: React.FC = () => {
 
     useEffect(() => {
     const fetchTickets = async () => {
+        console.log("Sending token:", token);
         try {
             setLoading(true);
 
