@@ -1,27 +1,54 @@
 // Vercel Serverless Function: /api/support
 // Handles all logic for support tickets and sending notifications.
 
+import jwt from "jsonwebtoken";
 import { connectToDatabase } from './lib/mongodb.js';
 import type { Ticket, TicketReply, User, NotificationMessage } from '../types';
 
 async function handleGetTickets(req: any, res: any, db: any) {
-    const { userId, forAdmin } = req.query;
-    const usersCollection = db.collection('users');
-    const user = userId ? await usersCollection.findOne({ id: userId }) : null;
+    const { forAdmin } = req.query;
+    const rawToken = req.headers.authorization?.split(" ")[1];
 
+    // 🔐 Admin route: verify token
     if (forAdmin === 'true') {
-        if (!user || !user.isAdmin) return res.status(403).json({ error: "Unauthorized" });
-        const allTickets = await db.collection('tickets').find({}).sort({ createdAt: -1 }).toArray();
-        return res.status(200).json(allTickets);
+        if (!rawToken) return res.status(401).json({ error: "Missing token" });
+
+        try {
+            const decoded: any = jwt.verify(rawToken, process.env.JWT_SECRET);
+            const user = await db.collection('users').findOne({ id: decoded.id });
+
+            if (!user || !user.isAdmin)
+                return res.status(403).json({ error: "Unauthorized" });
+
+            const allTickets = await db
+                .collection('tickets')
+                .find({})
+                .sort({ createdAt: -1 })
+                .toArray();
+
+            return res.status(200).json(allTickets);
+        } catch (err) {
+            console.error("JWT verification failed:", err);
+            return res.status(403).json({ error: "Invalid or expired token" });
+        }
     }
-    
+
+    // 👤 Normal user route (non-admin)
+    const { userId } = req.query;
     if (userId) {
-        const userTickets = await db.collection('tickets').find({ userId }).sort({ createdAt: -1 }).toArray();
+        const userTickets = await db
+            .collection('tickets')
+            .find({ userId })
+            .sort({ createdAt: -1 })
+            .toArray();
         return res.status(200).json(userTickets);
     }
-    
-    return res.status(400).json({ error: "User ID or admin flag is required." });
+
+    return res
+        .status(400)
+        .json({ error: "User ID or admin flag is required." });
 }
+
 
 async function handleCreateTicket(req: any, res: any, db: any) {
     const { userId, userName, userEmail, subject, message } = req.body;
