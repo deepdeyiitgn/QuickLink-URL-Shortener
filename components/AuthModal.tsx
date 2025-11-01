@@ -2,6 +2,8 @@ import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { XIcon, LoadingIcon, EyeIcon, EyeSlashIcon, CheckIcon } from './icons/IconComponents';
 import { AuthContextType } from '../types';
+import type { User } from "../types";
+
 
 const AuthModal: React.FC = () => {
   const auth = useContext(AuthContext);
