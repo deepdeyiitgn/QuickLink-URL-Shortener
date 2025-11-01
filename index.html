@@ -241,7 +241,13 @@
         document.documentElement.classList.remove('dark')
       }
     </script>
+    
      <script>
+
+       
+    //   <!-- ======= ORIGINAL (NO CHANGES) ======= -->
+         
+<script>
 // =======================
 // Persistent Background Music (SPA + Multi-track) 
 // =======================
@@ -318,10 +324,122 @@ if (!window.bgMusicManager) {
   document.addEventListener("click", tryStart);
   document.addEventListener("keydown", tryStart);
 }
+</script>
 
-   
-    </script>
+<!-- ======= SOURCE-LEVEL SWITCH (NO VISIBLE BUTTON) ======= -->
+<script>
+/*
+  Owner workflow:
+  - Open HTML source
+  - Set MUSIC_ENABLED_IN_SOURCE = false  (then save & deploy) to disable music site-wide
+  - Set MUSIC_ENABLED_IN_SOURCE = true   to enable music
+*/
+const MUSIC_ENABLED_IN_SOURCE = false; // <-- change here (true/false) before deploy
 
+(function () {
+  const POLL_INTERVAL = 120;
+  const WAIT_TIMEOUT = 8000;
+  const FADE_MS = 700;
+
+  function waitForManager(timeout = WAIT_TIMEOUT) {
+    return new Promise((resolve) => {
+      if (window.bgMusicManager) return resolve(window.bgMusicManager);
+      let waited = 0;
+      const iv = setInterval(() => {
+        waited += POLL_INTERVAL;
+        if (window.bgMusicManager) {
+          clearInterval(iv); resolve(window.bgMusicManager);
+        } else if (waited >= timeout) {
+          clearInterval(iv); resolve(null);
+        }
+      }, POLL_INTERVAL);
+    });
+  }
+
+  function fadeTo(audio, target, ms = FADE_MS) {
+    if (!audio) return;
+    const steps = 20;
+    const stepTime = ms / steps;
+    const start = audio.volume;
+    const delta = target - start;
+    let i = 0;
+    const iv = setInterval(() => {
+      i++;
+      audio.volume = Math.max(0, Math.min(1, start + (delta * i / steps)));
+      if (i >= steps) clearInterval(iv);
+    }, stepTime);
+  }
+
+  function disableManager(manager) {
+    if (!manager) return;
+    try {
+      manager.tracks.forEach(a => {
+        try {
+          // fade out then pause
+          fadeTo(a, 0, FADE_MS);
+          setTimeout(() => { try { a.pause(); a.currentTime = 0; a.volume = 0; } catch(e){} }, FADE_MS + 30);
+          // neutralize future onended handlers to avoid auto-advance
+          a.onended = null;
+        } catch (e) {}
+      });
+      // mark manager disabled so later enable can detect
+      manager._disabledBySourceSwitch = true;
+    } catch (e) {}
+  }
+
+  function enableManager(manager) {
+    if (!manager) return;
+    try {
+      // best-effort: if tracks were paused/zeroed, allow normal behavior
+      manager.tracks.forEach((a, idx) => {
+        try {
+          // ensure audio object exists and basic properties restored
+          if (!a || typeof a.play !== 'function') {
+            const src = (a && a.src) ? a.src : `./${(window.MUSIC_FILES && window.MUSIC_FILES[idx]) || ''}`;
+            manager.tracks[idx] = new Audio(src);
+            manager.tracks[idx].volume = 0;
+            manager.tracks[idx].loop = false;
+          }
+        } catch (e) {}
+      });
+
+      // if manager was disabled earlier, attempt to start the current track (user gesture may be required)
+      try {
+        const idx = typeof manager.currentIndex === 'number' ? manager.currentIndex : 0;
+        const toPlay = manager.tracks[idx];
+        if (toPlay) {
+          toPlay.currentTime = 0;
+          toPlay.play().catch(()=>{});
+          // original script will handle its own fades and onended chaining
+        }
+      } catch (e) {}
+      delete manager._disabledBySourceSwitch;
+    } catch (e) {}
+  }
+
+  (async function init() {
+    const mgr = await waitForManager();
+
+    if (!MUSIC_ENABLED_IN_SOURCE) {
+      // Owner turned music OFF in source — aggressively stop/prevent playback
+      disableManager(mgr);
+
+      // Optional extra-hard silence: uncomment to globally prevent any Audio play (affects all audio)
+      // Audio.prototype.play = function(){ return Promise.resolve(); };
+
+      return;
+    } else {
+      // Owner allowed music in source — if we previously disabled manager, restore
+      if (mgr && mgr._disabledBySourceSwitch) {
+        enableManager(mgr);
+      }
+      // otherwise let the original script run normally
+    }
+  })();
+})();
+</script>
+
+    
 <style>
 
   /* Diwali Popup Styles */
@@ -605,22 +723,21 @@ if (!window.bgMusicManager) {
       '2040-11-04', '2041-10-25', '2042-11-12', '2043-11-01', '2044-10-20', '2045-11-08'
     ];
 
-    // Helper to get next Diwali date
+    // Helper to get next Diwali date and index
     function getNextDiwali(now) {
       for (let i = 0; i < diwaliDates.length; i++) {
         const d = new Date(diwaliDates[i] + 'T00:00:00');
-        if (d > now) return {
-          date: d,
-          idx: i
-        };
+        if (d > now) return { date: d, idx: i };
       }
       return null;
     }
 
     // Timer state
-    let timerState = 'diwali'; // 'diwali' or 'upcoming'
+    let timerState = 'upcoming'; // 'upcoming' | 'countdown' | 'celebration'
     let timerIdx = null;
-    let timerEnd = null;
+    let celebrationDays = 4; // show "Happy Diwali" for 4 days
+    const celebrationMs = celebrationDays * 24 * 60 * 60 * 1000;
+    const oneMonthMs = 30 * 24 * 60 * 60 * 1000;
 
     // Create and show Diwali popup
     setTimeout(() => {
@@ -671,7 +788,7 @@ if (!window.bgMusicManager) {
               <div id="diwali-timer" style="font-size:1.2rem;color:#FFD700;margin:12px 0;"></div>
               <div class="diwali-footer">
                 <img src="https://i.postimg.cc/MHYsLfPz/Neon-Green-Circle-Frame-Fitness-You-Tube-Profile-Picturedurga-puja.png" alt="StudyBot Logo" class="diwali-logo">
-                <span>~ StudyBot Team</span>
+                <span>~ Quicklink Team</span>
               </div>
             </div>
             <div class="firework"></div>
@@ -690,8 +807,10 @@ if (!window.bgMusicManager) {
         });
       });
 
-      // Timer logic
+      // Timer logic element
       const timerEl = popup.querySelector('#diwali-timer');
+      const titleEl = popup.querySelector('.diwali-title');
+
       // Add skyshots and lanterns containers (background)
       const skyshotContainer = document.createElement('div');
       skyshotContainer.id = 'skyshot-container';
@@ -826,56 +945,97 @@ if (!window.bgMusicManager) {
       let popupSkyshotInterval = setInterval(() => launchSkyshot(popupSkyshot, popupSkyshot.offsetWidth, popupSkyshot.offsetHeight), 1800);
       let popupLanternInterval = setInterval(() => launchLantern(popupLantern, popupLantern.offsetWidth, popupLantern.offsetHeight), 2200);
 
-      // Timer logic
-      function updateTimer() {
-        const now = new Date();
-        let next = getNextDiwali(now);
-        if (!next) {
-          timerEl.textContent = 'No upcoming Diwali dates.';
-          return;
-        }
-        timerIdx = next.idx;
-        let diwaliDate = next.date;
-        let diff = diwaliDate - now;
-        let days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        let hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        let mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        let secs = Math.floor((diff % (1000 * 60)) / 1000);
-        if (diff > 0 && diff < 1000 * 60 * 60 * 24 * 31) {
-          timerState = 'diwali';
-          timerEl.textContent = `Diwali will start in: ${days}d ${hours}h ${mins}m ${secs}s`;
-          timerEnd = diwaliDate;
-        } else {
-          timerState = 'upcoming';
-          timerEl.textContent = `Upcoming Diwali will be: ${diwaliDate.toDateString()}`;
-          timerEnd = diwaliDate;
+      // Initialize timer index and state
+      const nowInit = new Date();
+      const nextInit = getNextDiwali(nowInit);
+      if (nextInit) {
+        timerIdx = nextInit.idx;
+      } else {
+        // fallback: set to first index if none found
+        timerIdx = 0;
+      }
+
+      // Utility to set to next index (with fallback beyond list)
+      function advanceToNextIndex() {
+        timerIdx = (timerIdx == null) ? 0 : timerIdx + 1;
+        if (timerIdx >= diwaliDates.length) {
+          // fallback: set next Diwali as one year after last known date
+          const last = new Date(diwaliDates[diwaliDates.length - 1] + 'T00:00:00');
+          const fallbackNext = new Date(last.getFullYear() + 1, last.getMonth(), last.getDate());
+          // append fallback to list so future runs have it
+          diwaliDates.push(fallbackNext.toISOString().slice(0,10));
         }
       }
 
-      updateTimer();
-      let timerInterval = setInterval(() => {
-        updateTimer();
-        if (timerState === 'diwali' && timerEnd) {
-          const now = new Date();
-          if (now >= timerEnd) {
-            clearInterval(timerInterval);
-            timerEl.textContent = 'Diwali is here! 🎉';
-            setTimeout(() => {
-              setTimeout(() => {
-                timerIdx = timerIdx + 1;
-                if (timerIdx < diwaliDates.length) {
-                  timerState = 'upcoming';
-                  timerEnd = new Date(diwaliDates[timerIdx] + 'T00:00:00');
-                  timerEl.textContent = `Upcoming Diwali will be: ${timerEnd.toDateString()}`;
-                  timerInterval = setInterval(updateTimer, 1000);
-                } else {
-                  timerEl.textContent = 'No upcoming Diwali dates.';
-                }
-              }, 3 * 24 * 60 * 60 * 1000);
-            }, 2000);
+      // Main update function (runs every second)
+      function updateTimer() {
+        const now = new Date();
+        // Ensure timerIdx points to a future date; if not, find next future
+        let current = getNextDiwali(now);
+        if (current) {
+          // If the current next date from list is after now and different than timerIdx, sync
+          if (timerIdx === null || new Date(diwaliDates[timerIdx] + 'T00:00:00') <= now) {
+            timerIdx = current.idx;
           }
+        } else {
+          // no next found in list (all in past) -> set to last + 1 year
+          if (timerIdx === null) timerIdx = diwaliDates.length - 1;
         }
-      }, 1000);
+
+        const diwaliDate = new Date(diwaliDates[timerIdx] + 'T00:00:00');
+
+        const diff = diwaliDate - now;
+
+        // 1) If countdown still pending
+        if (diff > 0) {
+          // countdown display
+          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+          timerEl.textContent = `${days}d ${hours}h ${mins}m ${secs}s`;
+
+          // Heading logic: if within 1 month -> "Diwali in:" else "Upcoming Diwali will be in:"
+          if (diff <= oneMonthMs) {
+            titleEl.textContent = '✨ Diwali in:';
+            timerState = 'countdown';
+          } else {
+            titleEl.textContent = '🎇 Upcoming Diwali will be in:';
+            timerState = 'upcoming';
+          }
+          return;
+        }
+
+        // 2) If we've reached Diwali day or after (celebration window)
+        const celebrationEnd = new Date(diwaliDate.getTime() + celebrationMs);
+        if (now >= diwaliDate && now < celebrationEnd) {
+          // Show Happy Diwali for 4 days
+          titleEl.textContent = '🎆 Happy Diwali!';
+          // Optional: show remaining celebration time
+          const remaining = celebrationEnd - now;
+          const cdDays = Math.floor(remaining / (1000 * 60 * 60 * 24));
+          const cdHours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const cdMins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+          const cdSecs = Math.floor((remaining % (1000 * 60)) / 1000);
+          timerEl.textContent = `Celebration: ${cdDays}d ${cdHours}h ${cdMins}m ${cdSecs}s`;
+          timerState = 'celebration';
+          return;
+        }
+
+        // 3) If celebration ended -> advance to next Diwali and continue countdown automatically
+        if (now >= celebrationEnd) {
+          advanceToNextIndex();
+          // Immediately compute next diwaliDate and update timer display on next tick
+          timerState = 'upcoming';
+          // No manual setTimeout loops — next call to updateTimer will handle display
+          return;
+        }
+      }
+
+      // Start a single interval to manage all states
+      updateTimer();
+      let timerInterval = setInterval(updateTimer, 1000);
 
       // Handle close button
       const closeBtn = popup.querySelector('.close-diwali-popup');
@@ -898,6 +1058,7 @@ if (!window.bgMusicManager) {
     }, 1000);
   });
 </script>
+
 
    <!-- Navaratri & Dussehra Popup | Dates: 22 Sept 2025 – 2 Oct 2025 ~04 oct 2025  14:02:10 pm-->
 
