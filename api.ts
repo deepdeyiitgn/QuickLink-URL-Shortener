@@ -58,7 +58,19 @@ export const api = {
     
     // Tickets
     getUserTickets: (userId: string): Promise<Ticket[]> => apiFetch(`/api/support?type=ticket&userId=${userId}`),
-    getAllTickets: (): Promise<Ticket[]> => apiFetch(`/api/support?type=ticket&forAdmin=true&userId=temp`), // userId is placeholder, backend checks admin status
+    getAllTickets: async (): Promise<Ticket[]> => {
+    const authData = JSON.parse(localStorage.getItem("auth") || "{}");
+    const userId = authData?.currentUser?.id || "temp";
+    const token = authData?.token;
+
+    return apiFetch(`/api/support?type=ticket&forAdmin=true&userId=${userId}`, {
+        headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+    });
+},
+
     createTicket: (data: any): Promise<Ticket> => apiFetch('/api/support?type=ticket', { method: 'POST', body: JSON.stringify(data) }),
     updateTicket: (ticketId: string, update: any): Promise<Ticket> => apiFetch('/api/support?type=ticket', { method: 'PUT', body: JSON.stringify({ ticketId, ...update }) }),
 
