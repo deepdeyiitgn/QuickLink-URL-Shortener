@@ -74,13 +74,15 @@ const handleSubmit = async (e: React.FormEvent) => {
       setSuccessMessage(message);
       setMode('signup_success');
     } else if (mode === 'login') {
-      const user: User = await login(email, password);
-      if (user?.token) {
-        localStorage.setItem("token", user.token);
-        console.log("Token saved:", user.token);
+      const { user, token } = await login(email, password); // <-- destructure both
+
+      if (token) {
+        localStorage.setItem("token", token);
+        console.log("Token saved:", token);
       } else {
         console.warn("Login successful but token missing");
       }
+
       closeAuthModal();
     } else if (mode === 'forgot') {
       await sendPasswordResetLink(email);
