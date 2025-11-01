@@ -55,7 +55,11 @@ export const api = {
     // Status & Admin
     getSystemStatus: (): Promise<any> => apiFetch('/api/status'),
     getAdminDashboardData: (adminId: string): Promise<any> => apiFetch(`/api/admin?adminId=${adminId}`),
-    
+
+    // 👤 User Tickets
+      getUserTickets: (userId: string): Promise<Ticket[]> =>
+        apiFetch(`/api/support?type=ticket&userId=${userId}`),
+
     // Tickets
     getAllTickets: async (config: RequestInit = {}): Promise<Ticket[]> => {
        return apiFetch(`/api/support?type=ticket&forAdmin=true`, {
