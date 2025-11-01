@@ -91,11 +91,28 @@ const TicketManagement: React.FC = () => {
     const [filter, setFilter] = useState<'all' | Ticket['status']>('all');
 
     useEffect(() => {
-        api.getAllTickets().then(allTickets => {
-            setTickets(allTickets);
-            setLoading(false);
-        });
+        const fetchTickets = async () => {
+            try {
+                setLoading(true);
+                const allTickets = await api.getAllTickets();
+                if (Array.isArray(allTickets)) {
+                    setTickets(allTickets);
+                } else {
+                    console.error("Invalid ticket data:", allTickets);
+                    setTickets([]);
+                }
+            } catch (error) {
+                console.error("Failed to fetch tickets:", error);
+                alert("Unable to load tickets right now. Please try again later.");
+                setTickets([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTickets();
     }, []);
+
     
     const handleTicketUpdate = (updatedTicket: Ticket) => {
         setTickets(prev => prev.map(t => t.id === updatedTicket.id ? updatedTicket : t));
