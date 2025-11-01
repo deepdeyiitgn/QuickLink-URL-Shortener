@@ -72,10 +72,8 @@ export interface AuthContextType {
   isApiSubscriptionModalOpen: boolean;
   loading: boolean;
   isFetchingDetails: boolean;
-  
-  // ✅ FIXED: Return both user and token
-  login: (email: string, password: string) => Promise<{ user: User; token: string }>;
-
+  // 👇 change this one line
+  login: (email: string, password: string) => Promise<{ user: User; token: string } | User>;
   signup: (name: string, email: string, password: string) => Promise<string>;
   logout: () => void;
   openAuthModal: (mode: AuthModalMode) => void;
@@ -95,6 +93,7 @@ export interface AuthContextType {
   sendPasswordResetLink: (email: string) => Promise<void>;
   resetPassword: (token: string, newPassword: string) => Promise<void>;
 }
+
 
 export interface UrlContextType {
   allUrls: ShortenedUrl[];
