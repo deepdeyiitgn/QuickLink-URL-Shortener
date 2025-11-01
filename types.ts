@@ -49,6 +49,7 @@ export interface User {
   status: UserStatus;
   subscription: Subscription | null;
   apiAccess: ApiAccess | null;
+  token?: string; // 👈 add this line
   // New fields for security/analytics
   ipAddress?: string;
   browser?: string;
