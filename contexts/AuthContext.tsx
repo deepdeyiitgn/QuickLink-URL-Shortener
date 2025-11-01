@@ -104,10 +104,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, [currentUser?.isAdmin, getAllUsers]);
 
 
-const login = async (email: string, password: string) => {
+const login = async (email: string, password: string): Promise<{ user: User; token: string }> => {
   const res = await api.login(email, password);
 
-  // res = { user, token }
   if (res?.token) {
     localStorage.setItem("token", res.token);
   } else {
@@ -116,11 +115,12 @@ const login = async (email: string, password: string) => {
 
   if (res?.user) {
     handleUserUpdate(res.user);
-    return res.user;
+    return { user: res.user, token: res.token }; // ✅ fixed return
   } else {
     throw new Error("User data missing from response");
   }
 };
+
 
 
     const signup = async (name: string, email: string, password: string): Promise<string> => {
