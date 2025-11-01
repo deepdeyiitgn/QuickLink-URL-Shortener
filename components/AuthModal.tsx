@@ -2,8 +2,6 @@ import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { XIcon, LoadingIcon, EyeIcon, EyeSlashIcon, CheckIcon } from './icons/IconComponents';
 import { AuthContextType } from '../types';
-import type { User } from "../types";
-
 
 const AuthModal: React.FC = () => {
   const auth = useContext(AuthContext);
@@ -62,38 +60,29 @@ const AuthModal: React.FC = () => {
         }
     };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsLoading(true);
-  setError('');
-  setSuccessMessage('');
-
-  try {
-    if (mode === 'signup') {
-      const message = await signup(name, email, password);
-      setSuccessMessage(message);
-      setMode('signup_success');
-    } else if (mode === 'login') {
-      const { user, token } = await login(email, password); // <-- destructure both
-
-      if (token) {
-        localStorage.setItem("token", token);
-        console.log("Token saved:", token);
-      } else {
-        console.warn("Login successful but token missing");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+    setSuccessMessage('');
+    try {
+      if (mode === 'signup') {
+        const message = await signup(name, email, password);
+        setSuccessMessage(message);
+        setMode('signup_success');
+      } else if (mode === 'login') {
+        await login(email, password);
+        closeAuthModal();
+      } else if (mode === 'forgot') {
+        await sendPasswordResetLink(email);
+        setSuccessMessage('Password reset link sent! Please check your email.');
       }
-
-      closeAuthModal();
-    } else if (mode === 'forgot') {
-      await sendPasswordResetLink(email);
-      setSuccessMessage('Password reset link sent! Please check your email.');
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred.');
+    } finally {
+      setIsLoading(false);
     }
-  } catch (err: any) {
-    setError(err.message || 'An unexpected error occurred.');
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   const renderContent = () => {
     if (mode === 'signup_success') {
