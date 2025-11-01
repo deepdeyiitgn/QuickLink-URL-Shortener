@@ -242,202 +242,93 @@
       }
     </script>
     
-     <script>
-
-       
-    //   <!-- ======= ORIGINAL (NO CHANGES) ======= -->
-         
 <script>
+// =======================
+// Background Music Toggle Switch (GitHub controlled)
+// =======================
+const MUSIC_ENABLED = false; // 🔊 true = on, 🔇 false = off
+
 // =======================
 // Persistent Background Music (SPA + Multi-track) 
 // =======================
+if (MUSIC_ENABLED) {
+  const MUSIC_FILES = ["background4.mp3", "background2.mp3", "background1.mp3", "background3.mp3"];
+  const FADE_DURATION = 10; // sec
+  const DEFAULT_VOL = 0.7;
 
-const MUSIC_FILES = ["background4.mp3", "background2.mp3", "background1.mp3", "background3.mp3"];
-const FADE_DURATION = 10; // sec
-const DEFAULT_VOL = 0.7;
+  // Detect mobile
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-// Detect mobile
-const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-// Create audio elements only once
-if (!window.bgMusicManager) {
-  window.bgMusicManager = {
-    tracks: MUSIC_FILES.map(file => {
-      const audio = new Audio(`./${file}`);
-      audio.volume = 0;
-      audio.loop = false;
-      return audio;
-    }),
-    currentIndex: 0
-  };
-
-  const manager = window.bgMusicManager;
-
-  const fade = (audio, to, duration) => {
-    const steps = 70;
-    const stepTime = (duration * 1000) / steps;
-    let currentStep = 0;
-    const interval = setInterval(() => {
-      if (currentStep++ >= steps) {
-        clearInterval(interval);
-      } else {
-        audio.volume += (to - audio.volume) / (steps - currentStep + 1);
-      }
-    }, stepTime);
-  };
-
-  const playTrack = (index) => {
-    const audio = manager.tracks[index];
-    audio.currentTime = 0;
-    audio.play().catch(() => {}); // Catch autoplay block errors
-    fade(audio, DEFAULT_VOL, FADE_DURATION);
-
-    audio.onended = () => {
-      const nextIndex = (index + 1) % manager.tracks.length;
-      const nextAudio = manager.tracks[nextIndex];
-      nextAudio.currentTime = 0;
-      nextAudio.play().catch(() => {});
-      fade(nextAudio, DEFAULT_VOL, FADE_DURATION);
-      fade(audio, 0, FADE_DURATION);
-      setTimeout(() => audio.pause(), FADE_DURATION * 1000);
-      manager.currentIndex = nextIndex;
-      playTrack(nextIndex);
+  // Create audio elements only once
+  if (!window.bgMusicManager) {
+    window.bgMusicManager = {
+      tracks: MUSIC_FILES.map(file => {
+        const audio = new Audio(`./${file}`);
+        audio.volume = 0;
+        audio.loop = false;
+        return audio;
+      }),
+      currentIndex: 0
     };
-  };
 
-  const startMusic = () => {
-    // Mobile autoplay restrictions
-    if (isMobile) {
-      document.addEventListener("click", () => playTrack(manager.currentIndex), { once: true });
-    } else {
-      playTrack(manager.currentIndex);
-    }
-  };
+    const manager = window.bgMusicManager;
 
-  // Start music on load / user interaction if blocked
-  const tryStart = () => {
-    startMusic();
-    document.removeEventListener("click", tryStart);
-    document.removeEventListener("keydown", tryStart);
-  };
+    const fade = (audio, to, duration) => {
+      const steps = 70;
+      const stepTime = (duration * 1000) / steps;
+      let currentStep = 0;
+      const interval = setInterval(() => {
+        if (currentStep++ >= steps) {
+          clearInterval(interval);
+        } else {
+          audio.volume += (to - audio.volume) / (steps - currentStep + 1);
+        }
+      }, stepTime);
+    };
 
-  document.addEventListener("click", tryStart);
-  document.addEventListener("keydown", tryStart);
+    const playTrack = (index) => {
+      const audio = manager.tracks[index];
+      audio.currentTime = 0;
+      audio.play().catch(() => {}); // Catch autoplay block errors
+      fade(audio, DEFAULT_VOL, FADE_DURATION);
+
+      audio.onended = () => {
+        const nextIndex = (index + 1) % manager.tracks.length;
+        const nextAudio = manager.tracks[nextIndex];
+        nextAudio.currentTime = 0;
+        nextAudio.play().catch(() => {});
+        fade(nextAudio, DEFAULT_VOL, FADE_DURATION);
+        fade(audio, 0, FADE_DURATION);
+        setTimeout(() => audio.pause(), FADE_DURATION * 1000);
+        manager.currentIndex = nextIndex;
+        playTrack(nextIndex);
+      };
+    };
+
+    const startMusic = () => {
+      // Mobile autoplay restrictions
+      if (isMobile) {
+        document.addEventListener("click", () => playTrack(manager.currentIndex), { once: true });
+      } else {
+        playTrack(manager.currentIndex);
+      }
+    };
+
+    // Start music on load / user interaction if blocked
+    const tryStart = () => {
+      startMusic();
+      document.removeEventListener("click", tryStart);
+      document.removeEventListener("keydown", tryStart);
+    };
+
+    document.addEventListener("click", tryStart);
+    document.addEventListener("keydown", tryStart);
+  }
+} else {
+  console.log("🔇 Background music is disabled by config flag.");
 }
 </script>
 
-<!-- ======= SOURCE-LEVEL SWITCH (NO VISIBLE BUTTON) ======= -->
-<script>
-/*
-  Owner workflow:
-  - Open HTML source
-  - Set MUSIC_ENABLED_IN_SOURCE = false  (then save & deploy) to disable music site-wide
-  - Set MUSIC_ENABLED_IN_SOURCE = true   to enable music
-*/
-const MUSIC_ENABLED_IN_SOURCE = true; // <-- change here (true/false) before deploy
-
-(function () {
-  const POLL_INTERVAL = 120;
-  const WAIT_TIMEOUT = 8000;
-  const FADE_MS = 700;
-
-  function waitForManager(timeout = WAIT_TIMEOUT) {
-    return new Promise((resolve) => {
-      if (window.bgMusicManager) return resolve(window.bgMusicManager);
-      let waited = 0;
-      const iv = setInterval(() => {
-        waited += POLL_INTERVAL;
-        if (window.bgMusicManager) {
-          clearInterval(iv); resolve(window.bgMusicManager);
-        } else if (waited >= timeout) {
-          clearInterval(iv); resolve(null);
-        }
-      }, POLL_INTERVAL);
-    });
-  }
-
-  function fadeTo(audio, target, ms = FADE_MS) {
-    if (!audio) return;
-    const steps = 20;
-    const stepTime = ms / steps;
-    const start = audio.volume;
-    const delta = target - start;
-    let i = 0;
-    const iv = setInterval(() => {
-      i++;
-      audio.volume = Math.max(0, Math.min(1, start + (delta * i / steps)));
-      if (i >= steps) clearInterval(iv);
-    }, stepTime);
-  }
-
-  function disableManager(manager) {
-    if (!manager) return;
-    try {
-      manager.tracks.forEach(a => {
-        try {
-          // fade out then pause
-          fadeTo(a, 0, FADE_MS);
-          setTimeout(() => { try { a.pause(); a.currentTime = 0; a.volume = 0; } catch(e){} }, FADE_MS + 30);
-          // neutralize future onended handlers to avoid auto-advance
-          a.onended = null;
-        } catch (e) {}
-      });
-      // mark manager disabled so later enable can detect
-      manager._disabledBySourceSwitch = true;
-    } catch (e) {}
-  }
-
-  function enableManager(manager) {
-    if (!manager) return;
-    try {
-      // best-effort: if tracks were paused/zeroed, allow normal behavior
-      manager.tracks.forEach((a, idx) => {
-        try {
-          // ensure audio object exists and basic properties restored
-          if (!a || typeof a.play !== 'function') {
-            const src = (a && a.src) ? a.src : `./${(window.MUSIC_FILES && window.MUSIC_FILES[idx]) || ''}`;
-            manager.tracks[idx] = new Audio(src);
-            manager.tracks[idx].volume = 0;
-            manager.tracks[idx].loop = false;
-          }
-        } catch (e) {}
-      });
-
-      // if manager was disabled earlier, attempt to start the current track (user gesture may be required)
-      try {
-        const idx = typeof manager.currentIndex === 'number' ? manager.currentIndex : 0;
-        const toPlay = manager.tracks[idx];
-        if (toPlay) {
-          toPlay.currentTime = 0;
-          toPlay.play().catch(()=>{});
-          // original script will handle its own fades and onended chaining
-        }
-      } catch (e) {}
-      delete manager._disabledBySourceSwitch;
-    } catch (e) {}
-  }
-
-  (async function init() {
-    const mgr = await waitForManager();
-
-    if (!MUSIC_ENABLED_IN_SOURCE) {
-      // Owner turned music OFF in source — aggressively stop/prevent playback
-      disableManager(mgr);
-
-      // Optional extra-hard silence: uncomment to globally prevent any Audio play (affects all audio)
-      // Audio.prototype.play = function(){ return Promise.resolve(); };
-
-      return;
-    } else {
-      // Owner allowed music in source — if we previously disabled manager, restore
-      if (mgr && mgr._disabledBySourceSwitch) {
-        enableManager(mgr);
-      }
-      // otherwise let the original script run normally
-    }
-  })();
-})();
-</script>
 
     
 <style>
