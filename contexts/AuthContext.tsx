@@ -104,19 +104,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, [currentUser?.isAdmin, getAllUsers]);
 
 
-    const login = async (email: string, password: string) => {
-      const res = await api.login(email, password);
+const login = async (email: string, password: string) => {
+  const res = await api.login(email, password);
 
-      // check if backend returned token
-     if (res.token) {
-       localStorage.setItem("token", res.token);
-     } else {
-      console.warn("Backend did not send token");
-    }
+  // Agar backend token nahi bhej raha, safe fallback
+  if ((res as any).token) {
+    localStorage.setItem("token", (res as any).token);
+  } else {
+    console.warn("Backend did not send token");
+  }
 
-    handleUserUpdate(res.user || res); // some APIs wrap inside .user
-    return res.user || res;
-  };
+  handleUserUpdate(res); // kyunki res hi User type hai
+  return res; // return user directly
+};
+
 
     const signup = async (name: string, email: string, password: string): Promise<string> => {
         const response = await api.signup(name, email, password);
